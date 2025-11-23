@@ -1,8 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { QrCode, ArrowLeft, Download } from "lucide-react";
+import { ArrowLeft, Download } from "lucide-react";
 import Link from "next/link";
+import prisma from "@/lib/prisma";
+import { RoomQRCode } from "@/components/dashboard/RoomQRCode";
+import { notFound } from "next/navigation";
 
 export default async function RoomDetailPage({
   params,
@@ -11,14 +14,17 @@ export default async function RoomDetailPage({
 }) {
   const { roomId } = await params;
 
-  // Mock data - in real app, fetch from DB
-  const room = {
-    id: roomId,
-    number: "305",
-    type: "Suite",
-    status: "Active",
-    code: "abc123",
-  };
+  const room = await prisma.room.findUnique({
+    where: { id: roomId },
+    include: { hotel: true }
+  });
+
+  if (!room) {
+    notFound();
+  }
+
+  const baseUrl = process.env.NEXT_PUBLIC_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
+  const qrUrl = `${baseUrl}/g/${room.hotel.slug}/${room.code}`;
 
   const recentRequests = [
     { id: "1", service: "Extra Towels", time: "2h ago", status: "Completed" },
@@ -49,11 +55,11 @@ export default async function RoomDetailPage({
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Type</p>
-              <p className="text-lg font-semibold">{room.type}</p>
+              <p className="text-lg font-semibold">{room.type || "Standard"}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Status</p>
-              <Badge variant={room.status === "Active" ? "default" : "destructive"}>
+              <Badge variant={room.status === "ACTIVE" ? "default" : "destructive"}>
                 {room.status}
               </Badge>
             </div>
@@ -70,7 +76,7 @@ export default async function RoomDetailPage({
           </CardHeader>
           <CardContent className="flex flex-col items-center justify-center py-8">
             <div className="w-48 h-48 bg-gray-900 rounded-lg flex items-center justify-center mb-4">
-              <QrCode className="h-32 w-32 text-white opacity-50" />
+              <RoomQRCode url={qrUrl} />
             </div>
             <Button variant="outline">
               <Download className="mr-2 h-4 w-4" /> Download QR
@@ -102,4 +108,3 @@ export default async function RoomDetailPage({
     </div>
   );
 }
-

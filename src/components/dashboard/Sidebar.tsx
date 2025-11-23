@@ -12,8 +12,12 @@ import {
   BarChart3, 
   Users, 
   Settings,
-  LogOut
+  LogOut,
+  Monitor,
+  Palette
 } from "lucide-react";
+import { handleSignOut } from "@/app/actions/auth";
+import { Logo } from "@/components/Logo";
 
 const sidebarItems = [
   {
@@ -25,6 +29,11 @@ const sidebarItems = [
     title: "Requests",
     href: "/dashboard/requests",
     icon: ClipboardList,
+  },
+  {
+    title: "Live Monitor",
+    href: "/dashboard/live-monitor",
+    icon: Monitor,
   },
   {
     title: "Rooms",
@@ -40,6 +49,11 @@ const sidebarItems = [
     title: "QR Codes",
     href: "/dashboard/qr",
     icon: QrCode,
+  },
+  {
+    title: "Guest Template",
+    href: "/dashboard/guest-template",
+    icon: Palette,
   },
   {
     title: "Analytics",
@@ -63,11 +77,8 @@ export function Sidebar() {
 
   return (
     <aside className="hidden md:flex w-64 flex-col h-screen sticky top-0 bg-gray-50/50 p-4">
-      <div className="px-4 py-6 flex items-center gap-3 mb-4">
-        <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-bold shadow-lg shadow-indigo-200">
-          H
-        </div>
-        <span className="text-xl font-bold font-heading text-gray-900">HotelX</span>
+      <div className="px-4 py-6 flex items-center gap-3 mb-8">
+        <Logo size="md" href="/dashboard" />
       </div>
 
       <nav className="flex-1 space-y-1">
@@ -93,10 +104,12 @@ export function Sidebar() {
       </nav>
 
       <div className="mt-auto pt-4">
-        <button className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-sm font-medium text-gray-500 hover:bg-white/50 hover:text-red-600 transition-colors group">
-          <LogOut className="h-5 w-5 group-hover:text-red-600" />
-          Log Out
-        </button>
+        <form action={handleSignOut}>
+          <button type="submit" className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-sm font-medium text-gray-500 hover:bg-white/50 hover:text-red-600 transition-colors group">
+            <LogOut className="h-5 w-5 group-hover:text-red-600" />
+            Log Out
+          </button>
+        </form>
       </div>
     </aside>
   );

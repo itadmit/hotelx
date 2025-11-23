@@ -1,0 +1,135 @@
+{
+  "navbar": {
+    "features": "Fonctionnalités",
+    "pricing": "Tarifs",
+    "about": "À propos",
+    "login": "Connexion",
+    "start_trial": "Essai gratuit"
+  },
+  "hero": {
+    "new_badge": "Nouveau : Support complet de 30+ langues",
+    "title_start": "Améliorez l'expérience client et les revenus avec",
+    "title_highlight": "Service QR",
+    "subtitle": "Permettez aux clients de commander des services, de la nourriture et des soins spa directement depuis leur téléphone - sans téléchargement d'application. Un système de gestion intelligent qui fait gagner du temps au personnel et augmente vos profits.",
+    "cta_primary": "Démarrer l'essai gratuit",
+    "cta_secondary": "Réserver une démo",
+    "trust_1": "Aucune carte de crédit requise",
+    "trust_2": "Configuration en 5 minutes",
+    "trust_3": "Annulation à tout moment",
+    "mockup_title": "Tableau de bord Admin + App Client",
+    "mockup_subtitle": "Tout en un seul endroit"
+  },
+  "how_it_works": {
+    "title": "Comment ça marche",
+    "subtitle": "Un processus simple avec une mise en œuvre rapide qui modernise votre hôtel en quelques minutes.",
+    "step_1_title": "1. Le client scanne",
+    "step_1_desc": "Un simple scan du code QR dans la chambre ouvre le menu des services. Aucun téléchargement d'application ou inscription requis.",
+    "step_2_title": "2. Le personnel reçoit",
+    "step_2_desc": "La demande apparaît instantanément sur la tablette ou le mobile du membre du personnel concerné (Réception, Ménage, Cuisine).",
+    "step_3_title": "3. Le manager analyse",
+    "step_3_desc": "Obtenez des informations commerciales en temps réel : temps de réponse, satisfaction et opportunités de vente additionnelle."
+  },
+  "benefits": {
+    "title": "Pourquoi les hôteliers choisissent HotelX ?",
+    "subtitle": "Nous comprenons les défis de la gestion d'un hôtel moderne. Notre système est conçu spécifiquement pour vous aider à rationaliser les processus, économiser des coûts et améliorer l'expérience client - le tout sur une plateforme simple.",
+    "item_1_title": "Augmenter les revenus",
+    "item_1_desc": "Les clients commandent jusqu'à 30% de services en plus lorsque le processus est numérique et simple.",
+    "item_2_title": "Gagner du temps",
+    "item_2_desc": "L'automatisation des demandes de routine libère le personnel pour se concentrer sur le service personnel.",
+    "item_3_title": "Améliorer la satisfaction",
+    "item_3_desc": "Des temps de réponse plus rapides et une transparence totale pour les clients augmentent les notes.",
+    "item_4_title": "Contrôle et surveillance",
+    "item_4_desc": "Rapports détaillés sur la performance du personnel et les temps de réponse en temps réel.",
+    "chart_title": "Revenus mensuels des services",
+    "chart_top_services": "Top Services (Cette semaine)",
+    "service_breakfast": "Petit-déjeuner en chambre",
+    "service_spa": "Services Spa",
+    "service_taxi": "Réservation de taxi",
+    "orders": "commandes"
+  },
+  "features": {
+    "title": "Tous les outils pour la gestion hôtelière moderne",
+    "subtitle": "Un système qui répond entièrement aux besoins de votre hôtel, de votre personnel et de vos clients.",
+    "f1_title": "App Client - Sans téléchargement",
+    "f1_desc": "Les clients scannent et commandent instantanément. Une interface moderne et rapide qui fonctionne sur n'importe quel smartphone sans installation.",
+    "f2_title": "Centre de commande du personnel",
+    "f2_desc": "Toutes les demandes en un seul endroit. Gestion des tâches en temps réel, notifications du personnel et suivi de l'exécution.",
+    "f3_title": "Traduction auto (30+ langues)",
+    "f3_desc": "Les clients commandent en anglais, le personnel reçoit en français. Suppression automatique de la barrière de la langue.",
+    "f4_title": "Gestion QR intelligente",
+    "f4_desc": "Générez des codes uniques pour chaque chambre ou zone. Mettez à jour les menus et services en temps réel sans réimpression.",
+    "f5_title": "Analytique avancée",
+    "f5_desc": "Comprenez le comportement des clients, les heures de pointe, la performance du personnel et les services les plus rentables.",
+    "f6_title": "Gestion des rôles",
+    "f6_desc": "Définissez des rôles (Réception, Ménage, Cuisine) et un accès personnalisé pour chaque membre du personnel."
+  },
+  "pricing": {
+    "title": "Tarification simple par chambre",
+    "subtitle": "Tarification transparente qui évolue avec la taille de votre hôtel. Pas de frais cachés.",
+    "slider_label": "NOMBRE DE CHAMBRES",
+    "rooms": "chambres",
+    "month": "/mois",
+    "per_room": "par chambre",
+    "plans": {
+      "basic": {
+        "name": "Self Service",
+        "desc": "Parfait pour les hôtels qui souhaitent un contrôle total et une configuration autonome.",
+        "cta": "Essai gratuit"
+      },
+      "pro": {
+        "name": "Growth",
+        "desc": "Idéal pour les hôtels en croissance nécessitant automatisation et support linguistique.",
+        "cta": "Commencer",
+        "badge": "Le plus populaire"
+      },
+      "premium": {
+        "name": "Managed VIP",
+        "desc": "Nous faisons tout pour vous. Saisie complète des menus, traductions et configuration.",
+        "cta": "Contacter les ventes"
+      }
+    },
+    "features": {
+      "qr": "Scans QR illimités",
+      "dashboard": "Tableau de bord personnel",
+      "webapp": "App Web Client",
+      "basic_analytics": "Analytique de base",
+      "adv_analytics": "Analytique avancée",
+      "multilang": "Support multilingue",
+      "setup": "Configuration complète par nous",
+      "support_basic": "Support par email",
+      "support_std": "Support standard",
+      "support_vip": "Support prioritaire VIP 24/7"
+    },
+    "enterprise": "Besoin d'une solution personnalisée pour une chaîne hôtelière ?",
+    "contact_sales": "Ventes Entreprise"
+  },
+  "testimonials": {
+    "title": "Ce que disent nos clients",
+    "subtitle": "Rejoignez des centaines d'hôtels qui améliorent déjà leur service avec HotelX",
+    "t1_quote": "Depuis la mise en œuvre de HotelX, nos temps de réponse ont chuté de 40% et les clients sont beaucoup plus heureux. Cela a transformé notre façon de travailler.",
+    "t1_author": "David Cohen",
+    "t1_role": "PDG, Seaside Hotel",
+    "t2_quote": "Le système est incroyablement simple. Le personnel a appris à l'utiliser en quelques minutes, et les clients adorent ne pas avoir à télécharger d'application.",
+    "t2_author": "Sarah Levy",
+    "t2_role": "Responsable des opérations, Boutique Hotels",
+    "t3_quote": "Les rapports nous ont donné des informations que nous n'avions pas auparavant. Nous savons exactement quels services sont les plus rentables.",
+    "t3_author": "Ron Abrahami",
+    "t3_role": "Propriétaire, Mountain View Resort"
+  },
+  "cta": {
+    "title": "Prêt à moderniser votre hôtel ?",
+    "subtitle": "Rejoignez des centaines d'hôtels profitant déjà d'une gestion plus intelligente, plus efficace et plus rentable. Essayez HotelX gratuitement pendant 14 jours.",
+    "button": "Démarrer l'essai gratuit",
+    "disclaimer": "Sans engagement • Pas de carte de crédit requise • Support 24/7"
+  },
+  "footer": {
+    "desc": "Permettre aux hôtels d'offrir des expériences client exceptionnelles grâce à l'innovation numérique.",
+    "product": "Produit",
+    "company": "Entreprise",
+    "contact": "Contact",
+    "privacy": "Politique de confidentialité",
+    "rights": "HotelX. Tous droits réservés.",
+    "language": "CHOISIR LA LANGUE"
+  }
+}
+

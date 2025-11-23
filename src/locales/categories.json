@@ -1,0 +1,47 @@
+{
+  "categories": {
+    "food-drinks": {
+      "en": "Food & Drinks",
+      "bg": "Храна и напитки",
+      "de": "Essen & Getränke",
+      "fr": "Nourriture et boissons",
+      "it": "Cibo e bevande"
+    },
+    "room-service": {
+      "en": "Room Service",
+      "bg": "Обслужване в стаята",
+      "de": "Zimmerservice",
+      "fr": "Service en chambre",
+      "it": "Servizio in camera"
+    },
+    "spa-wellness": {
+      "en": "Spa & Wellness",
+      "bg": "Спа и здраве",
+      "de": "Spa & Wellness",
+      "fr": "Spa et bien-être",
+      "it": "Spa e benessere"
+    },
+    "concierge": {
+      "en": "Concierge",
+      "bg": "Портье",
+      "de": "Concierge",
+      "fr": "Conciergerie",
+      "it": "Concierge"
+    },
+    "maintenance": {
+      "en": "Maintenance",
+      "bg": "Поддръжка",
+      "de": "Wartung",
+      "fr": "Maintenance",
+      "it": "Manutenzione"
+    },
+    "entertainment": {
+      "en": "Entertainment",
+      "bg": "Развлечения",
+      "de": "Unterhaltung",
+      "fr": "Divertissement",
+      "it": "Intrattenimento"
+    }
+  }
+}
+

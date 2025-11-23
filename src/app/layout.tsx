@@ -1,16 +1,18 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Outfit } from "next/font/google";
-import AuthProvider from "@/components/auth/AuthProvider";
+import { Inter, Outfit } from "next/font/google";
+import { Providers } from "@/components/Providers";
 import "./globals.css";
 
-const fontSans = Plus_Jakarta_Sans({
+const fontSans = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
+  display: "swap",
 });
 
 const fontHeading = Outfit({
   subsets: ["latin"],
   variable: "--font-heading",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -28,7 +30,7 @@ export default function RootLayout({
       <body
         className={`${fontSans.variable} ${fontHeading.variable} antialiased font-sans`}
       >
-        <AuthProvider>{children}</AuthProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

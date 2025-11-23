@@ -1,8 +1,57 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { auth } from "@/app/api/auth/[...nextauth]/route";
+import { redirect } from "next/navigation";
+import prisma from "@/lib/prisma";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Download, Calendar, TrendingUp, TrendingDown, Users, Clock, CheckCircle2 } from "lucide-react";
 
-export default function ReportsPage() {
+export default async function ReportsPage() {
+  const session = await auth();
+  
+  if (!session?.user?.hotelId) {
+    redirect("/login");
+  }
+
+  const hotelId = session.user.hotelId;
+
+  const [
+    totalRequests,
+    completedRequests,
+    topService
+  ] = await Promise.all([
+    prisma.request.count({ where: { hotelId } }),
+    prisma.request.count({ 
+      where: { 
+        hotelId,
+        status: "COMPLETED"
+      }
+    }),
+    prisma.request.groupBy({
+      by: ['serviceId'],
+      where: { hotelId },
+      _count: true,
+      orderBy: {
+        _count: {
+          serviceId: 'desc'
+        }
+      },
+      take: 1
+    })
+  ]);
+
+  const completionRate = totalRequests > 0 
+    ? Math.round((completedRequests / totalRequests) * 100)
+    : 0;
+
+  let topServiceName = "N/A";
+  if (topService.length > 0) {
+    const service = await prisma.service.findUnique({
+      where: { id: topService[0].serviceId },
+      select: { name: true }
+    });
+    topServiceName = service?.name || "N/A";
+  }
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -26,10 +75,10 @@ export default function ReportsPage() {
       {/* Stats Cards */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {[
-          { title: "Total Requests", value: "1,234", trend: "+12%", trendUp: true, icon: Users, color: "text-blue-600", bg: "bg-blue-50" },
+          { title: "Total Requests", value: totalRequests.toString(), trend: "+12%", trendUp: true, icon: Users, color: "text-blue-600", bg: "bg-blue-50" },
           { title: "Avg Response", value: "8m 30s", trend: "-15%", trendUp: true, icon: Clock, color: "text-orange-600", bg: "bg-orange-50" },
-          { title: "Completion Rate", value: "94%", trend: "+2%", trendUp: true, icon: CheckCircle2, color: "text-green-600", bg: "bg-green-50" },
-          { title: "Top Service", value: "Room Service", sub: "45% of total", icon: TrendingUp, color: "text-purple-600", bg: "bg-purple-50" },
+          { title: "Completion Rate", value: `${completionRate}%`, trend: "+2%", trendUp: true, icon: CheckCircle2, color: "text-green-600", bg: "bg-green-50" },
+          { title: "Top Service", value: topServiceName, sub: `${topService.length > 0 ? topService[0]._count : 0} requests`, icon: TrendingUp, color: "text-purple-600", bg: "bg-purple-50" },
         ].map((stat, i) => (
           <div key={i} className="bg-white rounded-3xl p-6 shadow-sm hover:shadow-md transition-shadow">
              <div className="flex justify-between items-start mb-4">

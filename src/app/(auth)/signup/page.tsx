@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
+import { signIn } from "next-auth/react";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -36,8 +37,19 @@ export default function SignupPage() {
         throw new Error(result.error || "Something went wrong");
       }
 
-      // Successful registration
-      router.push("/login?registered=true");
+      // Successful registration - now sign in and redirect to onboarding
+      const signInResult = await signIn("credentials", {
+        email: data.email,
+        password: data.password,
+        redirect: false,
+      });
+
+      if (signInResult?.error) {
+        throw new Error("Registration successful but login failed. Please login manually.");
+      }
+
+      // Redirect to onboarding to complete hotel setup
+      router.push("/onboarding");
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
@@ -56,7 +68,7 @@ export default function SignupPage() {
           Create an account
         </h1>
         <p className="text-sm text-muted-foreground">
-          Enter your details below to create your account
+          Start your free trial - no credit card required
         </p>
       </div>
       <div className="grid gap-6">
@@ -89,10 +101,6 @@ export default function SignupPage() {
             <div className="grid gap-2">
               <Label htmlFor="password">Password</Label>
               <Input id="password" name="password" type="password" required disabled={isLoading} minLength={6} autoComplete="new-password" />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="hotelName">Hotel Name</Label>
-              <Input id="hotelName" name="hotelName" placeholder="Grand Hotel" type="text" required disabled={isLoading} autoComplete="organization" />
             </div>
             <Button disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

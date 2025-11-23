@@ -1,11 +1,24 @@
+"use client";
+
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { Header } from "@/components/dashboard/Header";
+import { Toaster } from "sonner";
+import { useNewRequests } from "@/hooks/useNewRequests";
+import { useSession } from "next-auth/react";
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { data: session } = useSession();
+  
+  // Get hotelId from logged in user
+  const hotelId = session?.user?.hotelId;
+  
+  // Activate notification system only if user is logged in and has a hotel
+  useNewRequests(hotelId, !!hotelId);
+
   return (
     <div className="min-h-screen flex bg-gray-50">
       <Sidebar />
@@ -17,6 +30,7 @@ export default function DashboardLayout({
           </div>
         </main>
       </div>
+      <Toaster position="top-right" richColors />
     </div>
   );
 }

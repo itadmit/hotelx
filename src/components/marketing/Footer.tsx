@@ -1,20 +1,24 @@
 import Link from "next/link";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { Logo } from "@/components/Logo";
 
 export function Footer() {
   return (
     <footer className="bg-gray-900 text-gray-300 py-12 border-t border-gray-800">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="grid md:grid-cols-4 gap-8 mb-8">
+        <div className="grid md:grid-cols-4 gap-8 mb-12">
           <div className="col-span-1 md:col-span-2">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold">
-                H
-              </div>
-              <span className="text-xl font-bold text-white font-heading">HotelX</span>
+            <div className="mb-4">
+              <Logo variant="light" size="md" href="/" />
             </div>
-            <p className="text-gray-400 max-w-xs">
+            <p className="text-gray-400 max-w-xs mb-6 mt-8">
               Empowering hotels to deliver exceptional guest experiences through digital innovation.
             </p>
+            
+            <div className="mb-6">
+              <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Choose Language</p>
+              <LanguageSwitcher mode="flags" />
+            </div>
           </div>
           
           <div>

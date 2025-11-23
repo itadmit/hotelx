@@ -23,7 +23,7 @@ export function Dialog({ open, onOpenChange, children }: DialogProps) {
       />
       
       {/* Dialog Content */}
-      <div className="relative z-50 w-full max-w-lg bg-white p-6 shadow-lg sm:rounded-2xl animate-in fade-in zoom-in-95 duration-200">
+      <div className="relative z-50 w-full max-w-lg mx-4 sm:mx-0 bg-white p-6 shadow-lg rounded-3xl animate-in fade-in zoom-in-95 duration-200">
         {children}
       </div>
     </div>

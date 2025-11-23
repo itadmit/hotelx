@@ -1,0 +1,6 @@
+-- AlterTable
+ALTER TABLE "Service" ADD COLUMN     "isHot" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN     "isNew" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN     "isRecommended" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN     "isVegan" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN     "isVegetarian" BOOLEAN NOT NULL DEFAULT false;

@@ -32,7 +32,9 @@ model Hotel {
   name          String
   slug          String    @unique
   logo          String?
+  coverImage    String?   // Cover image for guest app
   primaryColor  String?   @default("#2563eb")
+  wifiName      String?   // WiFi network name for guest access
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -42,6 +44,7 @@ model Hotel {
   services      Service[]
   requests      Request[]
   categories    Category[]
+  translations  Translation[]
 }
 
 model Room {
@@ -64,9 +67,18 @@ model Room {
 model Category {
   id            String    @id @default(cuid())
   name          String
+  customName    String?   // Custom name override for hotel
   slug          String
   icon          String?   // Lucide icon name
+  emoji         String?   // Custom emoji for category
+  bgImage       String?   // Background image for category
+  isActive      Boolean   @default(true) // Hotel can enable/disable categories
   order         Int       @default(0)
+  
+  // Sub-categories support
+  parentId      String?   // Parent category ID for sub-categories
+  parent        Category? @relation("SubCategories", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  subCategories Category[] @relation("SubCategories")
   
   // Relations
   hotelId       String
@@ -85,6 +97,14 @@ model Service {
   estimatedTime String?   // e.g. "20 min"
   image         String?
   isActive      Boolean   @default(true)
+  
+  // Tags
+  isRecommended Boolean   @default(false) // Recommended
+  isNew         Boolean   @default(false) // New
+  isHot         Boolean   @default(false) // Hot/Popular
+  isVegetarian  Boolean   @default(false) // Vegetarian
+  isVegan       Boolean   @default(false) // Vegan
+  
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -94,12 +114,38 @@ model Service {
   categoryId    String
   category      Category  @relation(fields: [categoryId], references: [id])
   requests      Request[]
+  customFields  ServiceCustomField[]
+}
+
+model Translation {
+  id          String   @id @default(cuid())
+  entityType  String   // "Category" or "Service"
+  entityId    String   // ID of Category or Service
+  language    String   // "en", "he", "ar", etc.
+  field       String   // "name" or "description"
+  value       String   // Translated value
+  hotelId     String   // For easier querying
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  hotel       Hotel    @relation(fields: [hotelId], references: [id])
+
+  @@unique([entityType, entityId, language, field])
+  @@index([entityType, entityId])
+  @@index([hotelId])
 }
 
 model Request {
   id            String    @id @default(cuid())
   status        RequestStatus @default(NEW)
+  quantity      Int       @default(1) // Quantity of items ordered
+  customFieldsData Json?   // Store selected custom field values as JSON
   notes         String?
+  guestName     String?   // Full name of the guest placing the order
+  guestPhone    String?   // Guest phone number
+  guestEmail    String?   // Guest email
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   completedAt   DateTime?
@@ -113,6 +159,23 @@ model Request {
   service       Service   @relation(fields: [serviceId], references: [id])
   assigneeId    String?
   assignee      User?     @relation(fields: [assigneeId], references: [id])
+}
+
+model ServiceCustomField {
+  id          String   @id @default(cuid())
+  label       String   // e.g. "Egg Style", "Pillow Type"
+  fieldType   CustomFieldType // RADIO, CHECKBOX, SELECT
+  options     Json     // Array of options: ["Soft", "Medium", "Hard"]
+  isRequired  Boolean  @default(false)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  serviceId   String
+  service     Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@index([serviceId])
 }
 
 enum Role {
@@ -132,4 +195,10 @@ enum RequestStatus {
   IN_PROGRESS
   COMPLETED
   CANCELLED
+}
+
+enum CustomFieldType {
+  RADIO      // Single choice
+  CHECKBOX   // Multiple choice
+  SELECT     // Dropdown single choice
 }

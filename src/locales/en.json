@@ -1,0 +1,135 @@
+{
+  "navbar": {
+    "features": "Features",
+    "pricing": "Pricing",
+    "about": "About",
+    "login": "Login",
+    "start_trial": "Start Free Trial"
+  },
+  "hero": {
+    "new_badge": "New: Full support for 30+ languages",
+    "title_start": "Elevate Guest Experience & Revenue with",
+    "title_highlight": "QR-Based Service",
+    "subtitle": "Allow guests to order services, food, and spa treatments directly from their phone - no app download required. A smart management system that saves staff time and boosts your bottom line.",
+    "cta_primary": "Start Free Trial",
+    "cta_secondary": "Book a Demo",
+    "trust_1": "No credit card required",
+    "trust_2": "5-minute setup",
+    "trust_3": "Cancel anytime",
+    "mockup_title": "Advanced Admin Dashboard + Guest App",
+    "mockup_subtitle": "All in one place"
+  },
+  "how_it_works": {
+    "title": "How It Works",
+    "subtitle": "A simple process with quick implementation that upgrades your hotel in minutes.",
+    "step_1_title": "1. Guest Scans",
+    "step_1_desc": "A simple scan of the QR code in the room opens the service menu. No app download or registration required.",
+    "step_2_title": "2. Staff Receives",
+    "step_2_desc": "The request appears instantly on the tablet or mobile of the relevant staff member (Reception, Housekeeping, Kitchen).",
+    "step_3_title": "3. Manager Analyzes",
+    "step_3_desc": "Get business insights in real-time: response times, satisfaction, and upsell opportunities."
+  },
+  "benefits": {
+    "title": "Why Hotel Owners Choose HotelX?",
+    "subtitle": "We understand the challenges of running a modern hotel. Our system is built specifically to help you streamline processes, save costs, and improve guest experience - all in one simple platform.",
+    "item_1_title": "Increase Revenue",
+    "item_1_desc": "Guests order up to 30% more services when the process is digital and simple.",
+    "item_2_title": "Save Staff Time",
+    "item_2_desc": "Automation of routine requests frees up staff to focus on personal service.",
+    "item_3_title": "Improve Satisfaction",
+    "item_3_desc": "Faster response times and full transparency for guests increase ratings.",
+    "item_4_title": "Control & Monitor",
+    "item_4_desc": "Detailed reports on staff performance and response times in real-time.",
+    "chart_title": "Monthly Service Revenue",
+    "chart_top_services": "Top Services (This Week)",
+    "service_breakfast": "Room Breakfast",
+    "service_spa": "Spa Services",
+    "service_taxi": "Taxi Booking",
+    "orders": "orders"
+  },
+  "features": {
+    "title": "All Tools for Modern Hotel Management",
+    "subtitle": "One system that fully answers the needs of your hotel, staff, and guests.",
+    "f1_title": "Guest App - No Download",
+    "f1_desc": "Guests scan and order instantly. A modern, fast interface that works on any smartphone without installation.",
+    "f2_title": "Staff Command Center",
+    "f2_desc": "All requests in one place. Real-time task management, staff notifications, and execution tracking.",
+    "f3_title": "Auto-Translate (30+ Langs)",
+    "f3_desc": "Guests order in French, staff receives in English. Breaking the language barrier automatically.",
+    "f4_title": "Smart QR Management",
+    "f4_desc": "Generate unique codes for each room or area. Update menus and services in real-time without reprinting.",
+    "f5_title": "Advanced Analytics",
+    "f5_desc": "Understand guest behavior, peak times, staff performance, and most profitable services.",
+    "f6_title": "Staff Role Management",
+    "f6_desc": "Define roles (Front Desk, Housekeeping, Kitchen) and custom access for each staff member."
+  },
+  "pricing": {
+    "title": "Simple Pricing Per Room",
+    "subtitle": "Transparent pricing that scales with your hotel size. No hidden fees.",
+    "slider_label": "NUMBER OF ROOMS",
+    "rooms": "rooms",
+    "month": "/month",
+    "per_room": "per room",
+    "plans": {
+      "basic": {
+        "name": "Self Service",
+        "desc": "Perfect for hotels that want full control and setup themselves.",
+        "cta": "Start Free Trial"
+      },
+      "pro": {
+        "name": "Growth",
+        "desc": "Best for growing hotels needing automation and language support.",
+        "cta": "Get Started",
+        "badge": "Most Popular"
+      },
+      "premium": {
+        "name": "Managed VIP",
+        "desc": "We do everything for you. Full menu entry, translations, and setup.",
+        "cta": "Contact Sales"
+      }
+    },
+    "features": {
+      "qr": "Unlimited QR Scans",
+      "dashboard": "Staff Dashboard",
+      "webapp": "Guest Web App",
+      "basic_analytics": "Basic Analytics",
+      "adv_analytics": "Advanced Analytics",
+      "multilang": "Multi-language Support",
+      "setup": "Full Content Setup by Us",
+      "support_basic": "Email Support",
+      "support_std": "Standard Support",
+      "support_vip": "24/7 Priority VIP Support"
+    },
+    "enterprise": "Need a custom solution for a hotel chain?",
+    "contact_sales": "Contact Enterprise Sales"
+  },
+  "testimonials": {
+    "title": "What Our Customers Say",
+    "subtitle": "Join hundreds of hotels already upgrading their service with HotelX",
+    "t1_quote": "Since implementing HotelX, our response times have dropped by 40% and guests are much happier. It transformed how we work.",
+    "t1_author": "David Cohen",
+    "t1_role": "CEO, Seaside Hotel",
+    "t2_quote": "The system is incredibly simple. The staff learned to use it in minutes, and guests love not having to download an app.",
+    "t2_author": "Sarah Levy",
+    "t2_role": "Operations Manager, Boutique Hotels",
+    "t3_quote": "The reports gave us insights we never had before. We know exactly which services are most profitable and when we're busiest.",
+    "t3_author": "Ron Abrahami",
+    "t3_role": "Owner, Mountain View Resort"
+  },
+  "cta": {
+    "title": "Ready to Upgrade Your Hotel?",
+    "subtitle": "Join hundreds of hotels already enjoying smarter, more efficient, and profitable management. Try HotelX free for 14 days.",
+    "button": "Start Free Trial Now",
+    "disclaimer": "No commitment • No credit card required • 24/7 Support"
+  },
+  "footer": {
+    "desc": "Empowering hotels to deliver exceptional guest experiences through digital innovation.",
+    "product": "Product",
+    "company": "Company",
+    "contact": "Contact",
+    "privacy": "Privacy Policy",
+    "rights": "HotelX. All rights reserved.",
+    "language": "CHOOSE LANGUAGE"
+  }
+}
+
