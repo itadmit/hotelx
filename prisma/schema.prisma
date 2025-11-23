@@ -1,0 +1,135 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  password      String?
+  emailVerified DateTime?
+  image         String?
+  role          Role      @default(STAFF)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  hotelId       String?
+  hotel         Hotel?    @relation(fields: [hotelId], references: [id])
+  assignedRequests Request[]
+}
+
+model Hotel {
+  id            String    @id @default(cuid())
+  name          String
+  slug          String    @unique
+  logo          String?
+  primaryColor  String?   @default("#2563eb")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  users         User[]
+  rooms         Room[]
+  services      Service[]
+  requests      Request[]
+  categories    Category[]
+}
+
+model Room {
+  id            String    @id @default(cuid())
+  number        String
+  code          String    @unique // Unique code for QR (e.g. random 6 chars)
+  type          String?   // Suite, Single, Double
+  status        RoomStatus @default(ACTIVE)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  hotelId       String
+  hotel         Hotel     @relation(fields: [hotelId], references: [id])
+  requests      Request[]
+
+  @@unique([hotelId, number])
+}
+
+model Category {
+  id            String    @id @default(cuid())
+  name          String
+  slug          String
+  icon          String?   // Lucide icon name
+  order         Int       @default(0)
+  
+  // Relations
+  hotelId       String
+  hotel         Hotel     @relation(fields: [hotelId], references: [id])
+  services      Service[]
+
+  @@unique([hotelId, slug])
+}
+
+model Service {
+  id            String    @id @default(cuid())
+  name          String
+  description   String?
+  price         Decimal?  @db.Decimal(10, 2)
+  currency      String    @default("USD")
+  estimatedTime String?   // e.g. "20 min"
+  image         String?
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  hotelId       String
+  hotel         Hotel     @relation(fields: [hotelId], references: [id])
+  categoryId    String
+  category      Category  @relation(fields: [categoryId], references: [id])
+  requests      Request[]
+}
+
+model Request {
+  id            String    @id @default(cuid())
+  status        RequestStatus @default(NEW)
+  notes         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  completedAt   DateTime?
+
+  // Relations
+  hotelId       String
+  hotel         Hotel     @relation(fields: [hotelId], references: [id])
+  roomId        String
+  room          Room      @relation(fields: [roomId], references: [id])
+  serviceId     String
+  service       Service   @relation(fields: [serviceId], references: [id])
+  assigneeId    String?
+  assignee      User?     @relation(fields: [assigneeId], references: [id])
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  STAFF
+}
+
+enum RoomStatus {
+  ACTIVE
+  MAINTENANCE
+  INACTIVE
+}
+
+enum RequestStatus {
+  NEW
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
