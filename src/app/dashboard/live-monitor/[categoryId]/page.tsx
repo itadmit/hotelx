@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useSession } from "next-auth/react";
-import { Monitor, Clock, X, Maximize2 } from "lucide-react";
+import { Monitor, Clock, X, Maximize2, CheckCircle2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
@@ -105,6 +105,30 @@ export default function LiveMonitorCategoryPage({
     } else {
       document.exitFullscreen();
       setIsFullscreen(false);
+    }
+  };
+
+  const markAsCompleted = async (requestId: string) => {
+    try {
+      const response = await fetch('/api/monitor/requests/complete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ requestId }),
+      });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        // Remove from local state immediately for instant feedback
+        setRequests(prev => prev.filter(r => r.id !== requestId));
+      } else {
+        alert(result.error || "Failed to update request");
+      }
+    } catch (error) {
+      console.error("Error completing request:", error);
+      alert("Failed to complete request");
     }
   };
 
@@ -223,7 +247,7 @@ export default function LiveMonitorCategoryPage({
                     </div>
 
                     {/* Content */}
-                    <div className="space-y-2.5">
+                    <div className="space-y-2.5 mb-4">
                       <div className="flex items-baseline gap-3">
                         <div className="text-xs opacity-60 w-16">Room</div>
                         <div className="text-4xl font-bold leading-none">{request.room}</div>
@@ -243,6 +267,15 @@ export default function LiveMonitorCategoryPage({
                         </div>
                       )}
                     </div>
+
+                    {/* Complete Button */}
+                    <Button
+                      onClick={() => markAsCompleted(request.id)}
+                      className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg shadow-lg transition-all hover:scale-[1.02] flex items-center justify-center gap-2"
+                    >
+                      <CheckCircle2 className="h-5 w-5" />
+                      Mark as Completed
+                    </Button>
                   </div>
                 );
               })}

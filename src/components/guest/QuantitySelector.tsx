@@ -1,6 +1,7 @@
 "use client";
 
 import { Minus, Plus } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface QuantitySelectorProps {
   quantity: number;
@@ -8,9 +9,10 @@ interface QuantitySelectorProps {
 }
 
 export function QuantitySelector({ quantity, onQuantityChange }: QuantitySelectorProps) {
+  const { translate } = useLanguage();
   return (
     <div className="mb-4">
-      <label className="text-sm font-semibold text-gray-700 mb-2 block">Quantity</label>
+      <label className="text-sm font-semibold text-gray-700 mb-2 block">{translate("app.dashboard.common.quantity")}</label>
       <div className="flex items-center gap-3">
         <button
           type="button"

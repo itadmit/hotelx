@@ -8,6 +8,7 @@ import { Upload, Globe, Palette, Building2, Save, Trash2, Star, Download, Rotate
 import { updateHotelSettings, deleteAccount, importFullDemoData, resetHotelData } from "@/app/actions/hotel";
 import { signOut } from "next-auth/react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Hotel {
   id: string;
@@ -15,15 +16,20 @@ interface Hotel {
   logo: string | null;
   primaryColor: string | null;
   wifiName: string | null;
+  language: string | null;
+  currency: string | null;
 }
 
 
 export function HotelSettingsClient({ hotel }: { hotel: Hotel }) {
+  const { translate } = useLanguage();
   const [activeTab, setActiveTab] = useState("general");
   const [primaryColor, setPrimaryColor] = useState(hotel.primaryColor || "#4f46e5");
   const [hotelName, setHotelName] = useState(hotel.name);
   const [wifiName, setWifiName] = useState(hotel.wifiName || `${hotel.name}_Guest`);
   const [logoUrl, setLogoUrl] = useState(hotel.logo || "");
+  const [language, setLanguage] = useState(hotel.language || "en");
+  const [currency, setCurrency] = useState(hotel.currency || "USD");
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -55,11 +61,13 @@ export function HotelSettingsClient({ hotel }: { hotel: Hotel }) {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSaving(true);
-    const formData = new FormData();
+    const formData = new FormData(e.currentTarget);
     formData.append("name", hotelName);
     formData.append("logo", logoUrl);
     formData.append("primaryColor", primaryColor);
     formData.append("wifiName", wifiName);
+    formData.append("language", language);
+    formData.append("currency", currency);
     try {
       const result = await updateHotelSettings(formData);
       if (result.success) {
@@ -149,7 +157,7 @@ export function HotelSettingsClient({ hotel }: { hotel: Hotel }) {
             className="gap-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md shadow-indigo-200 cursor-pointer transition-transform active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Save className="h-4 w-4" />
-            {isSaving ? "Saving..." : "Save Changes"}
+            {isSaving ? translate("app.dashboard.common.saving") : translate("app.dashboard.settings.save_changes")}
           </Button>
         </div>
       </div>
@@ -204,10 +212,10 @@ export function HotelSettingsClient({ hotel }: { hotel: Hotel }) {
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="logo" className="text-gray-700">Hotel Logo</Label>
+                  <Label htmlFor="logo" className="text-gray-700">{translate("app.dashboard.common.hotel_logo")}</Label>
                   <div className="flex items-center gap-6 p-4 border-2 border-dashed border-gray-100 rounded-2xl hover:border-indigo-200 transition-colors bg-gray-50/50">
                     {logoUrl ? (
-                      <img src={logoUrl} alt="Hotel Logo" className="h-20 w-20 rounded-2xl object-cover shadow-sm" />
+                      <img src={logoUrl} alt={translate("app.dashboard.common.hotel_logo")} className="h-20 w-20 rounded-2xl object-cover shadow-sm" />
                     ) : (
                       <div className="h-20 w-20 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600 font-bold text-xl shadow-sm">
                         {hotelName.charAt(0).toUpperCase()}
@@ -309,18 +317,35 @@ export function HotelSettingsClient({ hotel }: { hotel: Hotel }) {
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="grid gap-2">
                   <Label htmlFor="language" className="text-gray-700">Default Language</Label>
-                  <select id="language" className="flex h-11 w-full rounded-xl border-none bg-gray-50 px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-200 cursor-pointer hover:bg-gray-100 transition-colors">
-                    <option>English</option>
-                    <option>Hebrew</option>
-                    <option>Spanish</option>
+                  <select 
+                    id="language" 
+                    name="language"
+                    value={language}
+                    onChange={(e) => setLanguage(e.target.value)}
+                    className="flex h-11 w-full rounded-xl border-none bg-gray-50 px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-200 cursor-pointer hover:bg-gray-100 transition-colors"
+                  >
+                    <option value="en">🇺🇸 English</option>
+                    <option value="bg">🇧🇬 Български</option>
+                    <option value="de">🇩🇪 Deutsch</option>
+                    <option value="fr">🇫🇷 Français</option>
+                    <option value="it">🇮🇹 Italiano</option>
                   </select>
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="currency" className="text-gray-700">Currency</Label>
-                  <select id="currency" className="flex h-11 w-full rounded-xl border-none bg-gray-50 px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-200 cursor-pointer hover:bg-gray-100 transition-colors">
-                    <option>USD ($)</option>
-                    <option>ILS (₪)</option>
-                    <option>EUR (€)</option>
+                  <select 
+                    id="currency" 
+                    name="currency"
+                    value={currency}
+                    onChange={(e) => setCurrency(e.target.value)}
+                    className="flex h-11 w-full rounded-xl border-none bg-gray-50 px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-200 cursor-pointer hover:bg-gray-100 transition-colors"
+                  >
+                    <option value="USD">USD ($)</option>
+                    <option value="EUR">EUR (€)</option>
+                    <option value="GBP">GBP (£)</option>
+                    <option value="ILS">ILS (₪)</option>
+                    <option value="JPY">JPY (¥)</option>
+                    <option value="BGN">BGN (лв)</option>
                   </select>
                 </div>
               </div>
@@ -357,7 +382,7 @@ export function HotelSettingsClient({ hotel }: { hotel: Hotel }) {
             <div className="bg-orange-50 rounded-3xl p-8 shadow-sm space-y-6 border border-orange-100 transition-all hover:shadow-md hover:border-orange-200">
               <div className="flex items-start justify-between flex-col sm:flex-row gap-4">
                 <div>
-                  <h3 className="font-bold text-lg text-orange-900">Reset Account</h3>
+                  <h3 className="font-bold text-lg text-orange-900">{translate("app.dashboard.common.reset_account")}</h3>
                   <p className="text-sm text-orange-700/70">Clear all data but keep hotel name</p>
                 </div>
                 <Button 
@@ -367,7 +392,7 @@ export function HotelSettingsClient({ hotel }: { hotel: Hotel }) {
                   disabled={isResetting}
                   className="bg-white border-orange-200 text-orange-600 hover:text-orange-700 hover:bg-orange-50 rounded-xl gap-2 w-full sm:w-auto cursor-pointer disabled:opacity-50"
                 >
-                  <RotateCcw className="h-4 w-4" /> {isResetting ? "Resetting..." : "Reset Account"}
+                  <RotateCcw className="h-4 w-4" /> {isResetting ? translate("app.dashboard.common.resetting") : translate("app.dashboard.common.reset_account")}
                 </Button>
               </div>
               <div className="bg-white rounded-lg p-4 border border-orange-200">
@@ -406,7 +431,7 @@ export function HotelSettingsClient({ hotel }: { hotel: Hotel }) {
       <Dialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-orange-900">Reset Account</DialogTitle>
+            <DialogTitle className="text-orange-900">{translate("app.dashboard.common.reset_account")}</DialogTitle>
             <DialogDescription className="text-gray-600">
               Are you sure you want to reset your account? This will delete all data but keep your hotel name.
             </DialogDescription>
@@ -438,11 +463,11 @@ export function HotelSettingsClient({ hotel }: { hotel: Hotel }) {
               className="rounded-xl bg-orange-600 hover:bg-orange-700 gap-2"
             >
               {isResetting ? (
-                <>Resetting...</>
+                <>{translate("app.dashboard.common.resetting")}</>
               ) : (
                 <>
                   <RotateCcw className="h-4 w-4" />
-                  Yes, Reset Account
+                  Yes, {translate("app.dashboard.common.reset_account")}
                 </>
               )}
             </Button>

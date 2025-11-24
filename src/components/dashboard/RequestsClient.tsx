@@ -8,9 +8,11 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { Search, Filter, MoreHorizontal, Clock, Plus, ArrowDownToLine, GripVertical, Trash2, UserPlus, Edit } from "lucide-react";
+import { Search, Filter, MoreHorizontal, Clock, Plus, ArrowDownToLine, GripVertical, Trash2, UserPlus, Edit, User } from "lucide-react";
 import { assignRequest, deleteRequest, updateRequestStatus, createRequest, updateRequest } from "@/app/actions/requests";
 import { Textarea } from "@/components/ui/textarea";
+import { CustomFieldRenderer } from "@/components/guest/CustomFieldRenderer";
+import { useLanguage } from "@/contexts/LanguageContext";
 import {
   DndContext,
   DragOverlay,
@@ -171,7 +173,7 @@ function RequestCard({ request, staff, onAssign, onDelete, onEdit }: {
                 className="text-sm pl-8"
                 onClick={() => onAssign(request.id, member.id)}
               >
-                {member.name || 'Staff Member'}
+                {member.name || translate("app.dashboard.common.staff_member")}
               </DropdownMenuItem>
             ))}
             {request.assignee !== "Unassigned" && (
@@ -283,15 +285,25 @@ interface RequestsClientProps {
 }
 
 export function RequestsClient({ initialRequests, staff, rooms, services, hotelId }: RequestsClientProps) {
+  const { translate } = useLanguage();
+  const t = (key: string) => translate(`app.dashboard.requests.${key}`);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [editingRequest, setEditingRequest] = useState<Request | null>(null);
+  const [editCustomFieldValues, setEditCustomFieldValues] = useState<Record<string, any>>({});
   const [activeId, setActiveId] = useState<string | null>(null);
   const [requests, setRequests] = useState<Request[]>(initialRequests);
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"board" | "list">("board");
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
+
+  const statusMap: Record<string, { bg: string; text: string; label: string }> = {
+    "NEW": { bg: "bg-indigo-100", text: "text-indigo-800", label: t("new") },
+    "IN_PROGRESS": { bg: "bg-yellow-100", text: "text-yellow-800", label: t("in_progress") },
+    "COMPLETED": { bg: "bg-green-100", text: "text-green-800", label: t("completed") },
+    "CANCELLED": { bg: "bg-gray-100", text: "text-gray-800", label: t("cancelled") },
+  };
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -384,6 +396,8 @@ export function RequestsClient({ initialRequests, staff, rooms, services, hotelI
 
   const handleEdit = (request: Request) => {
     setEditingRequest(request);
+    // Load existing custom field values
+    setEditCustomFieldValues(request.customFieldsData || {});
     setIsEditOpen(true);
   };
 
@@ -413,7 +427,7 @@ export function RequestsClient({ initialRequests, staff, rooms, services, hotelI
 
   const handleExport = () => {
     const csv = [
-      ["Room", "Service", "Status", "Assignee", "Quantity", "Guest Name", "Notes", "Created At"],
+      [translate("app.dashboard.requests.room"), translate("app.dashboard.requests.service"), translate("app.dashboard.requests.status"), translate("app.dashboard.requests.assignee"), translate("app.dashboard.common.quantity"), translate("app.dashboard.requests.guest_name"), translate("app.dashboard.requests.notes"), translate("app.dashboard.common.created_at")],
       ...requests.map(req => [
         req.room,
         req.service,
@@ -460,8 +474,8 @@ export function RequestsClient({ initialRequests, staff, rooms, services, hotelI
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Requests Board</h1>
-          <p className="text-gray-500 mt-1">Manage and track guest requests in real-time</p>
+          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">{t("title")}</h1>
+          <p className="text-gray-500 mt-1">{t("subtitle")}</p>
         </div>
         <div className="flex items-center gap-3">
           <Button 
@@ -470,14 +484,14 @@ export function RequestsClient({ initialRequests, staff, rooms, services, hotelI
             onClick={handleExport}
           >
             <ArrowDownToLine className="h-4 w-4" />
-            Export
+            {t("export")}
           </Button>
           <Button 
             onClick={() => setIsCreateOpen(true)}
             className="gap-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md shadow-indigo-200"
           >
             <Plus className="h-4 w-4" />
-            Create Request
+            {t("create_request")}
           </Button>
         </div>
       </div>
@@ -486,33 +500,33 @@ export function RequestsClient({ initialRequests, staff, rooms, services, hotelI
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Create Request</DialogTitle>
-            <DialogDescription>Manually add a new request to the board.</DialogDescription>
+            <DialogTitle>{t("create_new_request")}</DialogTitle>
+            <DialogDescription>{t("subtitle")}</DialogDescription>
           </DialogHeader>
           <form action={handleCreate} className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="roomNumber">Room Number *</Label>
+              <Label htmlFor="roomNumber">{t("room_number")} *</Label>
               <select
                 id="roomNumber"
                 name="roomNumber"
                 required
                 className="flex h-11 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100"
               >
-                <option value="">Select room...</option>
+                <option value="">{translate("app.dashboard.rooms.add_room")}...</option>
                 {rooms.map(room => (
                   <option key={room.id} value={room.number}>{room.number}</option>
                 ))}
               </select>
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="serviceId">Service *</Label>
+              <Label htmlFor="serviceId">{t("service")} *</Label>
               <select
                 id="serviceId"
                 name="serviceId"
                 required
                 className="flex h-11 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm focus:border-indigo-300 focus:ring-2 focus:ring-indigo-100"
               >
-                <option value="">Select service...</option>
+                <option value="">{t("select_service")}...</option>
                 {services.map(service => (
                   <option key={service.id} value={service.id}>
                     {service.name} ({service.category.name})
@@ -521,7 +535,7 @@ export function RequestsClient({ initialRequests, staff, rooms, services, hotelI
               </select>
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="quantity">Quantity</Label>
+              <Label htmlFor="quantity">{translate("app.guest.quantity")}</Label>
               <Input 
                 id="quantity" 
                 name="quantity" 
@@ -532,16 +546,16 @@ export function RequestsClient({ initialRequests, staff, rooms, services, hotelI
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="guestName">Guest Name</Label>
+              <Label htmlFor="guestName">{t("guest_name")}</Label>
               <Input id="guestName" name="guestName" className="h-11" />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="notes">Notes</Label>
+              <Label htmlFor="notes">{t("notes")}</Label>
               <Textarea id="notes" name="notes" rows={3} />
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setIsCreateOpen(false)}>Cancel</Button>
-              <Button type="submit">Create</Button>
+              <Button type="button" variant="outline" onClick={() => setIsCreateOpen(false)}>{t("cancel")}</Button>
+              <Button type="submit">{t("create_request")}</Button>
             </DialogFooter>
           </form>
         </DialogContent>
@@ -590,7 +604,7 @@ export function RequestsClient({ initialRequests, staff, rooms, services, hotelI
                 </select>
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="edit-quantity">Quantity</Label>
+                <Label htmlFor="edit-quantity">{translate("app.dashboard.common.quantity")}</Label>
                 <Input 
                   id="edit-quantity" 
                   name="quantity" 
@@ -618,10 +632,31 @@ export function RequestsClient({ initialRequests, staff, rooms, services, hotelI
                   defaultValue={editingRequest.notes || ""}
                 />
               </div>
+              
+              {/* Custom Fields */}
+              {editingRequest.customFields && editingRequest.customFields.length > 0 && (
+                <div className="border-t pt-4">
+                  <h4 className="font-semibold text-sm mb-3 text-gray-700">Customizations</h4>
+                  <CustomFieldRenderer
+                    fields={editingRequest.customFields}
+                    values={editCustomFieldValues}
+                    onChange={(fieldId, value) => {
+                      setEditCustomFieldValues(prev => ({ ...prev, [fieldId]: value }));
+                    }}
+                  />
+                  <input 
+                    type="hidden" 
+                    name="customFieldsData" 
+                    value={JSON.stringify(editCustomFieldValues)} 
+                  />
+                </div>
+              )}
+              
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => {
                   setIsEditOpen(false);
                   setEditingRequest(null);
+                  setEditCustomFieldValues({});
                 }}>Cancel</Button>
                 <Button type="submit">Save Changes</Button>
               </DialogFooter>
@@ -673,7 +708,7 @@ export function RequestsClient({ initialRequests, staff, rooms, services, hotelI
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input 
-            placeholder="Search by room or service..." 
+            placeholder={t("search_placeholder")} 
             className="pl-10 border-transparent bg-transparent focus:bg-gray-50 rounded-xl"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -686,7 +721,7 @@ export function RequestsClient({ initialRequests, staff, rooms, services, hotelI
             onClick={() => setIsFilterOpen(true)}
           >
             <Filter className="h-4 w-4" />
-            Filter
+            {t("filter")}
             {statusFilter.length > 0 && (
               <span className="ml-1 bg-indigo-600 text-white text-xs px-1.5 py-0.5 rounded-full">
                 {statusFilter.length}
@@ -695,14 +730,14 @@ export function RequestsClient({ initialRequests, staff, rooms, services, hotelI
           </Button>
           <div className="h-6 w-px bg-gray-200 mx-2"></div>
           <div className="flex items-center gap-2">
-             <span className="text-sm text-gray-500">View:</span>
+             <span className="text-sm text-gray-500">{translate("app.dashboard.requests.view")}:</span>
              <Button 
                variant="ghost" 
                size="sm" 
                className={viewMode === "board" ? "text-indigo-600 bg-indigo-50 font-medium rounded-lg" : "text-gray-500 hover:bg-gray-50 rounded-lg"}
                onClick={() => setViewMode("board")}
              >
-               Board
+               {t("view_board")}
              </Button>
              <Button 
                variant="ghost" 
@@ -710,7 +745,7 @@ export function RequestsClient({ initialRequests, staff, rooms, services, hotelI
                className={viewMode === "list" ? "text-indigo-600 bg-indigo-50 font-medium rounded-lg" : "text-gray-500 hover:bg-gray-50 rounded-lg"}
                onClick={() => setViewMode("list")}
              >
-               List
+               {t("view_list")}
              </Button>
           </div>
         </div>
@@ -776,39 +811,71 @@ export function RequestsClient({ initialRequests, staff, rooms, services, hotelI
           </DragOverlay>
         </DndContext>
       ) : (
-        <div className="bg-white rounded-2xl shadow-sm">
-          <div className="divide-y">
-            {filteredRequests.length === 0 ? (
-              <div className="p-8 text-center text-gray-500">
-                No requests found
-              </div>
-            ) : (
-              filteredRequests.map((req) => (
-                <div key={req.id} className="p-4 hover:bg-gray-50 transition-colors">
+        <div className="space-y-3">
+          {filteredRequests.length === 0 ? (
+            <div className="bg-white rounded-2xl p-8 text-center text-gray-500 shadow-sm">
+              No requests found
+            </div>
+          ) : (
+            filteredRequests.map((req) => {
+              const statusBadge = statusMap[req.status] || statusMap["NEW"];
+              return (
+                <div key={req.id} className="bg-white rounded-2xl p-5 shadow-sm hover:shadow-md transition-all duration-200 border border-gray-100 hover:border-indigo-200">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <span className="bg-gray-100 text-gray-700 text-xs font-bold px-2 py-1 rounded">
+                      <div className="flex items-center gap-3 mb-3">
+                        <span className="bg-gray-50 text-gray-700 text-xs font-bold px-3 py-1.5 rounded-lg">
                           Room {req.room}
                         </span>
-                        <span className={`px-2 py-1 rounded-full text-xs font-bold ${
-                          req.status === "NEW" ? "bg-indigo-100 text-indigo-800" :
-                          req.status === "IN_PROGRESS" ? "bg-yellow-100 text-yellow-800" :
-                          "bg-green-100 text-green-800"
-                        }`}>
-                          {req.status.replace("_", " ")}
+                        <span className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide ${statusBadge.bg} ${statusBadge.text}`}>
+                          {statusBadge.label}
                         </span>
+                        {req.priority === "High" && (
+                          <span className="bg-red-50 text-red-600 text-xs font-bold px-2 py-1 rounded-lg">
+                            HIGH PRIORITY
+                          </span>
+                        )}
                       </div>
-                      <h4 className="font-bold text-gray-900 mb-1">{req.service}</h4>
+                      <h4 className="font-bold text-gray-900 mb-2 text-base">
+                        {req.service}
+                        {req.quantity && req.quantity > 1 && (
+                          <span className="ml-2 text-xs font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">
+                            ×{req.quantity}
+                          </span>
+                        )}
+                      </h4>
                       {req.guestName && (
-                        <p className="text-xs text-gray-600 mb-1">👤 {req.guestName}</p>
+                        <p className="text-sm text-gray-600 mb-2">👤 {req.guestName}</p>
                       )}
-                      <div className="flex items-center gap-4 text-xs text-gray-400">
+                      {req.customFieldsData && Object.keys(req.customFieldsData).length > 0 && (
+                        <div className="mb-2 p-2 bg-blue-50 rounded-lg inline-block">
+                          <p className="text-xs font-semibold text-blue-900 mb-1">Customizations:</p>
+                          {Object.entries(req.customFieldsData).map(([fieldId, value]: [string, any]) => {
+                            const field = req.customFields?.find((f: any) => f.id === fieldId);
+                            const label = field?.label || fieldId;
+                            const displayValue = Array.isArray(value) ? value.join(', ') : value;
+                            return (
+                              <p key={fieldId} className="text-xs text-blue-800">
+                                <span className="font-medium">{label}:</span> {displayValue}
+                              </p>
+                            );
+                          })}
+                        </div>
+                      )}
+                      {req.notes && (
+                        <p className="text-sm text-gray-600 bg-gray-50 rounded-lg p-2 mb-2 italic">
+                          "{req.notes}"
+                        </p>
+                      )}
+                      <div className="flex items-center gap-4 text-xs text-gray-400 mt-2">
                         <span className="flex items-center gap-1">
                           <Clock className="h-3 w-3" />
                           {req.time}
                         </span>
-                        <span>{req.assignee}</span>
+                        <span className="flex items-center gap-1">
+                          <User className="h-3 w-3" />
+                          {req.assignee}
+                        </span>
                       </div>
                     </div>
                     <DropdownMenu>
@@ -828,7 +895,7 @@ export function RequestsClient({ initialRequests, staff, rooms, services, hotelI
                             className="text-sm pl-8"
                             onClick={() => handleAssign(req.id, member.id)}
                           >
-                            {member.name || 'Staff Member'}
+                            {member.name || translate("app.dashboard.common.staff_member")}
                           </DropdownMenuItem>
                         ))}
                         {req.assignee !== "Unassigned" && (
@@ -858,9 +925,9 @@ export function RequestsClient({ initialRequests, staff, rooms, services, hotelI
                     </DropdownMenu>
                   </div>
                 </div>
-              ))
-            )}
-          </div>
+              );
+            })
+          )}
         </div>
       )}
     </div>

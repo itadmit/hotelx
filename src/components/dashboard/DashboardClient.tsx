@@ -30,6 +30,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import Link from "next/link";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface DashboardClientProps {
   stats: {
@@ -50,6 +51,8 @@ interface DashboardClientProps {
 }
 
 export function DashboardClient({ stats, recentRequests, monthlyRevenue = [] }: DashboardClientProps) {
+  const { translate } = useLanguage();
+  const t = (key: string) => translate(`app.dashboard.${key}`);
   const [isAddServiceOpen, setIsAddServiceOpen] = useState(false);
   const [timeRange, setTimeRange] = useState<TimeRange>("weekly");
   const [showWhatsNew, setShowWhatsNew] = useState(false);
@@ -68,7 +71,7 @@ export function DashboardClient({ stats, recentRequests, monthlyRevenue = [] }: 
 
   const statsData = [
     { 
-      title: "Revenue", 
+      title: t("revenue"), 
       value: `$${stats.revenue.toLocaleString()}`, 
       change: null, 
       icon: CreditCard, 
@@ -76,7 +79,7 @@ export function DashboardClient({ stats, recentRequests, monthlyRevenue = [] }: 
       bg: "bg-indigo-50" 
     },
     { 
-      title: "Occupancy", 
+      title: t("occupancy"), 
       value: `${stats.occupancy}%`, 
       change: null, 
       icon: Building2, 
@@ -84,7 +87,7 @@ export function DashboardClient({ stats, recentRequests, monthlyRevenue = [] }: 
       bg: "bg-pink-50" 
     },
     { 
-      title: "Guests", 
+      title: t("guests"), 
       value: stats.guests.toString(), 
       change: null, 
       icon: Users, 
@@ -92,9 +95,9 @@ export function DashboardClient({ stats, recentRequests, monthlyRevenue = [] }: 
       bg: "bg-blue-50" 
     },
     { 
-      title: "Requests", 
+      title: t("requests"), 
       value: stats.requests.toString(), 
-      change: stats.requests > 0 ? "Active" : null, 
+      change: stats.requests > 0 ? t("active") : null, 
       icon: Activity, 
       color: "text-orange-600", 
       bg: "bg-orange-50" 
@@ -103,10 +106,10 @@ export function DashboardClient({ stats, recentRequests, monthlyRevenue = [] }: 
 
   const getStatusBadge = (status: string) => {
     const statusMap: Record<string, { bg: string; text: string; label: string }> = {
-      "NEW": { bg: "bg-indigo-100", text: "text-indigo-800", label: "New" },
-      "IN_PROGRESS": { bg: "bg-yellow-100", text: "text-yellow-800", label: "In Progress" },
-      "COMPLETED": { bg: "bg-green-100", text: "text-green-800", label: "Completed" },
-      "CANCELLED": { bg: "bg-gray-100", text: "text-gray-800", label: "Cancelled" },
+      "NEW": { bg: "bg-indigo-100", text: "text-indigo-800", label: translate("app.dashboard.requests.new") },
+      "IN_PROGRESS": { bg: "bg-yellow-100", text: "text-yellow-800", label: translate("app.dashboard.requests.in_progress") },
+      "COMPLETED": { bg: "bg-green-100", text: "text-green-800", label: translate("app.dashboard.requests.completed") },
+      "CANCELLED": { bg: "bg-gray-100", text: "text-gray-800", label: translate("app.dashboard.requests.cancelled") },
     };
     return statusMap[status] || statusMap["NEW"];
   };
@@ -116,20 +119,20 @@ export function DashboardClient({ stats, recentRequests, monthlyRevenue = [] }: 
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Good Morning! 👋</h1>
-          <p className="text-gray-500 mt-1">Here's a quick overview of your hotel's performance today.</p>
+          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">{t("good_morning")}</h1>
+          <p className="text-gray-500 mt-1">{t("overview")}</p>
         </div>
         <div className="flex items-center gap-3">
           <Button variant="outline" className="bg-white border-none shadow-sm text-gray-600 hover:bg-gray-50 gap-2 rounded-xl">
             <CalendarRange className="h-4 w-4" />
-            Today: {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+            {t("today")}: {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
           </Button>
           <Button 
             onClick={() => setIsAddServiceOpen(true)}
             className="gap-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md shadow-indigo-200"
           >
             <Utensils className="h-4 w-4" />
-            New Request
+            {t("new_request")}
           </Button>
         </div>
       </div>
@@ -138,16 +141,16 @@ export function DashboardClient({ stats, recentRequests, monthlyRevenue = [] }: 
       <Dialog open={isAddServiceOpen} onOpenChange={setIsAddServiceOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Create New Request</DialogTitle>
-            <DialogDescription>Add a new service request for a guest.</DialogDescription>
+            <DialogTitle>{t("new_request")}</DialogTitle>
+            <DialogDescription>{translate("app.dashboard.requests.create_new_request")}</DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="room">Room Number</Label>
+              <Label htmlFor="room">{translate("app.dashboard.requests.room_number")}</Label>
               <Input id="room" placeholder="e.g. 305" />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="service">Service Type</Label>
+              <Label htmlFor="service">{translate("app.dashboard.services.name")}</Label>
               <Select>
                 <option>Room Service</option>
                 <option>Housekeeping</option>
@@ -156,13 +159,13 @@ export function DashboardClient({ stats, recentRequests, monthlyRevenue = [] }: 
               </Select>
             </div>
             <div className="grid gap-2">
-               <Label htmlFor="notes">Notes</Label>
+               <Label htmlFor="notes">{translate("app.dashboard.requests.notes")}</Label>
                <Input id="notes" placeholder="Additional details..." />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAddServiceOpen(false)}>Cancel</Button>
-            <Button onClick={() => setIsAddServiceOpen(false)}>Create Request</Button>
+            <Button variant="outline" onClick={() => setIsAddServiceOpen(false)}>{translate("app.dashboard.requests.cancel")}</Button>
+            <Button onClick={() => setIsAddServiceOpen(false)}>{translate("app.dashboard.requests.create_request")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -240,12 +243,12 @@ export function DashboardClient({ stats, recentRequests, monthlyRevenue = [] }: 
           <div className="bg-white rounded-3xl p-8 shadow-sm overflow-hidden">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h3 className="text-lg font-bold text-gray-900">Guest Requests</h3>
-                <p className="text-sm text-gray-500">Latest service tickets needing attention</p>
+                <h3 className="text-lg font-bold text-gray-900">{t("recent_requests")}</h3>
+                <p className="text-sm text-gray-500">{translate("app.dashboard.requests.subtitle")}</p>
               </div>
               <Link href="/dashboard/requests">
                 <Button variant="ghost" className="text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 font-medium">
-                  See All Requests
+                  {t("view_all")}
                 </Button>
               </Link>
             </div>
@@ -254,17 +257,17 @@ export function DashboardClient({ stats, recentRequests, monthlyRevenue = [] }: 
               <table className="w-full">
                 <thead className="bg-gray-50/50">
                   <tr className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                    <th className="px-6 py-4 rounded-l-xl">Guest / Room</th>
-                    <th className="px-6 py-4">Service</th>
-                    <th className="px-6 py-4">Status</th>
-                    <th className="px-6 py-4 rounded-r-xl">Time</th>
+                    <th className="px-6 py-4 rounded-l-xl">{translate("app.dashboard.requests.room")} / {translate("app.dashboard.guests")}</th>
+                    <th className="px-6 py-4">{translate("app.dashboard.requests.service")}</th>
+                    <th className="px-6 py-4">{translate("app.dashboard.requests.status")}</th>
+                    <th className="px-6 py-4 rounded-r-xl">{translate("app.dashboard.requests.time")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
                   {recentRequests.length === 0 ? (
                     <tr>
                       <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
-                        No requests yet
+                        {t("no_requests")}
                       </td>
                     </tr>
                   ) : (
@@ -278,7 +281,7 @@ export function DashboardClient({ stats, recentRequests, monthlyRevenue = [] }: 
                                 {req.room}
                               </div>
                               <div>
-                                <div className="font-medium text-gray-900">Room {req.room}</div>
+                                <div className="font-medium text-gray-900">{translate("app.guest.room")} {req.room}</div>
                                 <div className="text-xs text-gray-500">{req.assignee}</div>
                               </div>
                             </div>

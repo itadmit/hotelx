@@ -5,9 +5,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useSession } from "next-auth/react";
 import { handleSignOut } from "@/app/actions/auth";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export function Header() {
   const { data: session } = useSession();
+  const { translate } = useLanguage();
   
   if (!session?.user) {
     return null;
@@ -20,12 +22,12 @@ export function Header() {
     .toUpperCase() || "??";
 
   const roleTranslations: Record<string, string> = {
-    ADMIN: "Administrator",
-    MANAGER: "Hotel Manager",
-    STAFF: "Staff",
+    ADMIN: translate("app.dashboard.header.administrator"),
+    MANAGER: translate("app.dashboard.header.hotel_manager"),
+    STAFF: translate("app.dashboard.header.staff"),
   };
 
-  const userRole = roleTranslations[session.user.role || "STAFF"] || "User";
+  const userRole = roleTranslations[session.user.role || "STAFF"] || translate("app.dashboard.header.user");
 
   return (
     <header className="h-20 px-8 flex items-center justify-between sticky top-0 z-10 bg-gray-50/50 backdrop-blur-sm">
@@ -34,7 +36,7 @@ export function Header() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
           <Input
             type="search"
-            placeholder="Search guests, rooms or services..."
+            placeholder={translate("app.dashboard.header.search_placeholder")}
             className="pl-10 bg-white border-transparent shadow-sm focus:border-indigo-100 focus:ring-2 focus:ring-indigo-100 rounded-xl h-11 transition-all"
           />
         </div>
@@ -63,7 +65,7 @@ export function Header() {
               className="gap-2 hover:bg-red-50 hover:text-red-600 transition-colors rounded-xl"
             >
               <LogOut className="h-4 w-4" />
-              <span className="hidden lg:inline">Log Out</span>
+              <span className="hidden lg:inline">{translate("app.dashboard.sidebar.log_out")}</span>
             </Button>
           </form>
         </div>

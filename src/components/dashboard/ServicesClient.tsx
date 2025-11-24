@@ -22,7 +22,7 @@ import {
   Languages
 } from "lucide-react";
 import Link from "next/link";
-import { languages } from "@/contexts/LanguageContext";
+import { languages, useLanguage } from "@/contexts/LanguageContext";
 import { createService } from "@/app/actions/hotel";
 
 interface Service {
@@ -47,8 +47,10 @@ interface ServicesClientProps {
 }
 
 export function ServicesClient({ services, categories }: ServicesClientProps) {
+  const { translate } = useLanguage();
   const [isAddServiceOpen, setIsAddServiceOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string>("All Services");
+  const allServicesText = translate("app.dashboard.services.all_services");
+  const [selectedCategory, setSelectedCategory] = useState<string>(allServicesText);
   const [isPending, startTransition] = useTransition();
   
   // Form state
@@ -59,7 +61,7 @@ export function ServicesClient({ services, categories }: ServicesClientProps) {
   const [serviceDescription, setServiceDescription] = useState("");
   const [translations, setTranslations] = useState<Record<string, { name: string; description: string }>>({});
 
-  const filteredServices = selectedCategory === "All Services" 
+  const filteredServices = selectedCategory === allServicesText 
     ? services 
     : services.filter(s => s.category === selectedCategory);
 
@@ -250,7 +252,7 @@ export function ServicesClient({ services, categories }: ServicesClientProps) {
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setIsAddServiceOpen(false)}>Cancel</Button>
               <Button type="submit" disabled={isPending}>
-                {isPending ? "Creating..." : "Create Service"}
+                {isPending ? translate("app.dashboard.services.creating") : translate("app.dashboard.services.create_service")}
               </Button>
             </DialogFooter>
           </form>
@@ -264,17 +266,17 @@ export function ServicesClient({ services, categories }: ServicesClientProps) {
              <h3 className="font-bold text-gray-900 px-4 mb-2">Categories</h3>
              <nav className="space-y-1">
                <button 
-                 onClick={() => setSelectedCategory("All Services")}
+                 onClick={() => setSelectedCategory(allServicesText)}
                  className={`w-full text-left px-4 py-3 rounded-xl text-sm font-medium transition-all ${
-                   selectedCategory === "All Services" 
+                   selectedCategory === allServicesText 
                      ? 'bg-indigo-50 text-indigo-700' 
                      : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
                  }`}
                >
                  <div className="flex items-center justify-between">
-                    All Services
+                    {allServicesText}
                     <span className={`bg-white text-indigo-600 text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm ${
-                      selectedCategory === "All Services" ? "" : "hidden"
+                      selectedCategory === allServicesText ? "" : "hidden"
                     }`}>
                       {services.length}
                     </span>

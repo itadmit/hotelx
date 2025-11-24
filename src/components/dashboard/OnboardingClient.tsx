@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Building2, Palette, Check, ArrowRight, Star, Settings } from "lucide-react";
 import { createHotel } from "@/app/actions/hotel";
 import { useRouter } from "next/navigation";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface OnboardingClientProps {
   userEmail: string;
@@ -14,6 +15,7 @@ interface OnboardingClientProps {
 
 export function OnboardingClient({ userEmail }: OnboardingClientProps) {
   const router = useRouter();
+  const { translate } = useLanguage();
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   
@@ -61,12 +63,12 @@ export function OnboardingClient({ userEmail }: OnboardingClientProps) {
   };
 
   const defaultServices = [
-    { id: "room-service", name: "Room Service", icon: "🍽️", description: "Food & beverage delivery" },
-    { id: "housekeeping", name: "Housekeeping", icon: "🧹", description: "Room cleaning & maintenance" },
-    { id: "concierge", name: "Concierge", icon: "🛎️", description: "Guest assistance & information" },
-    { id: "laundry", name: "Laundry Service", icon: "👔", description: "Washing & ironing" },
-    { id: "spa", name: "Spa & Wellness", icon: "💆", description: "Massage & treatments" },
-    { id: "transport", name: "Transportation", icon: "🚗", description: "Taxi & shuttle service" },
+    { id: "room-service", name: translate("app.dashboard.onboarding.room_service"), icon: "🍽️", description: translate("app.dashboard.onboarding.room_service_desc") },
+    { id: "housekeeping", name: translate("app.dashboard.onboarding.housekeeping"), icon: "🧹", description: translate("app.dashboard.onboarding.housekeeping_desc") },
+    { id: "concierge", name: translate("app.dashboard.onboarding.concierge"), icon: "🛎️", description: translate("app.dashboard.onboarding.concierge_desc") },
+    { id: "laundry", name: translate("app.dashboard.onboarding.laundry_service"), icon: "👔", description: translate("app.dashboard.onboarding.laundry_desc") },
+    { id: "spa", name: translate("app.dashboard.onboarding.spa_wellness"), icon: "💆", description: translate("app.dashboard.onboarding.spa_desc") },
+    { id: "transport", name: translate("app.dashboard.onboarding.transportation"), icon: "🚗", description: translate("app.dashboard.onboarding.transport_desc") },
   ];
 
   const toggleService = (serviceId: string) => {
@@ -338,7 +340,7 @@ export function OnboardingClient({ userEmail }: OnboardingClientProps) {
                     disabled={isLoading || !hotelName.trim() || selectedServices.length === 0}
                     className="flex-1 h-12 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md shadow-indigo-200 disabled:opacity-50"
                   >
-                    {isLoading ? "Creating..." : "Complete Setup"}
+                    {isLoading ? translate("app.dashboard.onboarding.creating") : translate("app.dashboard.onboarding.complete_setup")}
                   </Button>
                 </div>
               </div>

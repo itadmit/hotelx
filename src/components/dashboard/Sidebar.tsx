@@ -18,62 +18,64 @@ import {
 } from "lucide-react";
 import { handleSignOut } from "@/app/actions/auth";
 import { Logo } from "@/components/Logo";
-
-const sidebarItems = [
-  {
-    title: "Overview",
-    href: "/dashboard",
-    icon: LayoutDashboard,
-  },
-  {
-    title: "Requests",
-    href: "/dashboard/requests",
-    icon: ClipboardList,
-  },
-  {
-    title: "Live Monitor",
-    href: "/dashboard/live-monitor",
-    icon: Monitor,
-  },
-  {
-    title: "Rooms",
-    href: "/dashboard/rooms",
-    icon: BedDouble,
-  },
-  {
-    title: "Services",
-    href: "/dashboard/services",
-    icon: ConciergeBell,
-  },
-  {
-    title: "QR Codes",
-    href: "/dashboard/qr",
-    icon: QrCode,
-  },
-  {
-    title: "Guest Template",
-    href: "/dashboard/guest-template",
-    icon: Palette,
-  },
-  {
-    title: "Analytics",
-    href: "/dashboard/reports",
-    icon: BarChart3,
-  },
-  {
-    title: "Team",
-    href: "/dashboard/team",
-    icon: Users,
-  },
-  {
-    title: "Settings",
-    href: "/dashboard/hotel-settings",
-    icon: Settings,
-  },
-];
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { translate } = useLanguage();
+
+  const sidebarItems = [
+    {
+      title: translate("app.dashboard.sidebar.overview"),
+      href: "/dashboard",
+      icon: LayoutDashboard,
+    },
+    {
+      title: translate("app.dashboard.sidebar.requests"),
+      href: "/dashboard/requests",
+      icon: ClipboardList,
+    },
+    {
+      title: translate("app.dashboard.sidebar.live_monitor"),
+      href: "/dashboard/live-monitor",
+      icon: Monitor,
+    },
+    {
+      title: translate("app.dashboard.sidebar.rooms"),
+      href: "/dashboard/rooms",
+      icon: BedDouble,
+    },
+    {
+      title: translate("app.dashboard.sidebar.services"),
+      href: "/dashboard/services",
+      icon: ConciergeBell,
+    },
+    {
+      title: translate("app.dashboard.sidebar.qr_codes"),
+      href: "/dashboard/qr",
+      icon: QrCode,
+    },
+    {
+      title: translate("app.dashboard.sidebar.guest_template"),
+      href: "/dashboard/guest-template",
+      icon: Palette,
+    },
+    {
+      title: translate("app.dashboard.sidebar.analytics"),
+      href: "/dashboard/reports",
+      icon: BarChart3,
+    },
+    {
+      title: translate("app.dashboard.sidebar.team"),
+      href: "/dashboard/team",
+      icon: Users,
+    },
+    {
+      title: translate("app.dashboard.sidebar.settings"),
+      href: "/dashboard/hotel-settings",
+      icon: Settings,
+    },
+  ];
 
   return (
     <aside className="hidden md:flex w-64 flex-col h-screen sticky top-0 bg-gray-50/50 p-4">
@@ -107,7 +109,7 @@ export function Sidebar() {
         <form action={handleSignOut}>
           <button type="submit" className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-sm font-medium text-gray-500 hover:bg-white/50 hover:text-red-600 transition-colors group">
             <LogOut className="h-5 w-5 group-hover:text-red-600" />
-            Log Out
+            {translate("app.dashboard.sidebar.log_out")}
           </button>
         </form>
       </div>

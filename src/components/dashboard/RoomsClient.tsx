@@ -10,6 +10,7 @@ import { Search, Plus, QrCode, Download, Upload, MoreHorizontal, Filter, Sliders
 import { QRCodeSVG } from "qrcode.react";
 import Link from "next/link";
 import { createRoom } from "@/app/actions/hotel";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Room {
   id: string;
@@ -26,6 +27,7 @@ interface RoomsClientProps {
 }
 
 export function RoomsClient({ rooms, hotelSlug }: RoomsClientProps) {
+  const { translate } = useLanguage();
   const [isAddRoomOpen, setIsAddRoomOpen] = useState(false);
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [selectedQrRoom, setSelectedQrRoom] = useState<{ number: string; code: string } | null>(null);
@@ -107,7 +109,7 @@ export function RoomsClient({ rooms, hotelSlug }: RoomsClientProps) {
             <DialogFooter>
                <Button type="button" variant="outline" onClick={() => setIsAddRoomOpen(false)}>Cancel</Button>
                <Button type="submit" disabled={isPending}>
-                 {isPending ? "Adding..." : "Add Room"}
+                 {isPending ? translate("app.dashboard.common.adding") : translate("app.dashboard.common.add_room")}
                </Button>
             </DialogFooter>
           </form>

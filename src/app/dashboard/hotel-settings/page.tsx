@@ -25,6 +25,8 @@ export default async function HotelSettingsPage() {
       logo: true,
       primaryColor: true,
       wifiName: true,
+      language: true,
+      currency: true,
     }
   });
 

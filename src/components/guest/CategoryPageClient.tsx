@@ -4,6 +4,81 @@ import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ServiceTags } from "./ServiceTags";
+import { useLanguage } from "@/contexts/LanguageContext";
+
+// Category name translations (same as GuestHomeClient)
+const categoryTranslations: Record<string, Record<string, string>> = {
+  "Food & Drinks": {
+    en: "Food & Drinks",
+    bg: "Храна и напитки",
+    de: "Essen & Getränke",
+    fr: "Nourriture et boissons",
+    it: "Cibo e bevande",
+  },
+  "Room Service": {
+    en: "Room Service",
+    bg: "Обслужване в стаята",
+    de: "Zimmerservice",
+    fr: "Service en chambre",
+    it: "Servizio in camera",
+  },
+  "Spa & Wellness": {
+    en: "Spa & Wellness",
+    bg: "Спа и уелнес",
+    de: "Spa & Wellness",
+    fr: "Spa et bien-être",
+    it: "Spa e benessere",
+  },
+  "Concierge": {
+    en: "Concierge",
+    bg: "Консиерж",
+    de: "Concierge",
+    fr: "Conciergerie",
+    it: "Concierge",
+  },
+  "Maintenance": {
+    en: "Maintenance",
+    bg: "Поддръжка",
+    de: "Wartung",
+    fr: "Maintenance",
+    it: "Manutenzione",
+  },
+  "Entertainment": {
+    en: "Entertainment",
+    bg: "Развлечения",
+    de: "Unterhaltung",
+    fr: "Divertissement",
+    it: "Intrattenimento",
+  },
+  "Breakfast": {
+    en: "Breakfast",
+    bg: "Закуска",
+    de: "Frühstück",
+    fr: "Petit-déjeuner",
+    it: "Colazione",
+  },
+  "Lunch": {
+    en: "Lunch",
+    bg: "Обяд",
+    de: "Mittagessen",
+    fr: "Déjeuner",
+    it: "Pranzo",
+  },
+  "Dinner": {
+    en: "Dinner",
+    bg: "Вечеря",
+    de: "Abendessen",
+    fr: "Dîner",
+    it: "Cena",
+  },
+  "Beverages": {
+    en: "Beverages",
+    bg: "Напитки",
+    de: "Getränke",
+    fr: "Boissons",
+    it: "Bevande",
+  },
+};
 
 interface Service {
   id: string;
@@ -42,7 +117,19 @@ export function CategoryPageClient({
   subCategories,
   primaryColor,
 }: CategoryPageClientProps) {
+  const { translate, language } = useLanguage();
+  const t = (key: string) => translate(`app.guest.${key}`);
   const [selectedSubCategoryId, setSelectedSubCategoryId] = useState<string | null>(null);
+
+  // Translate category name
+  const translateCategoryName = (name: string, customName: string | null): string => {
+    if (customName) return customName; // Custom names are not translated
+    const translations = categoryTranslations[name];
+    if (translations && translations[language]) {
+      return translations[language];
+    }
+    return name; // Fallback to original name
+  };
 
   // Filter services based on selected sub-category
   const filteredServices = selectedSubCategoryId
@@ -72,7 +159,7 @@ export function CategoryPageClient({
                     selectedSubCategoryId === null ? "text-white" : "text-gray-700"
                   }`}
                 >
-                  All
+                  {t("all")}
                 </span>
               </div>
             </button>
@@ -96,7 +183,7 @@ export function CategoryPageClient({
                       selectedSubCategoryId === subCat.id ? "text-white" : "text-gray-700"
                     }`}
                   >
-                    {subCat.customName || subCat.name}
+                    {translateCategoryName(subCat.name, subCat.customName)}
                   </span>
                 </div>
               </button>
@@ -109,7 +196,7 @@ export function CategoryPageClient({
       <div className="p-4 space-y-4 pb-8">
         {filteredServices.length === 0 ? (
           <div className="text-center py-10 text-gray-500">
-            No services available in this category at the moment.
+            {t("no_services")}
           </div>
         ) : (
           filteredServices.map((service) => (
@@ -139,7 +226,7 @@ export function CategoryPageClient({
                             style: "currency",
                             currency: service.currency,
                           }).format(Number(service.price))
-                        : "Free"}
+                        : t("free")}
                     </span>
                   </div>
                   {service.description && (
@@ -165,7 +252,7 @@ export function CategoryPageClient({
                     className="w-full rounded-md h-8 text-xs font-semibold"
                     style={{ backgroundColor: primaryColor || undefined }}
                   >
-                    Order Now
+                    {t("order_now")}
                   </Button>
                 </Link>
               </div>

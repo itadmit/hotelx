@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ServiceRequestFormClient } from "./ServiceRequestFormClient";
 import { QuantitySelector } from "./QuantitySelector";
 import { CustomFieldRenderer, CustomField } from "./CustomFieldRenderer";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface ServiceRequestFormWrapperProps {
   hotelSlug: string;
@@ -16,6 +17,8 @@ interface ServiceRequestFormWrapperProps {
 }
 
 export function ServiceRequestFormWrapper(props: ServiceRequestFormWrapperProps) {
+  const { translate } = useLanguage();
+  const t = (key: string) => translate(`app.guest.${key}`);
   const [quantity, setQuantity] = useState(1);
   const [customFieldValues, setCustomFieldValues] = useState<Record<string, any>>({});
 
@@ -28,7 +31,7 @@ export function ServiceRequestFormWrapper(props: ServiceRequestFormWrapperProps)
       {/* Custom Fields */}
       {props.customFields && props.customFields.length > 0 && (
         <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
-          <h3 className="font-bold text-base text-gray-900 mb-4">Customize Your Order</h3>
+          <h3 className="font-bold text-base text-gray-900 mb-4">{t("customize_order")}</h3>
           <CustomFieldRenderer
             fields={props.customFields}
             values={customFieldValues}
@@ -41,7 +44,7 @@ export function ServiceRequestFormWrapper(props: ServiceRequestFormWrapperProps)
       <div className="space-y-3">
         {/* Compact Quantity Selector */}
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-gray-700">Quantity:</span>
+          <span className="text-sm font-medium text-gray-700">{t("quantity")}:</span>
           <div className="flex items-center gap-2">
             <button
               type="button"

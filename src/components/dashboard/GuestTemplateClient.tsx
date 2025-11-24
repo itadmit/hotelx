@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Palette, Smartphone, Save, Eye, Image as ImageIcon, Grid3x3, Upload, Download, Check } from "lucide-react";
 import { updateGuestTemplate, importDemoData } from "@/app/actions/hotel";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Category {
   id: string;
@@ -33,6 +34,7 @@ export function GuestTemplateClient({ hotel }: { hotel: Hotel }) {
   const [isImporting, setIsImporting] = useState(false);
   const [showPreview, setShowPreview] = useState(true);
   const [isSaved, setIsSaved] = useState(false);
+  const { translate } = useLanguage();
   
   const [coverImage, setCoverImage] = useState(hotel.coverImage || "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80");
   const [primaryColor, setPrimaryColor] = useState(hotel.primaryColor || "#4f46e5");
@@ -126,8 +128,8 @@ export function GuestTemplateClient({ hotel }: { hotel: Hotel }) {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Guest Template</h1>
-          <p className="text-gray-500 mt-1">Customize how your guest-facing pages look</p>
+          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">{translate("app.dashboard.guest_template.title")}</h1>
+          <p className="text-gray-500 mt-1">{translate("app.dashboard.guest_template.subtitle")}</p>
         </div>
         <div className="flex items-center gap-3">
           <Button 
@@ -137,7 +139,7 @@ export function GuestTemplateClient({ hotel }: { hotel: Hotel }) {
             className="bg-white border-none shadow-sm text-gray-600 hover:bg-gray-50 rounded-xl gap-2"
           >
             <Download className="h-4 w-4" />
-            {isImporting ? "Importing..." : "Import Demo Data"}
+            {isImporting ? translate("app.dashboard.guest_template.importing") : translate("app.dashboard.guest_template.import_demo_data")}
           </Button>
           <Button 
             variant="outline"
@@ -145,7 +147,7 @@ export function GuestTemplateClient({ hotel }: { hotel: Hotel }) {
             className="bg-white border-none shadow-sm text-gray-600 hover:bg-gray-50 rounded-xl gap-2"
           >
             <Eye className="h-4 w-4" />
-            {showPreview ? "Hide" : "Show"} Preview
+            {showPreview ? translate("app.dashboard.guest_template.hide") : translate("app.dashboard.guest_template.show_preview")}
           </Button>
           <Button 
             onClick={handleSave}
@@ -159,12 +161,12 @@ export function GuestTemplateClient({ hotel }: { hotel: Hotel }) {
             {isSaved ? (
               <>
                 <Check className="h-4 w-4" />
-                Saved!
+                {translate("app.dashboard.guest_template.saved")}
               </>
             ) : (
               <>
                 <Save className="h-4 w-4" />
-                {isPending ? "Saving..." : "Save Changes"}
+                {isPending ? translate("app.dashboard.guest_template.saving") : translate("app.dashboard.settings.save_changes")}
               </>
             )}
           </Button>
@@ -177,13 +179,13 @@ export function GuestTemplateClient({ hotel }: { hotel: Hotel }) {
           {/* Cover Image */}
           <div className="bg-white rounded-3xl p-6 shadow-sm space-y-6">
             <div>
-              <h3 className="font-bold text-gray-900 mb-1">Cover Image</h3>
-              <p className="text-sm text-gray-500">Hero image at the top of guest page</p>
+              <h3 className="font-bold text-gray-900 mb-1">{translate("app.dashboard.guest_template.cover_image")}</h3>
+              <p className="text-sm text-gray-500">{translate("app.dashboard.guest_template.cover_image_desc")}</p>
             </div>
 
             <div className="grid gap-4">
               <Label htmlFor="coverImage" className="text-gray-700 font-medium">
-                Image URL
+                {translate("app.dashboard.guest_template.image_url")}
               </Label>
               <Input
                 id="coverImage"
@@ -193,14 +195,14 @@ export function GuestTemplateClient({ hotel }: { hotel: Hotel }) {
                 className="h-12 rounded-xl bg-gray-50 border-transparent focus:bg-white focus:border-indigo-200 focus:ring-4 focus:ring-indigo-50"
               />
               <p className="text-xs text-gray-400">
-                Recommended size: 800x400px
+                {translate("app.dashboard.guest_template.recommended_size")}
               </p>
               
               {coverImage && (
                 <div className="mt-4 rounded-xl overflow-hidden">
                   <img 
                     src={coverImage} 
-                    alt="Cover preview" 
+                    alt={translate("app.dashboard.guest_template.cover_preview")} 
                     className="w-full h-40 object-cover"
                   />
                 </div>
@@ -211,12 +213,12 @@ export function GuestTemplateClient({ hotel }: { hotel: Hotel }) {
           {/* Color Scheme */}
           <div className="bg-white rounded-3xl p-6 shadow-sm space-y-6">
             <div>
-              <h3 className="font-bold text-gray-900 mb-1">Color Scheme</h3>
-              <p className="text-sm text-gray-500">Choose your brand colors</p>
+              <h3 className="font-bold text-gray-900 mb-1">{translate("app.dashboard.guest_template.color_scheme")}</h3>
+              <p className="text-sm text-gray-500">{translate("app.dashboard.guest_template.color_scheme_desc")}</p>
             </div>
 
             <div className="grid gap-4">
-              <Label className="text-gray-700 font-medium">Primary Color</Label>
+              <Label className="text-gray-700 font-medium">{translate("app.dashboard.guest_template.primary_color")}</Label>
               <div className="flex gap-4 flex-wrap">
                 {colors.map((color) => (
                   <button
@@ -238,8 +240,8 @@ export function GuestTemplateClient({ hotel }: { hotel: Hotel }) {
           {/* Categories Customization */}
           <div className="bg-white rounded-3xl p-6 shadow-sm space-y-6">
             <div>
-              <h3 className="font-bold text-gray-900 mb-1">Categories</h3>
-              <p className="text-sm text-gray-500">Customize category appearance</p>
+              <h3 className="font-bold text-gray-900 mb-1">{translate("app.dashboard.guest_template.categories")}</h3>
+              <p className="text-sm text-gray-500">{translate("app.dashboard.guest_template.categories_desc")}</p>
             </div>
 
             <div className="space-y-4">
@@ -248,7 +250,7 @@ export function GuestTemplateClient({ hotel }: { hotel: Hotel }) {
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
                       <h3 className="font-bold text-gray-900">{category.customName || category.name}</h3>
-                      <p className="text-xs text-gray-500">Default: {category.name}</p>
+                      <p className="text-xs text-gray-500">{translate("app.dashboard.guest_template.default")}: {category.name}</p>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-2xl">{category.emoji || "🏨"}</span>
@@ -269,17 +271,17 @@ export function GuestTemplateClient({ hotel }: { hotel: Hotel }) {
                   </div>
                   
                   <div className="grid gap-2">
-                    <Label className="text-xs text-gray-600">Custom Name (optional - overrides default)</Label>
+                    <Label className="text-xs text-gray-600">{translate("app.dashboard.guest_template.custom_name")}</Label>
                     <Input
                       value={category.customName || ""}
                       onChange={(e) => updateCategoryCustomName(category.id, e.target.value)}
-                      placeholder={`Leave empty to use: ${category.name}`}
+                      placeholder={translate("app.dashboard.guest_template.custom_name_placeholder").replace("{name}", category.name)}
                       className="h-10 rounded-lg bg-gray-50 border-transparent focus:bg-white"
                     />
                   </div>
                   
                   <div className="grid gap-2">
-                    <Label className="text-xs text-gray-600">Emoji</Label>
+                    <Label className="text-xs text-gray-600">{translate("app.dashboard.guest_template.emoji")}</Label>
                     <Input
                       value={category.emoji || ""}
                       onChange={(e) => updateCategoryEmoji(category.id, e.target.value)}
@@ -290,7 +292,7 @@ export function GuestTemplateClient({ hotel }: { hotel: Hotel }) {
                   </div>
 
                   <div className="grid gap-2">
-                    <Label className="text-xs text-gray-600">Background Image URL (optional)</Label>
+                    <Label className="text-xs text-gray-600">{translate("app.dashboard.guest_template.background_image_url")}</Label>
                     <Input
                       value={category.bgImage || ""}
                       onChange={(e) => updateCategoryBgImage(category.id, e.target.value)}
@@ -309,7 +311,7 @@ export function GuestTemplateClient({ hotel }: { hotel: Hotel }) {
           <div className="lg:col-span-8 lg:sticky lg:top-24 h-fit">
             <div className="bg-gray-100/50 rounded-3xl border-2 border-dashed border-gray-200 flex items-start justify-center p-8 relative max-h-[calc(100vh-8rem)] overflow-y-auto">
               <div className="absolute top-4 left-4 bg-white px-3 py-1 rounded-full text-xs font-bold text-gray-400 shadow-sm z-10">
-                Preview Mode
+                {translate("app.dashboard.guest_template.preview_mode")}
               </div>
 
               {/* Mobile Preview Frame */}
@@ -322,18 +324,18 @@ export function GuestTemplateClient({ hotel }: { hotel: Hotel }) {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
                   <div className="absolute bottom-0 left-0 p-4 text-white w-full">
-                    <p className="text-xs font-medium opacity-90 mb-0.5">Welcome to</p>
+                    <p className="text-xs font-medium opacity-90 mb-0.5">{translate("app.dashboard.guest_template.welcome_to")}</p>
                     <h1 className="text-xl font-bold">{hotel.name}</h1>
                     <div className="mt-1.5 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-white/20 backdrop-blur-sm border border-white/30">
-                      Room 100
+                      {translate("app.dashboard.guest_template.room_100")}
                     </div>
                   </div>
                 </div>
 
                 {/* Content */}
                 <div className="p-5">
-                  <h2 className="text-sm font-semibold text-gray-900 mb-2">How can we help you today?</h2>
-                  <p className="text-xs text-gray-500 mb-5">Choose a category to request a service.</p>
+                  <h2 className="text-sm font-semibold text-gray-900 mb-2">{translate("app.dashboard.guest_template.how_can_help")}</h2>
+                  <p className="text-xs text-gray-500 mb-5">{translate("app.dashboard.guest_template.choose_category_desc")}</p>
 
                   {/* Categories Grid */}
                   <div className="grid grid-cols-2 gap-3 mb-5">
@@ -373,19 +375,19 @@ export function GuestTemplateClient({ hotel }: { hotel: Hotel }) {
                   </div>
 
                   {/* Popular Services */}
-                  <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider mb-3">Popular Services</h3>
+                  <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider mb-3">{translate("app.dashboard.guest_template.popular_services")}</h3>
                   <div className="space-y-2.5">
                     <div className="flex items-center justify-between p-2 rounded-lg bg-white border border-gray-100">
                       <div className="flex-1">
-                        <p className="font-medium text-gray-900 text-xs">In-Room Breakfast</p>
-                        <p className="text-xs text-gray-500">30 mins</p>
+                        <p className="font-medium text-gray-900 text-xs">{translate("app.dashboard.guest_template.in_room_breakfast")}</p>
+                        <p className="text-xs text-gray-500">{translate("app.dashboard.guest_template.mins")}</p>
                       </div>
                       <span className="text-xs font-semibold text-gray-900">$25.00</span>
                     </div>
                   </div>
                 </div>
                 <div className="bg-gray-50 p-3 text-center text-[10px] text-gray-400 border-t border-gray-100">
-                  Powered by HotelX
+                  {translate("app.dashboard.guest_template.powered_by")}
                 </div>
               </div>
             </div>

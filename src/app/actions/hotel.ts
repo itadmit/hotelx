@@ -21,6 +21,8 @@ export async function updateHotelSettings(formData: FormData) {
   const logo = formData.get("logo") as string;
   const primaryColor = formData.get("primaryColor") as string;
   const wifiName = formData.get("wifiName") as string;
+  const language = formData.get("language") as string;
+  const currency = formData.get("currency") as string;
 
   await prisma.hotel.update({
     where: { id: hotelId },
@@ -29,6 +31,8 @@ export async function updateHotelSettings(formData: FormData) {
       logo: logo && logo.trim() !== "" ? logo : undefined,
       primaryColor: primaryColor && primaryColor.trim() !== "" ? primaryColor : undefined,
       wifiName: wifiName && wifiName.trim() !== "" ? wifiName : undefined,
+      language: language && language.trim() !== "" ? language : undefined,
+      currency: currency && currency.trim() !== "" ? currency : undefined,
     },
   });
 

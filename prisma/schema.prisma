@@ -35,6 +35,8 @@ model Hotel {
   coverImage    String?   // Cover image for guest app
   primaryColor  String?   @default("#2563eb")
   wifiName      String?   // WiFi network name for guest access
+  language      String?   @default("en") // Default language: en, bg, de, fr, it
+  currency      String?   @default("USD") // Default currency: USD, EUR, GBP, ILS, JPY, BGN
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 

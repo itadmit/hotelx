@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Download, Printer, Copy, ArrowRight, Check } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface QRBuilderProps {
   hotelSlug: string;
@@ -15,6 +16,7 @@ interface QRBuilderProps {
 }
 
 export function QRBuilder({ hotelSlug, hotelName, wifiName: initialWifiName, baseUrl }: QRBuilderProps) {
+  const { translate } = useLanguage();
   const [themeColor, setThemeColor] = useState("bg-indigo-600");
   const [instructionText, setInstructionText] = useState("Scan to order services");
   const [logoUrl, setLogoUrl] = useState("");
@@ -154,7 +156,7 @@ export function QRBuilder({ hotelSlug, hotelName, wifiName: initialWifiName, bas
             <div className={`h-2 ${themeColor} w-full`}></div>
             <div className="p-8 flex flex-col items-center text-center">
               {logoUrl ? (
-                <img src={logoUrl} alt="Hotel Logo" className="w-16 h-16 object-contain mb-6" />
+                <img src={logoUrl} alt={translate("app.dashboard.common.hotel_logo")} className="w-16 h-16 object-contain mb-6" />
               ) : (
                 <div className={`w-16 h-16 ${themeColor} rounded-2xl flex items-center justify-center text-white font-bold text-2xl mb-6 shadow-lg`}>
                   {hotelName.charAt(0) || "H"}

@@ -15,6 +15,7 @@ import {
   DialogTitle 
 } from "@/components/ui/dialog";
 import { CustomField } from "./CustomFieldRenderer";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface ServiceRequestFormClientProps {
   hotelSlug: string;
@@ -40,6 +41,7 @@ export function ServiceRequestFormClient({
   customFieldValues
 }: ServiceRequestFormClientProps) {
   const router = useRouter();
+  const { translate } = useLanguage();
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [notes, setNotes] = useState("");
   const [guestName, setGuestName] = useState("");
@@ -188,7 +190,7 @@ export function ServiceRequestFormClient({
               className="w-full sm:w-auto rounded-md"
               style={{ backgroundColor: primaryColor || undefined }}
             >
-              {isPending ? "Processing..." : "Confirm Order"}
+              {isPending ? translate("app.dashboard.common.processing") : translate("app.dashboard.common.confirm_order")}
             </Button>
           </DialogFooter>
         </DialogContent>

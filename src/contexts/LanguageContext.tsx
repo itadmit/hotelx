@@ -17,6 +17,7 @@ interface LanguageContextType {
   setLanguage: (lang: Language) => void;
   dir: "ltr";
   t: Dictionary;
+  translate: (key: string) => string;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -44,13 +45,40 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem("hotelx-lang", lang);
   };
 
+  // Translate function with fallback to English
+  const translate = (key: string): string => {
+    const keys = key.split('.');
+    let value: any = t;
+    
+    // Try to get value from current language
+    for (const k of keys) {
+      if (value && typeof value === 'object' && k in value) {
+        value = value[k];
+      } else {
+        // Fallback to English
+        let fallback: any = en;
+        for (const fk of keys) {
+          if (fallback && typeof fallback === 'object' && fk in fallback) {
+            fallback = fallback[fk];
+          } else {
+            return key; // Return key if not found in either
+          }
+        }
+        return typeof fallback === 'string' ? fallback : key;
+      }
+    }
+    
+    return typeof value === 'string' ? value : key;
+  };
+
   return (
     <LanguageContext.Provider 
       value={{ 
         language, 
         setLanguage: handleSetLanguage,
         dir: "ltr",
-        t
+        t,
+        translate
       }}
     >
       {children}
