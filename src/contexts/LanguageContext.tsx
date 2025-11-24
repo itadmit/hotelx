@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import en from "@/locales/en.json";
 import bg from "@/locales/bg.json";
 import de from "@/locales/de.json";
@@ -23,16 +24,30 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
+  const { data: session } = useSession();
   const [language, setLanguage] = useState<Language>("en");
   const [t, setT] = useState<Dictionary>(en);
 
   useEffect(() => {
-    // Load saved language from localStorage if available
+    // First try to load from localStorage (for immediate UI update)
     const saved = localStorage.getItem("hotelx-lang") as Language;
     if (saved && Object.keys(dictionaries).includes(saved)) {
       setLanguage(saved);
     }
-  }, []);
+    
+    // Then try to load from database via API if user is logged in
+    if (session?.user?.hotelId) {
+      fetch(`/api/hotel/language?hotelId=${session.user.hotelId}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.language && Object.keys(dictionaries).includes(data.language)) {
+            setLanguage(data.language as Language);
+            localStorage.setItem("hotelx-lang", data.language);
+          }
+        })
+        .catch(err => console.error("Failed to load language from database:", err));
+    }
+  }, [session?.user?.hotelId]);
 
   useEffect(() => {
     setT(dictionaries[language]);

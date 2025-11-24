@@ -71,6 +71,11 @@ export function HotelSettingsClient({ hotel }: { hotel: Hotel }) {
     try {
       const result = await updateHotelSettings(formData);
       if (result.success) {
+        // Update language in localStorage and LanguageContext immediately
+        if (language && Object.keys({ en: true, bg: true, de: true, fr: true, it: true }).includes(language)) {
+          localStorage.setItem("hotelx-lang", language);
+          setLanguage(language as "en" | "bg" | "de" | "fr" | "it");
+        }
         // Refresh the page to show updated data
         window.location.reload();
       }
