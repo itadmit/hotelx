@@ -52,7 +52,7 @@ interface DashboardClientProps {
 
 export function DashboardClient({ stats, recentRequests, monthlyRevenue = [] }: DashboardClientProps) {
   const { translate } = useLanguage();
-  const t = (key: string) => translate(`app.dashboard.${key}`);
+  const t = (key: string) => translate(`app.dashboard.dashboard.${key}`);
   const [isAddServiceOpen, setIsAddServiceOpen] = useState(false);
   const [timeRange, setTimeRange] = useState<TimeRange>("weekly");
   const [showWhatsNew, setShowWhatsNew] = useState(false);
