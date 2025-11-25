@@ -229,8 +229,12 @@
         "no_services": "Aucun service trouvé"
       },
       "settings": {
-        "title": "Paramètres",
+        "title": "Paramètres de l'hôtel",
+        "subtitle": "Configurez l'identité et les préférences de votre hôtel",
         "general": "Général",
+        "general_info": "Informations générales",
+        "branding": "Image de marque",
+        "branding_look": "Image de marque et apparence",
         "localization": "Localisation",
         "appearance": "Apparence",
         "hotel_name": "Nom de l'hôtel",
@@ -239,7 +243,19 @@
         "wifi_name": "Nom WiFi",
         "default_language": "Langue par défaut",
         "currency": "Devise",
-        "save_changes": "Enregistrer les modifications"
+        "save_changes": "Enregistrer les modifications",
+        "discard": "Annuler",
+        "basic_information": "Informations de base",
+        "basic_info_desc": "Ces informations apparaîtront dans votre application client",
+        "number_of_rooms": "Nombre de chambres",
+        "number_of_rooms_desc": "Nombre total de chambres dans votre hôtel",
+        "hotel_rating": "Classement de l'hôtel",
+        "hotel_rating_desc": "Votre classement par étoiles de l'hôtel",
+        "branding_desc": "Personnalisez l'apparence et l'ambiance",
+        "font_family": "Famille de polices",
+        "localization_desc": "Définir la langue et la devise",
+        "logo_url": "URL du logo",
+        "logo_url_desc": "Entrez l'URL du logo ou téléchargez une image"
       },
       "dashboard": {
         "good_morning": "Bonjour ! 👋",
@@ -390,6 +406,68 @@
         "all": "Tous",
         "quantity": "Quantité",
         "created_at": "Créé le"
+      }
+    },
+    "error": {
+      "something_went_wrong": "Quelque chose s'est mal passé",
+      "try_refreshing": "Une erreur inattendue s'est produite. Veuillez actualiser la page.",
+      "try_again": "Réessayer",
+      "refresh_page": "Actualiser la page",
+      "failed_to_load": "Échec du chargement des données. Veuillez réessayer.",
+      "network_error": "Erreur réseau. Veuillez vérifier votre connexion."
+    },
+    "toast": {
+      "success": {
+        "saved": "Enregistré avec succès !",
+        "created": "Créé avec succès !",
+        "updated": "Mis à jour avec succès !",
+        "deleted": "Supprimé avec succès !",
+        "settings_saved": "Paramètres enregistrés avec succès !",
+        "service_created": "Service créé avec succès !",
+        "service_updated": "Service mis à jour avec succès !",
+        "room_created": "Chambre créée avec succès !",
+        "request_created": "Demande créée avec succès !",
+        "request_updated": "Demande mise à jour avec succès !",
+        "request_completed": "Demande marquée comme terminée !",
+        "demo_data_imported": "Données de démonstration importées avec succès !",
+        "data_reset": "Données de l'hôtel réinitialisées avec succès !",
+        "link_copied": "Lien copié dans le presse-papiers !",
+        "account_deleted": "Compte supprimé avec succès !"
+      },
+      "error": {
+        "failed_to_save": "Échec de l'enregistrement. Veuillez réessayer.",
+        "failed_to_create": "Échec de la création. Veuillez réessayer.",
+        "failed_to_update": "Échec de la mise à jour. Veuillez réessayer.",
+        "failed_to_delete": "Échec de la suppression. Veuillez réessayer.",
+        "failed_to_load": "Échec du chargement des données. Veuillez réessayer.",
+        "network_error": "Erreur réseau. Veuillez vérifier votre connexion.",
+        "unauthorized": "Vous n'êtes pas autorisé à effectuer cette action.",
+        "validation_error": "Veuillez remplir tous les champs obligatoires.",
+        "service_update_failed": "Échec de la mise à jour du service. Veuillez réessayer.",
+        "service_create_failed": "Échec de la création du service. Veuillez réessayer.",
+        "room_create_failed": "Échec de la création de la chambre. Veuillez réessayer.",
+        "request_create_failed": "Échec de la création de la demande. Veuillez réessayer.",
+        "request_update_failed": "Échec de la mise à jour de la demande. Veuillez réessayer.",
+        "request_complete_failed": "Échec de la finalisation de la demande. Veuillez réessayer.",
+        "settings_save_failed": "Échec de l'enregistrement des paramètres. Veuillez réessayer.",
+        "demo_import_failed": "Échec de l'importation des données de démonstration. Veuillez réessayer.",
+        "data_reset_failed": "Échec de la réinitialisation des données. Veuillez réessayer.",
+        "account_delete_failed": "Échec de la suppression du compte. Veuillez réessayer.",
+        "hotel_create_failed": "Échec de la création de l'hôtel. Veuillez réessayer.",
+        "invalid_fields": "Format de données de champs personnalisés invalide."
+      },
+      "info": {
+        "processing": "Traitement de votre demande...",
+        "loading": "Chargement...",
+        "saving": "Enregistrement des modifications...",
+        "creating": "Création...",
+        "updating": "Mise à jour...",
+        "deleting": "Suppression..."
+      },
+      "warning": {
+        "required_fields": "Veuillez remplir tous les champs obligatoires.",
+        "guest_name_required": "Veuillez entrer votre nom complet.",
+        "custom_field_required": "Veuillez remplir le champ obligatoire : {field}"
       }
     }
   }

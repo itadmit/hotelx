@@ -161,7 +161,7 @@ export function ServiceRequestForm({
               <Button 
                 onClick={() => {
                   if (!guestName.trim()) {
-                    alert("Please enter your full name");
+                    // Validation will be handled by the form
                     return;
                   }
                   // Submitting the form programmatically

@@ -16,6 +16,8 @@ import {
 } from "@/components/ui/dialog";
 import { CustomField } from "./CustomFieldRenderer";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useToast } from "@/hooks/useToast";
+import { toast } from "sonner";
 
 interface ServiceRequestFormClientProps {
   hotelSlug: string;
@@ -42,6 +44,7 @@ export function ServiceRequestFormClient({
 }: ServiceRequestFormClientProps) {
   const router = useRouter();
   const { translate } = useLanguage();
+  const { showTranslatedSuccess, showTranslatedError, showTranslatedWarning } = useToast();
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [notes, setNotes] = useState("");
   const [guestName, setGuestName] = useState("");
@@ -51,14 +54,16 @@ export function ServiceRequestFormClient({
 
   const handleConfirm = async () => {
     if (!guestName.trim()) {
-      alert("Please enter your full name");
+      showTranslatedWarning("app.toast.warning.guest_name_required");
       return;
     }
 
     // Validate required custom fields
     for (const field of customFields) {
       if (field.isRequired && !customFieldValues[field.id]) {
-        alert(`Please fill in the required field: ${field.label}`);
+        toast.warning(translate("app.toast.warning.custom_field_required"), {
+          description: translate("app.toast.warning.custom_field_required").replace("{field}", field.label),
+        });
         return;
       }
     }
@@ -79,10 +84,11 @@ export function ServiceRequestFormClient({
     try {
       await createRequest(formData);
       setIsConfirmOpen(false);
+      showTranslatedSuccess("app.toast.success.request_created");
       router.refresh();
     } catch (error) {
       console.error("Error creating request:", error);
-      alert("An error occurred. Please try again.");
+      showTranslatedError("app.toast.error.request_create_failed");
     } finally {
       setIsPending(false);
     }

@@ -24,6 +24,7 @@ import {
 import Link from "next/link";
 import { languages, useLanguage } from "@/contexts/LanguageContext";
 import { createService } from "@/app/actions/hotel";
+import { useToast } from "@/hooks/useToast";
 
 interface Service {
   id: string;
@@ -46,8 +47,56 @@ interface ServicesClientProps {
   categories: Category[];
 }
 
+// Category name translations
+const categoryTranslations: Record<string, Record<string, string>> = {
+  "Food & Drinks": {
+    en: "Food & Drinks",
+    bg: "Храна и напитки",
+    de: "Essen & Getränke",
+    fr: "Nourriture et boissons",
+    it: "Cibo e bevande",
+  },
+  "Room Service": {
+    en: "Room Service",
+    bg: "Обслужване в стаята",
+    de: "Zimmerservice",
+    fr: "Service en chambre",
+    it: "Servizio in camera",
+  },
+  "Spa & Wellness": {
+    en: "Spa & Wellness",
+    bg: "Спа и уелнес",
+    de: "Spa & Wellness",
+    fr: "Spa et bien-être",
+    it: "Spa e benessere",
+  },
+  "Concierge": {
+    en: "Concierge",
+    bg: "Консиерж",
+    de: "Concierge",
+    fr: "Conciergerie",
+    it: "Concierge",
+  },
+  "Maintenance": {
+    en: "Maintenance",
+    bg: "Поддръжка",
+    de: "Wartung",
+    fr: "Maintenance",
+    it: "Manutenzione",
+  },
+  "Entertainment": {
+    en: "Entertainment",
+    bg: "Развлечения",
+    de: "Unterhaltung",
+    fr: "Divertissement",
+    it: "Intrattenimento",
+  },
+};
+
 export function ServicesClient({ services, categories }: ServicesClientProps) {
-  const { translate } = useLanguage();
+  const { translate, language } = useLanguage();
+  const { showTranslatedSuccess, showTranslatedError, showTranslatedWarning } = useToast();
+  const t = (key: string) => translate(`app.dashboard.services.${key}`);
   const [isAddServiceOpen, setIsAddServiceOpen] = useState(false);
   const allServicesText = translate("app.dashboard.services.all_services");
   const [selectedCategory, setSelectedCategory] = useState<string>(allServicesText);
@@ -60,6 +109,15 @@ export function ServicesClient({ services, categories }: ServicesClientProps) {
   const [serviceTime, setServiceTime] = useState("");
   const [serviceDescription, setServiceDescription] = useState("");
   const [translations, setTranslations] = useState<Record<string, { name: string; description: string }>>({});
+
+  // Translate category name
+  const translateCategoryName = (name: string): string => {
+    const translations = categoryTranslations[name];
+    if (translations && translations[language]) {
+      return translations[language];
+    }
+    return name; // Fallback to original name
+  };
 
   const filteredServices = selectedCategory === allServicesText 
     ? services 
@@ -90,28 +148,28 @@ export function ServicesClient({ services, categories }: ServicesClientProps) {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Services & Menu</h1>
-          <p className="text-gray-500 mt-1">Manage your digital guest directory and menu items</p>
+          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">{t("title")}</h1>
+          <p className="text-gray-500 mt-1">{t("subtitle")}</p>
         </div>
         <Button 
           onClick={() => setIsAddServiceOpen(true)}
           className="gap-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md shadow-indigo-200"
         >
           <Plus className="h-4 w-4" />
-          Add New Service
+          {t("add_service")}
         </Button>
       </div>
 
       <Dialog open={isAddServiceOpen} onOpenChange={setIsAddServiceOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Add New Service</DialogTitle>
-            <DialogDescription>Create a new service or menu item for guests. Add translations for all languages.</DialogDescription>
+            <DialogTitle>{t("add_service")}</DialogTitle>
+            <DialogDescription>{t("service_name")}</DialogDescription>
           </DialogHeader>
           <form onSubmit={(e) => {
             e.preventDefault();
             if (!serviceName || !serviceCategory) {
-              alert("Please fill in all required fields");
+              showTranslatedWarning("app.toast.warning.required_fields");
               return;
             }
             
@@ -134,9 +192,10 @@ export function ServicesClient({ services, categories }: ServicesClientProps) {
                 setServiceTime("");
                 setTranslations({});
                 setIsAddServiceOpen(false);
+                showTranslatedSuccess("app.toast.success.service_created");
               } catch (error) {
                 console.error("Failed to create service:", error);
-                alert("Failed to create service. Please try again.");
+                showTranslatedError("app.toast.error.service_create_failed");
               }
             });
           }} className="grid gap-6 py-4">
@@ -144,34 +203,34 @@ export function ServicesClient({ services, categories }: ServicesClientProps) {
             <div className="space-y-4">
               <h3 className="font-semibold text-gray-900 flex items-center gap-2">
                 <Languages className="h-4 w-4" />
-                Basic Information (English)
+                {t("basic_information")}
               </h3>
               <div className="grid gap-4">
                 <div className="grid gap-2">
-                  <Label>Service Name *</Label>
+                  <Label>{t("service_name")} *</Label>
                   <Input 
                     value={serviceName}
                     onChange={(e) => setServiceName(e.target.value)}
-                    placeholder="e.g. Burger & Fries" 
+                    placeholder={t("service_name_placeholder")} 
                     required
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label>Category *</Label>
+                  <Label>{t("category")} *</Label>
                   <Select 
                     value={serviceCategory}
                     onChange={(e) => setServiceCategory(e.target.value)}
                     required
                   >
-                    <option value="">Select category...</option>
+                    <option value="">{t("select_category")}</option>
                     {categories.map(cat => (
-                      <option key={cat.id} value={cat.id}>{cat.name}</option>
+                      <option key={cat.id} value={cat.id}>{translateCategoryName(cat.name)}</option>
                     ))}
                   </Select>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="grid gap-2">
-                    <Label>Price</Label>
+                    <Label>{t("price")}</Label>
                     <Input 
                       value={servicePrice}
                       onChange={(e) => setServicePrice(e.target.value)}
@@ -181,20 +240,20 @@ export function ServicesClient({ services, categories }: ServicesClientProps) {
                     />
                   </div>
                   <div className="grid gap-2">
-                    <Label>Est. Time</Label>
+                    <Label>{t("estimated_time")}</Label>
                     <Input 
                       value={serviceTime}
                       onChange={(e) => setServiceTime(e.target.value)}
-                      placeholder="e.g. 20 min" 
+                      placeholder={t("estimated_time_placeholder")} 
                     />
                   </div>
                 </div>
                 <div className="grid gap-2">
-                  <Label>Description</Label>
+                  <Label>{t("description")}</Label>
                   <Input 
                     value={serviceDescription}
                     onChange={(e) => setServiceDescription(e.target.value)}
-                    placeholder="Short description..." 
+                    placeholder={t("description_placeholder")} 
                   />
                 </div>
               </div>
@@ -204,7 +263,7 @@ export function ServicesClient({ services, categories }: ServicesClientProps) {
             <div className="space-y-4 border-t pt-4">
               <h3 className="font-semibold text-gray-900 flex items-center gap-2">
                 <Languages className="h-4 w-4" />
-                Translations (Required for all languages)
+                {t("translations_required")}
               </h3>
               <div className="space-y-4">
                 {languages.map((lang) => (
@@ -214,7 +273,7 @@ export function ServicesClient({ services, categories }: ServicesClientProps) {
                       <span className="font-medium text-gray-900">{lang.name}</span>
                     </div>
                     <div className="grid gap-2">
-                      <Label className="text-sm">Service Name *</Label>
+                      <Label className="text-sm">{t("service_name")} *</Label>
                       <Input
                         value={translations[lang.code]?.name || ""}
                         onChange={(e) => setTranslations({
@@ -225,12 +284,12 @@ export function ServicesClient({ services, categories }: ServicesClientProps) {
                             description: translations[lang.code]?.description || ""
                           }
                         })}
-                        placeholder={`${lang.name} name...`}
+                        placeholder={`${lang.name} ${t("name_placeholder")}...`}
                         required
                       />
                     </div>
                     <div className="grid gap-2">
-                      <Label className="text-sm">Description</Label>
+                      <Label className="text-sm">{t("description")}</Label>
                       <Input
                         value={translations[lang.code]?.description || ""}
                         onChange={(e) => setTranslations({
@@ -294,7 +353,7 @@ export function ServicesClient({ services, categories }: ServicesClientProps) {
                          : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
                      }`}
                    >
-                     {cat.name}
+                     {translateCategoryName(cat.name)}
                    </button>
                  );
                })}
@@ -302,14 +361,14 @@ export function ServicesClient({ services, categories }: ServicesClientProps) {
           </div>
           
           <div className="pt-6 border-t border-gray-100">
-             <h3 className="font-bold text-gray-900 px-4 mb-2">Quick Stats</h3>
+             <h3 className="font-bold text-gray-900 px-4 mb-2">{t("quick_stats")}</h3>
              <div className="grid grid-cols-2 gap-2 px-2">
                 <div className="bg-gray-50 p-3 rounded-2xl">
-                   <div className="text-xs text-gray-500 mb-1">Active Items</div>
+                   <div className="text-xs text-gray-500 mb-1">{t("active_items")}</div>
                    <div className="text-xl font-bold text-gray-900">{services.filter(s => s.status === "Active").length}</div>
                 </div>
                 <div className="bg-gray-50 p-3 rounded-2xl">
-                   <div className="text-xs text-gray-500 mb-1">Categories</div>
+                   <div className="text-xs text-gray-500 mb-1">{t("categories")}</div>
                    <div className="text-xl font-bold text-gray-900">{categories.length}</div>
                 </div>
              </div>
@@ -373,10 +432,10 @@ export function ServicesClient({ services, categories }: ServicesClientProps) {
 
                       <div className="flex items-center justify-between pt-2">
                         <Badge className={`${service.status === 'Active' ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'} border-none rounded-lg px-3`}>
-                          {service.status}
+                          {service.status === 'Active' ? t("active") : t("inactive")}
                         </Badge>
                         <span className="text-xs font-medium text-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                           Edit Details <MoreHorizontal className="h-3 w-3" />
+                           {t("edit_details")} <MoreHorizontal className="h-3 w-3" />
                         </span>
                       </div>
                     </div>

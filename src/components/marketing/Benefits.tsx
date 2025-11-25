@@ -1,32 +1,38 @@
+"use client";
+
 import { TrendingUp, Clock, Smile, Shield } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export function Benefits() {
+  const { translate } = useLanguage();
+  const t = (key: string) => translate(`benefits.${key}`);
+  
   const benefits = [
     {
       icon: TrendingUp,
-      title: "Increase Revenue",
-      description: "Guests order up to 30% more services when the process is digital and simple.",
+      title: t("item_1_title"),
+      description: t("item_1_desc"),
       color: "text-green-600",
       bg: "bg-green-50",
     },
     {
       icon: Clock,
-      title: "Save Staff Time",
-      description: "Automation of routine requests frees up staff to focus on personal service.",
+      title: t("item_2_title"),
+      description: t("item_2_desc"),
       color: "text-blue-600",
       bg: "bg-blue-50",
     },
     {
       icon: Smile,
-      title: "Improve Satisfaction",
-      description: "Faster response times and full transparency for guests increase Booking.com ratings.",
+      title: t("item_3_title"),
+      description: t("item_3_desc"),
       color: "text-orange-600",
       bg: "bg-orange-50",
     },
     {
       icon: Shield,
-      title: "Control & Monitor",
-      description: "Detailed reports on staff performance and response times in real-time.",
+      title: t("item_4_title"),
+      description: t("item_4_desc"),
       color: "text-indigo-600",
       bg: "bg-indigo-50",
     },
@@ -38,10 +44,10 @@ export function Benefits() {
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div>
             <h2 className="text-3xl md:text-4xl font-bold font-heading text-gray-900 mb-6">
-              Why Hotel Owners Choose HotelX?
+              {t("title")}
             </h2>
             <p className="text-lg text-gray-600 mb-8 leading-relaxed">
-              We understand the challenges of running a modern hotel. Our system is built specifically to help you streamline processes, save costs, and improve guest experience - all in one simple platform.
+              {t("subtitle")}
             </p>
             
             <div className="grid sm:grid-cols-2 gap-6">
@@ -67,7 +73,7 @@ export function Benefits() {
               <div className="space-y-6 relative z-10">
                 <div className="flex items-center justify-between border-b border-gray-800 pb-4">
                   <div>
-                    <p className="text-gray-400 text-sm">Monthly Service Revenue</p>
+                    <p className="text-gray-400 text-sm">{t("chart_title")}</p>
                     <p className="text-2xl font-bold mt-1">$42,500</p>
                   </div>
                   <div className="bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-sm font-medium">
@@ -76,16 +82,16 @@ export function Benefits() {
                 </div>
                 
                 <div className="space-y-3">
-                  <p className="text-gray-400 text-sm">Top Services (This Week)</p>
+                  <p className="text-gray-400 text-sm">{t("chart_top_services")}</p>
                   {[
-                    { name: "Room Breakfast", count: 145, w: "85%" },
-                    { name: "Spa Services", count: 82, w: "60%" },
-                    { name: "Taxi Booking", count: 64, w: "45%" },
+                    { name: t("service_breakfast"), count: 145, w: "85%" },
+                    { name: t("service_spa"), count: 82, w: "60%" },
+                    { name: t("service_taxi"), count: 64, w: "45%" },
                   ].map((item, i) => (
                     <div key={i}>
                       <div className="flex justify-between text-sm mb-1">
                         <span>{item.name}</span>
-                        <span className="text-gray-400">{item.count} orders</span>
+                        <span className="text-gray-400">{item.count} {t("orders")}</span>
                       </div>
                       <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
                         <div className="h-full bg-blue-500 rounded-full" style={{ width: item.w }}></div>

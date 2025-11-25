@@ -10,7 +10,14 @@ export async function createRequest(formData: FormData) {
   const quantityStr = formData.get("quantity") as string;
   const quantity = parseInt(quantityStr) || 1;
   const customFieldsDataStr = formData.get("customFieldsData") as string;
-  const customFieldsData = customFieldsDataStr ? JSON.parse(customFieldsDataStr) : null;
+  let customFieldsData = null;
+  if (customFieldsDataStr) {
+    try {
+      customFieldsData = JSON.parse(customFieldsDataStr);
+    } catch (e) {
+      throw new Error("Invalid custom fields data format");
+    }
+  }
   const notes = formData.get("notes") as string;
   const guestName = formData.get("guestName") as string;
   const guestPhone = formData.get("guestPhone") as string;

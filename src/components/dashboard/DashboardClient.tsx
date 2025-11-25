@@ -323,8 +323,8 @@ export function DashboardClient({ stats, recentRequests, monthlyRevenue = [] }: 
             
             <div className="space-y-4 mt-6">
                {[
-                 { label: "Active Rooms", count: stats.guests, color: "bg-green-500" },
-                 { label: "Total Rooms", count: stats.guests + Math.floor(stats.guests * 0.3), color: "bg-blue-500" },
+                 { label: t("active_rooms"), count: stats.guests, color: "bg-green-500" },
+                 { label: t("total_rooms"), count: stats.guests + Math.floor(stats.guests * 0.3), color: "bg-blue-500" },
                ].map((item, i) => (
                  <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-gray-50">
                     <div className="flex items-center gap-3">

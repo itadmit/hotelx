@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Palette, Smartphone, Save, Eye, Image as ImageIcon, Grid3x3, Upload, Download, Check } from "lucide-react";
 import { updateGuestTemplate, importDemoData } from "@/app/actions/hotel";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useToast } from "@/hooks/useToast";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface Category {
   id: string;
@@ -34,7 +36,9 @@ export function GuestTemplateClient({ hotel }: { hotel: Hotel }) {
   const [isImporting, setIsImporting] = useState(false);
   const [showPreview, setShowPreview] = useState(true);
   const [isSaved, setIsSaved] = useState(false);
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const { translate } = useLanguage();
+  const { showTranslatedSuccess, showTranslatedError } = useToast();
   
   const [coverImage, setCoverImage] = useState(hotel.coverImage || "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80");
   const [primaryColor, setPrimaryColor] = useState(hotel.primaryColor || "#4f46e5");
@@ -101,16 +105,17 @@ export function GuestTemplateClient({ hotel }: { hotel: Hotel }) {
       } catch (error) {
         console.error("Failed to save:", error);
         setIsSaved(false);
-        alert("Failed to save settings. Please try again.");
+        showTranslatedError("app.toast.error.settings_save_failed");
       }
     });
   };
 
-  const handleImportDemo = async () => {
-    if (!confirm("This will import demo data and overwrite your current settings. Continue?")) {
-      return;
-    }
-    
+  const handleImportDemo = () => {
+    setIsImportDialogOpen(true);
+  };
+
+  const confirmImportDemo = async () => {
+    setIsImportDialogOpen(false);
     setIsImporting(true);
     try {
       await importDemoData();
@@ -118,7 +123,7 @@ export function GuestTemplateClient({ hotel }: { hotel: Hotel }) {
       window.location.reload();
     } catch (error) {
       console.error("Failed to import demo data:", error);
-      alert("Failed to import demo data. Please try again.");
+      showTranslatedError("app.toast.error.demo_import_failed");
       setIsImporting(false);
     }
   };
@@ -394,6 +399,26 @@ export function GuestTemplateClient({ hotel }: { hotel: Hotel }) {
           </div>
         )}
       </div>
+
+      {/* Import Demo Data Confirmation Dialog */}
+      <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{translate("app.dashboard.guest_template.import_demo_data") || "Import Demo Data"}</DialogTitle>
+            <DialogDescription>
+              {translate("app.dashboard.guest_template.import_demo_warning") || "This will import demo data and overwrite your current settings. Continue?"}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsImportDialogOpen(false)}>
+              {translate("app.dashboard.requests.cancel")}
+            </Button>
+            <Button onClick={confirmImportDemo} disabled={isImporting}>
+              {isImporting ? translate("app.dashboard.guest_template.importing") : translate("app.dashboard.guest_template.import_demo_data")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -1,36 +1,42 @@
+"use client";
+
 import { QrCode, Smartphone, LayoutDashboard, Globe, ShieldCheck, Zap, Users, BarChart, Settings } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export function Features() {
+  const { translate } = useLanguage();
+  const t = (key: string) => translate(`features.${key}`);
+  
   const features = [
     {
       icon: Smartphone,
-      title: "Guest App - No Download Required",
-      description: "Guests scan and order instantly. A modern, fast interface that works on any smartphone without installation.",
+      title: t("f1_title"),
+      description: t("f1_desc"),
     },
     {
       icon: LayoutDashboard,
-      title: "Staff Command Center",
-      description: "All requests in one place. Real-time task management, staff notifications, and execution tracking.",
+      title: t("f2_title"),
+      description: t("f2_desc"),
     },
     {
       icon: Globe,
-      title: "Auto-Translate to 30+ Languages",
-      description: "Guests order in French, staff receives in English. Breaking the language barrier automatically.",
+      title: t("f3_title"),
+      description: t("f3_desc"),
     },
     {
       icon: QrCode,
-      title: "Smart QR Management",
-      description: "Generate unique codes for each room or area. Update menus and services in real-time without reprinting.",
+      title: t("f4_title"),
+      description: t("f4_desc"),
     },
     {
       icon: BarChart,
-      title: "Advanced Analytics",
-      description: "Understand guest behavior, peak times, staff performance, and most profitable services.",
+      title: t("f5_title"),
+      description: t("f5_desc"),
     },
     {
       icon: Users,
-      title: "Staff Role Management",
-      description: "Define roles (Front Desk, Housekeeping, Kitchen) and custom access for each staff member.",
+      title: t("f6_title"),
+      description: t("f6_desc"),
     },
   ];
 
@@ -38,9 +44,9 @@ export function Features() {
     <section className="py-24 bg-gray-50">
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold font-heading text-gray-900 mb-4">All Tools for Modern Hotel Management</h2>
+          <h2 className="text-3xl md:text-4xl font-bold font-heading text-gray-900 mb-4">{t("title")}</h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            One system that fully answers the needs of your hotel, staff, and guests.
+            {t("subtitle")}
           </p>
         </div>
 

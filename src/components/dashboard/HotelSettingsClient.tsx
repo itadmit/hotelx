@@ -9,6 +9,8 @@ import { updateHotelSettings, deleteAccount, importFullDemoData, resetHotelData 
 import { signOut } from "next-auth/react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useToast } from "@/hooks/useToast";
+import { toast } from "sonner";
 
 interface Hotel {
   id: string;
@@ -23,6 +25,7 @@ interface Hotel {
 
 export function HotelSettingsClient({ hotel }: { hotel: Hotel }) {
   const { translate } = useLanguage();
+  const { showTranslatedSuccess, showTranslatedError } = useToast();
   const [activeTab, setActiveTab] = useState("general");
   const [primaryColor, setPrimaryColor] = useState(hotel.primaryColor || "#4f46e5");
   const [hotelName, setHotelName] = useState(hotel.name);
@@ -36,6 +39,7 @@ export function HotelSettingsClient({ hotel }: { hotel: Hotel }) {
   const [isImporting, setIsImporting] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const [starRating, setStarRating] = useState(3);
 
   const colorMap: Record<string, string> = {
@@ -76,12 +80,13 @@ export function HotelSettingsClient({ hotel }: { hotel: Hotel }) {
           localStorage.setItem("hotelx-lang", language);
           setLanguage(language as "en" | "bg" | "de" | "fr" | "it");
         }
+        showTranslatedSuccess("app.toast.success.settings_saved");
         // Refresh the page to show updated data
         window.location.reload();
       }
     } catch (error) {
       console.error("Failed to save settings:", error);
-      alert("Failed to save settings. Please try again.");
+      showTranslatedError("app.toast.error.settings_save_failed");
       setIsSaving(false);
     }
   };
@@ -90,30 +95,38 @@ export function HotelSettingsClient({ hotel }: { hotel: Hotel }) {
     setIsDeleting(true);
     try {
       await deleteAccount();
+      showTranslatedSuccess("app.toast.success.account_deleted");
       // Sign out and redirect to home
       await signOut({ callbackUrl: "/" });
     } catch (error) {
       console.error("Failed to delete account:", error);
-      alert("Failed to delete account. Please try again.");
+      showTranslatedError("app.toast.error.account_delete_failed");
       setIsDeleting(false);
       setIsDeleteDialogOpen(false);
     }
   };
 
   const handleImportDemo = async () => {
-    if (!confirm("This will import full demo data including rooms, categories, services, and requests. This will DELETE all existing data. Continue?")) {
-      return;
-    }
-    
+    setIsImportDialogOpen(true);
+  };
+
+  const confirmImportDemo = async () => {
+    setIsImportDialogOpen(false);
     setIsImporting(true);
     try {
       const result = await importFullDemoData();
-      alert(`Demo data imported successfully! ✅\n\nCreated:\n- ${result.rooms} rooms\n- ${result.categories} categories\n- ${result.services} services\n- ${result.requests} requests`);
+      toast.success(
+        translate("app.toast.success.demo_data_imported"),
+        {
+          description: `Created: ${result.rooms} rooms, ${result.categories} categories, ${result.services} services, ${result.requests} requests`,
+          duration: 5000,
+        }
+      );
       // Reload the page to show updated data
       window.location.reload();
     } catch (error) {
       console.error("Failed to import demo data:", error);
-      alert("Failed to import demo data. Please try again.");
+      showTranslatedError("app.toast.error.demo_import_failed");
       setIsImporting(false);
     }
   };
@@ -122,24 +135,50 @@ export function HotelSettingsClient({ hotel }: { hotel: Hotel }) {
     setIsResetting(true);
     try {
       await resetHotelData();
-      alert("Hotel data reset successfully! ✅\n\nAll rooms, categories, services, and requests have been deleted. Hotel name has been preserved.");
+      toast.success(
+        translate("app.toast.success.data_reset"),
+        {
+          description: translate("app.toast.success.data_reset") + " All rooms, categories, services, and requests have been deleted. Hotel name has been preserved.",
+          duration: 5000,
+        }
+      );
       // Reload the page to show updated data
       window.location.reload();
     } catch (error) {
       console.error("Failed to reset data:", error);
-      alert("Failed to reset data. Please try again.");
+      showTranslatedError("app.toast.error.data_reset_failed");
       setIsResetting(false);
       setIsResetDialogOpen(false);
     }
   };
 
   return (
+    <>
+      {/* Import Demo Data Confirmation Dialog */}
+      <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{translate("app.dashboard.settings.import_demo_data") || "Import Demo Data"}</DialogTitle>
+            <DialogDescription>
+              {translate("app.dashboard.settings.import_demo_warning") || "This will import full demo data including rooms, categories, services, and requests. This will DELETE all existing data. Continue?"}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsImportDialogOpen(false)}>
+              {translate("app.dashboard.requests.cancel")}
+            </Button>
+            <Button onClick={confirmImportDemo} disabled={isImporting}>
+              {isImporting ? translate("app.toast.info.processing") : translate("app.dashboard.settings.import") || "Import"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     <div className="space-y-8 max-w-5xl mx-auto pb-20 pt-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Hotel Settings</h1>
-          <p className="text-gray-500 mt-1">Configure your hotel's identity and preferences</p>
+          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">{translate("app.dashboard.settings.title")}</h1>
+          <p className="text-gray-500 mt-1">{translate("app.dashboard.settings.subtitle")}</p>
         </div>
         <div className="flex items-center gap-3">
           <Button 
@@ -153,7 +192,7 @@ export function HotelSettingsClient({ hotel }: { hotel: Hotel }) {
             }}
             className="bg-white border-none shadow-sm text-gray-600 hover:bg-gray-50 rounded-xl cursor-pointer transition-transform active:scale-95"
           >
-            Discard
+            {translate("app.dashboard.settings.discard")}
           </Button>
           <Button 
             type="submit"
@@ -178,21 +217,21 @@ export function HotelSettingsClient({ hotel }: { hotel: Hotel }) {
                   onClick={() => scrollToSection("general")}
                   className={`w-full text-left px-4 py-3 rounded-xl text-sm font-medium flex items-center gap-3 transition-all cursor-pointer ${activeTab === "general" ? "bg-indigo-50 text-indigo-700" : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"}`}
                 >
-                  <Building2 className="h-4 w-4" /> General Info
+                  <Building2 className="h-4 w-4" /> {translate("app.dashboard.settings.general_info")}
                 </button>
                 <button 
                   type="button"
                   onClick={() => scrollToSection("branding")}
                   className={`w-full text-left px-4 py-3 rounded-xl text-sm font-medium flex items-center gap-3 transition-all cursor-pointer ${activeTab === "branding" ? "bg-indigo-50 text-indigo-700" : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"}`}
                 >
-                  <Palette className="h-4 w-4" /> Branding & Look
+                  <Palette className="h-4 w-4" /> {translate("app.dashboard.settings.branding_look")}
                 </button>
                 <button 
                   type="button"
                   onClick={() => scrollToSection("localization")}
                   className={`w-full text-left px-4 py-3 rounded-xl text-sm font-medium flex items-center gap-3 transition-all cursor-pointer ${activeTab === "localization" ? "bg-indigo-50 text-indigo-700" : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"}`}
                 >
-                  <Globe className="h-4 w-4" /> Localization
+                  <Globe className="h-4 w-4" /> {translate("app.dashboard.settings.localization")}
                 </button>
               </nav>
             </div>
@@ -202,13 +241,13 @@ export function HotelSettingsClient({ hotel }: { hotel: Hotel }) {
           <div className="md:col-span-2 space-y-8">
             <div id="general" className="bg-white rounded-3xl p-8 shadow-sm space-y-6 scroll-mt-24 transition-all hover:shadow-md">
               <div>
-                <h3 className="font-bold text-lg text-gray-900">Basic Information</h3>
-                <p className="text-sm text-gray-500">This info will appear on your guest app</p>
+                <h3 className="font-bold text-lg text-gray-900">{translate("app.dashboard.settings.basic_information")}</h3>
+                <p className="text-sm text-gray-500">{translate("app.dashboard.settings.basic_info_desc")}</p>
               </div>
               
               <div className="space-y-6">
                 <div className="grid gap-2">
-                  <Label htmlFor="hotelName" className="text-gray-700">Hotel Name</Label>
+                  <Label htmlFor="hotelName" className="text-gray-700">{translate("app.dashboard.settings.hotel_name")}</Label>
                   <Input 
                     id="hotelName" 
                     value={hotelName}
@@ -229,17 +268,17 @@ export function HotelSettingsClient({ hotel }: { hotel: Hotel }) {
                     <div className="space-y-2">
                       <Input
                         type="url"
-                        placeholder="Logo URL"
+                        placeholder={translate("app.dashboard.settings.logo_url")}
                         value={logoUrl}
                         onChange={(e) => setLogoUrl(e.target.value)}
                         className="rounded-lg bg-white"
                       />
-                  <p className="text-xs text-gray-400">Enter logo URL or upload image</p>
+                  <p className="text-xs text-gray-400">{translate("app.dashboard.settings.logo_url_desc")}</p>
                 </div>
               </div>
             </div>
             <div className="grid gap-2">
-                  <Label htmlFor="roomCount" className="text-gray-700">Number of Rooms</Label>
+                  <Label htmlFor="roomCount" className="text-gray-700">{translate("app.dashboard.settings.number_of_rooms")}</Label>
                   <Input 
                     id="roomCount" 
                     type="number"
@@ -248,10 +287,10 @@ export function HotelSettingsClient({ hotel }: { hotel: Hotel }) {
                     defaultValue={10}
                     className="rounded-xl bg-gray-50 border-transparent focus:bg-white focus:border-indigo-200 focus:ring-4 focus:ring-indigo-50 transition-all" 
                   />
-                  <p className="text-xs text-gray-400">Total number of rooms in your hotel</p>
+                  <p className="text-xs text-gray-400">{translate("app.dashboard.settings.number_of_rooms_desc")}</p>
                 </div>
                 <div className="grid gap-2">
-                  <Label className="text-gray-700">Hotel Rating</Label>
+                  <Label className="text-gray-700">{translate("app.dashboard.settings.hotel_rating")}</Label>
                   <div className="flex gap-2">
                     {[1, 2, 3, 4, 5].map((rating) => (
                       <button
@@ -270,20 +309,20 @@ export function HotelSettingsClient({ hotel }: { hotel: Hotel }) {
                       </button>
                     ))}
                   </div>
-                  <p className="text-xs text-gray-400">Your hotel's star rating</p>
+                  <p className="text-xs text-gray-400">{translate("app.dashboard.settings.hotel_rating_desc")}</p>
                 </div>
               </div>
             </div>
 
             <div id="branding" className="bg-white rounded-3xl p-8 shadow-sm space-y-6 scroll-mt-24 transition-all hover:shadow-md">
               <div>
-                <h3 className="font-bold text-lg text-gray-900">Branding</h3>
-                <p className="text-sm text-gray-500">Customize the look and feel</p>
+                <h3 className="font-bold text-lg text-gray-900">{translate("app.dashboard.settings.branding")}</h3>
+                <p className="text-sm text-gray-500">{translate("app.dashboard.settings.branding_desc")}</p>
               </div>
 
               <div className="space-y-6">
                 <div className="grid gap-2">
-                  <Label className="text-gray-700">Primary Color</Label>
+                  <Label className="text-gray-700">{translate("app.dashboard.settings.primary_color")}</Label>
                   <div className="flex gap-3 flex-wrap">
                     {[
                       { hex: "#2563eb", class: "bg-blue-600" },
@@ -303,7 +342,7 @@ export function HotelSettingsClient({ hotel }: { hotel: Hotel }) {
                   </div>
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="font" className="text-gray-700">Font Family</Label>
+                  <Label htmlFor="font" className="text-gray-700">{translate("app.dashboard.settings.font_family")}</Label>
                   <select id="font" className="flex h-11 w-full rounded-xl border-none bg-gray-50 px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-200 cursor-pointer hover:bg-gray-100 transition-colors">
                     <option>Inter</option>
                     <option>Poppins</option>
@@ -315,13 +354,13 @@ export function HotelSettingsClient({ hotel }: { hotel: Hotel }) {
 
             <div id="localization" className="bg-white rounded-3xl p-8 shadow-sm space-y-6 scroll-mt-24 transition-all hover:shadow-md">
               <div>
-                <h3 className="font-bold text-lg text-gray-900">Localization</h3>
-                <p className="text-sm text-gray-500">Set language and currency</p>
+                <h3 className="font-bold text-lg text-gray-900">{translate("app.dashboard.settings.localization")}</h3>
+                <p className="text-sm text-gray-500">{translate("app.dashboard.settings.localization_desc")}</p>
               </div>
 
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="grid gap-2">
-                  <Label htmlFor="language" className="text-gray-700">Default Language</Label>
+                  <Label htmlFor="language" className="text-gray-700">{translate("app.dashboard.settings.default_language")}</Label>
                   <select 
                     id="language" 
                     name="language"
@@ -337,7 +376,7 @@ export function HotelSettingsClient({ hotel }: { hotel: Hotel }) {
                   </select>
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="currency" className="text-gray-700">Currency</Label>
+                  <Label htmlFor="currency" className="text-gray-700">{translate("app.dashboard.settings.currency")}</Label>
                   <select 
                     id="currency" 
                     name="currency"

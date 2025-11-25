@@ -229,8 +229,12 @@
         "no_services": "Nessun servizio trovato"
       },
       "settings": {
-        "title": "Impostazioni",
+        "title": "Impostazioni hotel",
+        "subtitle": "Configura l'identità e le preferenze del tuo hotel",
         "general": "Generale",
+        "general_info": "Informazioni generali",
+        "branding": "Branding",
+        "branding_look": "Branding e aspetto",
         "localization": "Localizzazione",
         "appearance": "Aspetto",
         "hotel_name": "Nome hotel",
@@ -239,7 +243,19 @@
         "wifi_name": "Nome WiFi",
         "default_language": "Lingua predefinita",
         "currency": "Valuta",
-        "save_changes": "Salva modifiche"
+        "save_changes": "Salva modifiche",
+        "discard": "Annulla",
+        "basic_information": "Informazioni di base",
+        "basic_info_desc": "Queste informazioni appariranno nella tua app ospiti",
+        "number_of_rooms": "Numero di camere",
+        "number_of_rooms_desc": "Numero totale di camere nel tuo hotel",
+        "hotel_rating": "Valutazione hotel",
+        "hotel_rating_desc": "La valutazione a stelle del tuo hotel",
+        "branding_desc": "Personalizza l'aspetto e la sensazione",
+        "font_family": "Famiglia di caratteri",
+        "localization_desc": "Imposta lingua e valuta",
+        "logo_url": "URL logo",
+        "logo_url_desc": "Inserisci l'URL del logo o carica un'immagine"
       },
       "dashboard": {
         "good_morning": "Buongiorno! 👋",
@@ -390,6 +406,68 @@
         "all": "Tutti",
         "quantity": "Quantità",
         "created_at": "Creato il"
+      }
+    },
+    "error": {
+      "something_went_wrong": "Qualcosa è andato storto",
+      "try_refreshing": "Si è verificato un errore imprevisto. Si prega di aggiornare la pagina.",
+      "try_again": "Riprova",
+      "refresh_page": "Aggiorna la pagina",
+      "failed_to_load": "Impossibile caricare i dati. Si prega di riprovare.",
+      "network_error": "Errore di rete. Si prega di controllare la connessione."
+    },
+    "toast": {
+      "success": {
+        "saved": "Salvato con successo!",
+        "created": "Creato con successo!",
+        "updated": "Aggiornato con successo!",
+        "deleted": "Eliminato con successo!",
+        "settings_saved": "Impostazioni salvate con successo!",
+        "service_created": "Servizio creato con successo!",
+        "service_updated": "Servizio aggiornato con successo!",
+        "room_created": "Camera creata con successo!",
+        "request_created": "Richiesta creata con successo!",
+        "request_updated": "Richiesta aggiornata con successo!",
+        "request_completed": "Richiesta contrassegnata come completata!",
+        "demo_data_imported": "Dati demo importati con successo!",
+        "data_reset": "Dati dell'hotel reimpostati con successo!",
+        "link_copied": "Link copiato negli appunti!",
+        "account_deleted": "Account eliminato con successo!"
+      },
+      "error": {
+        "failed_to_save": "Salvataggio non riuscito. Si prega di riprovare.",
+        "failed_to_create": "Creazione non riuscita. Si prega di riprovare.",
+        "failed_to_update": "Aggiornamento non riuscito. Si prega di riprovare.",
+        "failed_to_delete": "Eliminazione non riuscita. Si prega di riprovare.",
+        "failed_to_load": "Impossibile caricare i dati. Si prega di riprovare.",
+        "network_error": "Errore di rete. Si prega di controllare la connessione.",
+        "unauthorized": "Non sei autorizzato a eseguire questa azione.",
+        "validation_error": "Si prega di compilare tutti i campi obbligatori.",
+        "service_update_failed": "Impossibile aggiornare il servizio. Si prega di riprovare.",
+        "service_create_failed": "Impossibile creare il servizio. Si prega di riprovare.",
+        "room_create_failed": "Impossibile creare la camera. Si prega di riprovare.",
+        "request_create_failed": "Impossibile creare la richiesta. Si prega di riprovare.",
+        "request_update_failed": "Impossibile aggiornare la richiesta. Si prega di riprovare.",
+        "request_complete_failed": "Impossibile completare la richiesta. Si prega di riprovare.",
+        "settings_save_failed": "Impossibile salvare le impostazioni. Si prega di riprovare.",
+        "demo_import_failed": "Impossibile importare i dati demo. Si prega di riprovare.",
+        "data_reset_failed": "Impossibile reimpostare i dati. Si prega di riprovare.",
+        "account_delete_failed": "Impossibile eliminare l'account. Si prega di riprovare.",
+        "hotel_create_failed": "Impossibile creare l'hotel. Si prega di riprovare.",
+        "invalid_fields": "Formato dati campi personalizzati non valido."
+      },
+      "info": {
+        "processing": "Elaborazione della tua richiesta...",
+        "loading": "Caricamento...",
+        "saving": "Salvataggio delle modifiche...",
+        "creating": "Creazione...",
+        "updating": "Aggiornamento...",
+        "deleting": "Eliminazione..."
+      },
+      "warning": {
+        "required_fields": "Si prega di compilare tutti i campi obbligatori.",
+        "guest_name_required": "Si prega di inserire il nome completo.",
+        "custom_field_required": "Si prega di compilare il campo obbligatorio: {field}"
       }
     }
   }

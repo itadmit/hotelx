@@ -11,6 +11,7 @@ import { QRCodeSVG } from "qrcode.react";
 import Link from "next/link";
 import { createRoom } from "@/app/actions/hotel";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useToast } from "@/hooks/useToast";
 
 interface Room {
   id: string;
@@ -28,6 +29,7 @@ interface RoomsClientProps {
 
 export function RoomsClient({ rooms, hotelSlug }: RoomsClientProps) {
   const { translate } = useLanguage();
+  const { showTranslatedSuccess, showTranslatedError } = useToast();
   const [isAddRoomOpen, setIsAddRoomOpen] = useState(false);
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [selectedQrRoom, setSelectedQrRoom] = useState<{ number: string; code: string } | null>(null);
@@ -43,9 +45,10 @@ export function RoomsClient({ rooms, hotelSlug }: RoomsClientProps) {
       try {
         await createRoom(formData);
         setIsAddRoomOpen(false);
+        showTranslatedSuccess("app.toast.success.room_created");
       } catch (error) {
         console.error("Failed to create room:", error);
-        alert("Failed to create room. Please try again.");
+        showTranslatedError("app.toast.error.room_create_failed");
       }
     });
   };
@@ -53,7 +56,7 @@ export function RoomsClient({ rooms, hotelSlug }: RoomsClientProps) {
   const copyGuestLink = (roomCode: string) => {
     const guestUrl = `${baseUrl}/g/${hotelSlug}/${roomCode}`;
     navigator.clipboard.writeText(guestUrl);
-    alert("Link copied to clipboard!");
+    showTranslatedSuccess("app.toast.success.link_copied");
   };
 
   return (

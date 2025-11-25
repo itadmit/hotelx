@@ -229,8 +229,12 @@
         "no_services": "Keine Dienste gefunden"
       },
       "settings": {
-        "title": "Einstellungen",
+        "title": "Hotel-Einstellungen",
+        "subtitle": "Konfigurieren Sie die Identität und Präferenzen Ihres Hotels",
         "general": "Allgemein",
+        "general_info": "Allgemeine Informationen",
+        "branding": "Markenbildung",
+        "branding_look": "Markenbildung & Aussehen",
         "localization": "Lokalisierung",
         "appearance": "Erscheinungsbild",
         "hotel_name": "Hotelname",
@@ -239,7 +243,19 @@
         "wifi_name": "WiFi-Name",
         "default_language": "Standardsprache",
         "currency": "Währung",
-        "save_changes": "Änderungen speichern"
+        "save_changes": "Änderungen speichern",
+        "discard": "Verwerfen",
+        "basic_information": "Grundinformationen",
+        "basic_info_desc": "Diese Informationen werden in Ihrer Gäste-App angezeigt",
+        "number_of_rooms": "Anzahl der Zimmer",
+        "number_of_rooms_desc": "Gesamtzahl der Zimmer in Ihrem Hotel",
+        "hotel_rating": "Hotelbewertung",
+        "hotel_rating_desc": "Ihre Hotel-Sternbewertung",
+        "branding_desc": "Passen Sie das Aussehen und die Atmosphäre an",
+        "font_family": "Schriftfamilie",
+        "localization_desc": "Sprache und Währung festlegen",
+        "logo_url": "Logo-URL",
+        "logo_url_desc": "Logo-URL eingeben oder Bild hochladen"
       },
       "dashboard": {
         "good_morning": "Guten Morgen! 👋",
@@ -390,6 +406,68 @@
         "all": "Alle",
         "quantity": "Menge",
         "created_at": "Erstellt am"
+      }
+    },
+    "error": {
+      "something_went_wrong": "Etwas ist schief gelaufen",
+      "try_refreshing": "Ein unerwarteter Fehler ist aufgetreten. Bitte aktualisieren Sie die Seite.",
+      "try_again": "Erneut versuchen",
+      "refresh_page": "Seite aktualisieren",
+      "failed_to_load": "Daten konnten nicht geladen werden. Bitte versuchen Sie es erneut.",
+      "network_error": "Netzwerkfehler. Bitte überprüfen Sie Ihre Verbindung."
+    },
+    "toast": {
+      "success": {
+        "saved": "Erfolgreich gespeichert!",
+        "created": "Erfolgreich erstellt!",
+        "updated": "Erfolgreich aktualisiert!",
+        "deleted": "Erfolgreich gelöscht!",
+        "settings_saved": "Einstellungen erfolgreich gespeichert!",
+        "service_created": "Service erfolgreich erstellt!",
+        "service_updated": "Service erfolgreich aktualisiert!",
+        "room_created": "Zimmer erfolgreich erstellt!",
+        "request_created": "Anfrage erfolgreich erstellt!",
+        "request_updated": "Anfrage erfolgreich aktualisiert!",
+        "request_completed": "Anfrage als abgeschlossen markiert!",
+        "demo_data_imported": "Demo-Daten erfolgreich importiert!",
+        "data_reset": "Hoteldaten erfolgreich zurückgesetzt!",
+        "link_copied": "Link in die Zwischenablage kopiert!",
+        "account_deleted": "Konto erfolgreich gelöscht!"
+      },
+      "error": {
+        "failed_to_save": "Speichern fehlgeschlagen. Bitte versuchen Sie es erneut.",
+        "failed_to_create": "Erstellen fehlgeschlagen. Bitte versuchen Sie es erneut.",
+        "failed_to_update": "Aktualisieren fehlgeschlagen. Bitte versuchen Sie es erneut.",
+        "failed_to_delete": "Löschen fehlgeschlagen. Bitte versuchen Sie es erneut.",
+        "failed_to_load": "Daten konnten nicht geladen werden. Bitte versuchen Sie es erneut.",
+        "network_error": "Netzwerkfehler. Bitte überprüfen Sie Ihre Verbindung.",
+        "unauthorized": "Sie sind nicht berechtigt, diese Aktion auszuführen.",
+        "validation_error": "Bitte füllen Sie alle erforderlichen Felder aus.",
+        "service_update_failed": "Service konnte nicht aktualisiert werden. Bitte versuchen Sie es erneut.",
+        "service_create_failed": "Service konnte nicht erstellt werden. Bitte versuchen Sie es erneut.",
+        "room_create_failed": "Zimmer konnte nicht erstellt werden. Bitte versuchen Sie es erneut.",
+        "request_create_failed": "Anfrage konnte nicht erstellt werden. Bitte versuchen Sie es erneut.",
+        "request_update_failed": "Anfrage konnte nicht aktualisiert werden. Bitte versuchen Sie es erneut.",
+        "request_complete_failed": "Anfrage konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.",
+        "settings_save_failed": "Einstellungen konnten nicht gespeichert werden. Bitte versuchen Sie es erneut.",
+        "demo_import_failed": "Demo-Daten konnten nicht importiert werden. Bitte versuchen Sie es erneut.",
+        "data_reset_failed": "Daten konnten nicht zurückgesetzt werden. Bitte versuchen Sie es erneut.",
+        "account_delete_failed": "Konto konnte nicht gelöscht werden. Bitte versuchen Sie es erneut.",
+        "hotel_create_failed": "Hotel konnte nicht erstellt werden. Bitte versuchen Sie es erneut.",
+        "invalid_fields": "Ungültiges Format für benutzerdefinierte Felder."
+      },
+      "info": {
+        "processing": "Ihre Anfrage wird verarbeitet...",
+        "loading": "Laden...",
+        "saving": "Änderungen werden gespeichert...",
+        "creating": "Erstellen...",
+        "updating": "Aktualisieren...",
+        "deleting": "Löschen..."
+      },
+      "warning": {
+        "required_fields": "Bitte füllen Sie alle erforderlichen Felder aus.",
+        "guest_name_required": "Bitte geben Sie Ihren vollständigen Namen ein.",
+        "custom_field_required": "Bitte füllen Sie das erforderliche Feld aus: {field}"
       }
     }
   }

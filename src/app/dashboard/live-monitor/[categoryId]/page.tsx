@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { Monitor, Clock, X, Maximize2, CheckCircle2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/useToast";
 
 type Request = {
   id: string;
@@ -123,12 +124,13 @@ export default function LiveMonitorCategoryPage({
       if (result.success) {
         // Remove from local state immediately for instant feedback
         setRequests(prev => prev.filter(r => r.id !== requestId));
+        showTranslatedSuccess("app.toast.success.request_completed");
       } else {
-        alert(result.error || "Failed to update request");
+        showTranslatedError("app.toast.error.request_complete_failed");
       }
     } catch (error) {
       console.error("Error completing request:", error);
-      alert("Failed to complete request");
+      showTranslatedError("app.toast.error.request_complete_failed");
     }
   };
 

@@ -1,23 +1,29 @@
+"use client";
+
 import { Star } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export function Testimonials() {
+  const { translate } = useLanguage();
+  const t = (key: string) => translate(`testimonials.${key}`);
+  
   const testimonials = [
     {
-      quote: "Since implementing HotelX, our response times have dropped by 40% and guests are much happier. It transformed how we work.",
-      author: "David Cohen",
-      role: "CEO, Seaside Hotel",
+      quote: t("t1_quote"),
+      author: t("t1_author"),
+      role: t("t1_role"),
       rating: 5,
     },
     {
-      quote: "The system is incredibly simple. The staff learned to use it in minutes, and guests love not having to download an app.",
-      author: "Sarah Levy",
-      role: "Operations Manager, Boutique Hotels",
+      quote: t("t2_quote"),
+      author: t("t2_author"),
+      role: t("t2_role"),
       rating: 5,
     },
     {
-      quote: "The reports gave us insights we never had before. We know exactly which services are most profitable and when we're busiest.",
-      author: "Ron Abrahami",
-      role: "Owner, Mountain View Resort",
+      quote: t("t3_quote"),
+      author: t("t3_author"),
+      role: t("t3_role"),
       rating: 5,
     },
   ];
@@ -27,10 +33,10 @@ export function Testimonials() {
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold font-heading text-gray-900 mb-4">
-            What Our Customers Say
+            {t("title")}
           </h2>
           <p className="text-lg text-gray-600">
-            Join hundreds of hotels already upgrading their service with HotelX
+            {t("subtitle")}
           </p>
         </div>
 

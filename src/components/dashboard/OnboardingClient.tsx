@@ -8,6 +8,7 @@ import { Building2, Palette, Check, ArrowRight, Star, Settings } from "lucide-re
 import { createHotel } from "@/app/actions/hotel";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useToast } from "@/hooks/useToast";
 
 interface OnboardingClientProps {
   userEmail: string;
@@ -16,6 +17,7 @@ interface OnboardingClientProps {
 export function OnboardingClient({ userEmail }: OnboardingClientProps) {
   const router = useRouter();
   const { translate } = useLanguage();
+  const { showTranslatedSuccess, showTranslatedError } = useToast();
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   
@@ -52,12 +54,12 @@ export function OnboardingClient({ userEmail }: OnboardingClientProps) {
         // Redirect to dashboard
         window.location.href = "/dashboard";
       } else {
-        alert("Failed to create hotel. Please try again.");
+        showTranslatedError("app.toast.error.hotel_create_failed");
         setIsLoading(false);
       }
     } catch (error) {
       console.error("Error creating hotel:", error);
-      alert("An error occurred. Please try again.");
+      showTranslatedError("app.toast.error.failed_to_create");
       setIsLoading(false);
     }
   };

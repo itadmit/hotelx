@@ -13,6 +13,7 @@ import { assignRequest, deleteRequest, updateRequestStatus, createRequest, updat
 import { Textarea } from "@/components/ui/textarea";
 import { CustomFieldRenderer } from "@/components/guest/CustomFieldRenderer";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useToast } from "@/hooks/useToast";
 import {
   DndContext,
   DragOverlay,
@@ -60,6 +61,9 @@ function RequestCard({ request, staff, onAssign, onDelete, onEdit }: {
   onDelete: (requestId: string) => void;
   onEdit: (request: Request) => void;
 }) {
+  const { translate } = useLanguage();
+  const t = (key: string) => translate(`app.dashboard.requests.${key}`);
+  
   const {
     attributes,
     listeners,
@@ -76,10 +80,10 @@ function RequestCard({ request, staff, onAssign, onDelete, onEdit }: {
   };
 
   const statusMap: Record<string, { bg: string; text: string; label: string }> = {
-    "NEW": { bg: "bg-indigo-100", text: "text-indigo-800", label: "New" },
-    "IN_PROGRESS": { bg: "bg-yellow-100", text: "text-yellow-800", label: "In Progress" },
-    "COMPLETED": { bg: "bg-green-100", text: "text-green-800", label: "Completed" },
-    "CANCELLED": { bg: "bg-gray-100", text: "text-gray-800", label: "Cancelled" },
+    "NEW": { bg: "bg-indigo-100", text: "text-indigo-800", label: t("new") },
+    "IN_PROGRESS": { bg: "bg-yellow-100", text: "text-yellow-800", label: t("in_progress") },
+    "COMPLETED": { bg: "bg-green-100", text: "text-green-800", label: t("completed") },
+    "CANCELLED": { bg: "bg-gray-100", text: "text-gray-800", label: t("cancelled") },
   };
 
   const statusBadge = statusMap[request.status] || statusMap["NEW"];
@@ -286,6 +290,7 @@ interface RequestsClientProps {
 
 export function RequestsClient({ initialRequests, staff, rooms, services, hotelId }: RequestsClientProps) {
   const { translate } = useLanguage();
+  const { showTranslatedSuccess, showTranslatedError } = useToast();
   const t = (key: string) => translate(`app.dashboard.requests.${key}`);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -297,6 +302,8 @@ export function RequestsClient({ initialRequests, staff, rooms, services, hotelI
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"board" | "list">("board");
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [requestToDelete, setRequestToDelete] = useState<string | null>(null);
 
   const statusMap: Record<string, { bg: string; text: string; label: string }> = {
     "NEW": { bg: "bg-indigo-100", text: "text-indigo-800", label: t("new") },
@@ -387,10 +394,18 @@ export function RequestsClient({ initialRequests, staff, rooms, services, hotelI
     await assignRequest(requestId, staffId);
   };
 
-  const handleDelete = async (requestId: string) => {
-    if (confirm('Are you sure you want to delete this request?')) {
-      setRequests(prevRequests => prevRequests.filter(req => req.id !== requestId));
-      await deleteRequest(requestId);
+  const handleDelete = (requestId: string) => {
+    setRequestToDelete(requestId);
+    setDeleteConfirmOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (requestToDelete) {
+      setRequests(prevRequests => prevRequests.filter(req => req.id !== requestToDelete));
+      await deleteRequest(requestToDelete);
+      showTranslatedSuccess("app.toast.success.deleted");
+      setDeleteConfirmOpen(false);
+      setRequestToDelete(null);
     }
   };
 
@@ -406,9 +421,10 @@ export function RequestsClient({ initialRequests, staff, rooms, services, hotelI
     const result = await createRequest(formData);
     if (result.success) {
       setIsCreateOpen(false);
+      showTranslatedSuccess("app.toast.success.request_created");
       window.location.reload(); // Refresh to get new request
     } else {
-      alert(result.error || "Failed to create request");
+      showTranslatedError("app.toast.error.request_create_failed");
     }
   };
 
@@ -419,9 +435,10 @@ export function RequestsClient({ initialRequests, staff, rooms, services, hotelI
     if (result.success) {
       setIsEditOpen(false);
       setEditingRequest(null);
+      showTranslatedSuccess("app.toast.success.request_updated");
       window.location.reload();
     } else {
-      alert(result.error || "Failed to update request");
+      showTranslatedError("app.toast.error.request_update_failed");
     }
   };
 
@@ -462,9 +479,9 @@ export function RequestsClient({ initialRequests, staff, rooms, services, hotelI
   });
 
   const columns = [
-    { title: "New", status: "NEW" as const, color: "bg-indigo-500" },
-    { title: "In Progress", status: "IN_PROGRESS" as const, color: "bg-orange-500" },
-    { title: "Completed", status: "COMPLETED" as const, color: "bg-green-500" },
+    { title: t("new"), status: "NEW" as const, color: "bg-indigo-500" },
+    { title: t("in_progress"), status: "IN_PROGRESS" as const, color: "bg-orange-500" },
+    { title: t("completed"), status: "COMPLETED" as const, color: "bg-green-500" },
   ];
 
   const activeRequest = activeId ? requests.find((r) => r.id === activeId) : null;
@@ -930,6 +947,26 @@ export function RequestsClient({ initialRequests, staff, rooms, services, hotelI
           )}
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{translate("app.dashboard.requests.delete")}</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this request? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteConfirmOpen(false)}>
+              {translate("app.dashboard.requests.cancel")}
+            </Button>
+            <Button variant="destructive" onClick={confirmDelete}>
+              {translate("app.dashboard.requests.delete")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

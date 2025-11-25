@@ -1,11 +1,25 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Download } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import prisma from "@/lib/prisma";
 import { RoomQRCode } from "@/components/dashboard/RoomQRCode";
+import { DownloadQRButton } from "@/components/dashboard/DownloadQRButton";
 import { notFound } from "next/navigation";
+
+function formatTimeAgo(date: Date): string {
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffMins < 1) return "Just now";
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  return `${diffDays}d ago`;
+}
 
 export default async function RoomDetailPage({
   params,
@@ -26,11 +40,26 @@ export default async function RoomDetailPage({
   const baseUrl = process.env.NEXT_PUBLIC_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
   const qrUrl = `${baseUrl}/g/${room.hotel.slug}/${room.code}`;
 
-  const recentRequests = [
-    { id: "1", service: "Extra Towels", time: "2h ago", status: "Completed" },
-    { id: "2", service: "Room Service", time: "1d ago", status: "Completed" },
-    { id: "3", service: "Maintenance", time: "2d ago", status: "In Progress" },
-  ];
+  // Fetch real recent requests for this room
+  const recentRequests = await prisma.request.findMany({
+    where: { roomId: room.id },
+    take: 5,
+    orderBy: { createdAt: 'desc' },
+    include: {
+      service: {
+        select: {
+          name: true
+        }
+      }
+    }
+  });
+
+  const formattedRequests = recentRequests.map(req => ({
+    id: req.id,
+    service: req.service.name,
+    time: formatTimeAgo(req.createdAt),
+    status: req.status
+  }));
 
   return (
     <div className="space-y-6">
@@ -78,9 +107,7 @@ export default async function RoomDetailPage({
             <div className="w-48 h-48 bg-gray-900 rounded-lg flex items-center justify-center mb-4">
               <RoomQRCode url={qrUrl} />
             </div>
-            <Button variant="outline">
-              <Download className="mr-2 h-4 w-4" /> Download QR
-            </Button>
+            <DownloadQRButton url={qrUrl} roomNumber={room.number} />
           </CardContent>
         </Card>
       </div>
@@ -91,17 +118,21 @@ export default async function RoomDetailPage({
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {recentRequests.map((req) => (
-              <div key={req.id} className="flex items-center justify-between p-4 border rounded-lg">
-                <div>
-                  <p className="font-medium">{req.service}</p>
-                  <p className="text-sm text-muted-foreground">{req.time}</p>
+            {formattedRequests.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-4">No requests yet for this room</p>
+            ) : (
+              formattedRequests.map((req) => (
+                <div key={req.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div>
+                    <p className="font-medium">{req.service}</p>
+                    <p className="text-sm text-muted-foreground">{req.time}</p>
+                  </div>
+                  <Badge variant={req.status === "COMPLETED" ? "outline" : "default"}>
+                    {req.status}
+                  </Badge>
                 </div>
-                <Badge variant={req.status === "Completed" ? "outline" : "default"}>
-                  {req.status}
-                </Badge>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </CardContent>
       </Card>

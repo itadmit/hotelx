@@ -96,6 +96,7 @@
       "adv_analytics": "Advanced Analytics",
       "multilang": "Multi-language Support",
       "setup": "Full Content Setup by Us",
+      "setup_tooltip": "Send us your PDF menus, we digitize everything.",
       "support_basic": "Email Support",
       "support_std": "Standard Support",
       "support_vip": "24/7 Priority VIP Support"
@@ -206,7 +207,8 @@
         "select_service": "Select Service",
         "guest_name": "Guest Name",
         "notes": "Notes",
-        "customizations": "Customizations"
+        "customizations": "Customizations",
+        "delete_confirm": "Are you sure you want to delete this request? This action cannot be undone."
       },
       "rooms": {
         "title": "Rooms",
@@ -229,8 +231,12 @@
         "no_services": "No services found"
       },
       "settings": {
-        "title": "Settings",
+        "title": "Hotel Settings",
+        "subtitle": "Configure your hotel's identity and preferences",
         "general": "General",
+        "general_info": "General Info",
+        "branding": "Branding",
+        "branding_look": "Branding & Look",
         "localization": "Localization",
         "appearance": "Appearance",
         "hotel_name": "Hotel Name",
@@ -239,7 +245,19 @@
         "wifi_name": "WiFi Name",
         "default_language": "Default Language",
         "currency": "Currency",
-        "save_changes": "Save Changes"
+        "save_changes": "Save Changes",
+        "discard": "Discard",
+        "basic_information": "Basic Information",
+        "basic_info_desc": "This info will appear on your guest app",
+        "number_of_rooms": "Number of Rooms",
+        "number_of_rooms_desc": "Total number of rooms in your hotel",
+        "hotel_rating": "Hotel Rating",
+        "hotel_rating_desc": "Your hotel's star rating",
+        "branding_desc": "Customize the look and feel",
+        "font_family": "Font Family",
+        "localization_desc": "Set language and currency",
+        "logo_url": "Logo URL",
+        "logo_url_desc": "Enter logo URL or upload image"
       },
       "dashboard": {
         "good_morning": "Good Morning! 👋",
@@ -253,7 +271,9 @@
         "active": "Active",
         "recent_requests": "Recent Requests",
         "no_requests": "No requests yet",
-        "view_all": "View All"
+        "view_all": "View All",
+        "active_rooms": "Active Rooms",
+        "total_rooms": "Total Rooms"
       },
       "rooms": {
         "management": "Rooms Management",
@@ -273,6 +293,8 @@
         "no_activity": "No activity"
       },
       "services": {
+        "title": "Services & Menu",
+        "subtitle": "Manage your digital guest directory and menu items",
         "add_service": "Add Service",
         "edit_service": "Edit Service",
         "service_name": "Service Name",
@@ -292,7 +314,22 @@
         "this_action_cannot_be_undone": "This action cannot be undone.",
         "all_services": "All Services",
         "creating": "Creating...",
-        "create_service": "Create Service"
+        "create_service": "Create Service",
+        "category": "Category",
+        "price": "Price",
+        "select_category": "Select category...",
+        "service_name_placeholder": "e.g. Burger & Fries",
+        "estimated_time_placeholder": "e.g. 20 min",
+        "description_placeholder": "Short description...",
+        "basic_information": "Basic Information (English)",
+        "translations_required": "Translations (Required for all languages)",
+        "name_placeholder": "name",
+        "quick_stats": "Quick Stats",
+        "active_items": "Active Items",
+        "categories": "Categories",
+        "edit_details": "Edit Details",
+        "please_fill_required": "Please fill in all required fields",
+        "failed_to_create": "Failed to create service. Please try again."
       },
       "sidebar": {
         "overview": "Overview",
@@ -366,11 +403,49 @@
         "creating": "Creating..."
       },
       "reports": {
+        "title": "Reports & Analytics",
+        "subtitle": "Deep dive into your hotel's operational performance",
+        "last_30_days": "Last 30 Days",
+        "export_report": "Export Report",
         "total_requests": "Total Requests",
         "avg_response": "Avg Response",
         "completion_rate": "Completion Rate",
         "top_service": "Top Service",
-        "requests_count": "{count} requests"
+        "requests_count": "{count} requests",
+        "requests_over_time": "Requests Over Time",
+        "daily_request_volume": "Daily request volume",
+        "service_distribution": "Service Distribution",
+        "breakdown_by_category": "Breakdown by category",
+        "chart_requests_per_day": "Chart: Requests per day (Last 7 days)",
+        "chart_top_services": "Chart: Top services breakdown"
+      },
+      "qr": {
+        "title": "QR Code Generator",
+        "subtitle": "Create digital access points for your rooms"
+      },
+      "team": {
+        "title": "Team Management",
+        "subtitle": "Manage staff access, roles, and permissions",
+        "invite_member": "Invite Member",
+        "invite_team_member": "Invite Team Member",
+        "invite_description": "Send an invitation to a new staff member.",
+        "email_address": "Email Address",
+        "full_name": "Full Name",
+        "role": "Role",
+        "service_staff": "Service Staff",
+        "reception": "Reception",
+        "manager": "Manager",
+        "admin": "Admin",
+        "cancel": "Cancel",
+        "send_invitation": "Send Invitation",
+        "search_team_members": "Search team members...",
+        "permissions": "Permissions",
+        "unknown": "Unknown",
+        "just_now": "Just now",
+        "m_ago": "{m}m ago",
+        "h_ago": "{h}h ago",
+        "d_ago": "{d}d ago",
+        "long_time_ago": "Long time ago"
       },
       "monitor": {
         "all_departments": "All Departments",
@@ -389,7 +464,99 @@
         "add_room": "Add Room",
         "all": "All",
         "quantity": "Quantity",
-        "created_at": "Created At"
+        "created_at": "Created At",
+        "status": "Status",
+        "actions": "Actions",
+        "active": "Active",
+        "away": "Away",
+        "last_activity": "Last Activity"
+      },
+      "team": {
+        "title": "Team Management",
+        "subtitle": "Manage staff access, roles, and permissions",
+        "invite_member": "Invite Member",
+        "invite_team_member": "Invite Team Member",
+        "invite_description": "Send an invitation to a new staff member.",
+        "email_address": "Email Address",
+        "full_name": "Full Name",
+        "role": "Role",
+        "service_staff": "Service Staff",
+        "reception": "Reception",
+        "manager": "Manager",
+        "admin": "Admin",
+        "cancel": "Cancel",
+        "send_invitation": "Send Invitation",
+        "search_team_members": "Search team members...",
+        "permissions": "Permissions",
+        "unknown": "Unknown",
+        "just_now": "Just now",
+        "m_ago": "{m}m ago",
+        "h_ago": "{h}h ago",
+        "d_ago": "{d}d ago",
+        "long_time_ago": "Long time ago",
+        "no_team_members": "No team members found. Invite your first team member to get started."
+      }
+    },
+    "error": {
+      "something_went_wrong": "Something went wrong",
+      "try_refreshing": "An unexpected error occurred. Please try refreshing the page.",
+      "try_again": "Try Again",
+      "refresh_page": "Refresh Page",
+      "failed_to_load": "Failed to load data. Please try again.",
+      "network_error": "Network error. Please check your connection."
+    },
+    "toast": {
+      "success": {
+        "saved": "Saved successfully!",
+        "created": "Created successfully!",
+        "updated": "Updated successfully!",
+        "deleted": "Deleted successfully!",
+        "settings_saved": "Settings saved successfully!",
+        "service_created": "Service created successfully!",
+        "service_updated": "Service updated successfully!",
+        "room_created": "Room created successfully!",
+        "request_created": "Request created successfully!",
+        "request_updated": "Request updated successfully!",
+        "request_completed": "Request marked as completed!",
+        "demo_data_imported": "Demo data imported successfully!",
+        "data_reset": "Hotel data reset successfully!",
+        "link_copied": "Link copied to clipboard!",
+        "account_deleted": "Account deleted successfully!"
+      },
+      "error": {
+        "failed_to_save": "Failed to save. Please try again.",
+        "failed_to_create": "Failed to create. Please try again.",
+        "failed_to_update": "Failed to update. Please try again.",
+        "failed_to_delete": "Failed to delete. Please try again.",
+        "failed_to_load": "Failed to load data. Please try again.",
+        "network_error": "Network error. Please check your connection.",
+        "unauthorized": "You are not authorized to perform this action.",
+        "validation_error": "Please fill in all required fields.",
+        "service_update_failed": "Failed to update service. Please try again.",
+        "service_create_failed": "Failed to create service. Please try again.",
+        "room_create_failed": "Failed to create room. Please try again.",
+        "request_create_failed": "Failed to create request. Please try again.",
+        "request_update_failed": "Failed to update request. Please try again.",
+        "request_complete_failed": "Failed to complete request. Please try again.",
+        "settings_save_failed": "Failed to save settings. Please try again.",
+        "demo_import_failed": "Failed to import demo data. Please try again.",
+        "data_reset_failed": "Failed to reset data. Please try again.",
+        "account_delete_failed": "Failed to delete account. Please try again.",
+        "hotel_create_failed": "Failed to create hotel. Please try again.",
+        "invalid_fields": "Invalid custom fields data format."
+      },
+      "info": {
+        "processing": "Processing your request...",
+        "loading": "Loading...",
+        "saving": "Saving changes...",
+        "creating": "Creating...",
+        "updating": "Updating...",
+        "deleting": "Deleting..."
+      },
+      "warning": {
+        "required_fields": "Please fill in all required fields.",
+        "guest_name_required": "Please enter your full name.",
+        "custom_field_required": "Please fill in the required field: {field}"
       }
     }
   }

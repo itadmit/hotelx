@@ -343,6 +343,62 @@ export async function createService(data: {
   return { success: true, serviceId: result.id };
 }
 
+export async function updateService(serviceId: string, formData: FormData) {
+  const session = await auth();
+  
+  if (!session?.user?.hotelId) {
+    throw new Error("Unauthorized");
+  }
+
+  const hotelId = session.user.hotelId as string;
+
+  // Verify service belongs to hotel
+  const service = await prisma.service.findUnique({
+    where: { id: serviceId },
+    select: { hotelId: true }
+  });
+
+  if (!service || service.hotelId !== hotelId) {
+    throw new Error("Service not found or unauthorized");
+  }
+
+  const name = formData.get("name") as string;
+  const description = formData.get("description") as string;
+  const categoryId = formData.get("categoryId") as string;
+  const price = formData.get("price") as string;
+  const estimatedTime = formData.get("estimatedTime") as string;
+  const isActive = formData.get("isActive") === "true";
+
+  // Verify category belongs to hotel
+  if (categoryId) {
+    const category = await prisma.category.findUnique({
+      where: { id: categoryId },
+      select: { hotelId: true }
+    });
+
+    if (!category || category.hotelId !== hotelId) {
+      throw new Error("Category not found or unauthorized");
+    }
+  }
+
+  await prisma.service.update({
+    where: { id: serviceId },
+    data: {
+      name: name || undefined,
+      description: description && description.trim() !== "" ? description : undefined,
+      categoryId: categoryId || undefined,
+      price: price && price.trim() !== "" ? parseFloat(price) : undefined,
+      estimatedTime: estimatedTime && estimatedTime.trim() !== "" ? estimatedTime : undefined,
+      isActive: isActive,
+    },
+  });
+
+  revalidatePath("/dashboard/services");
+  revalidatePath(`/dashboard/services/${serviceId}`);
+  
+  return { success: true };
+}
+
 export async function deleteAccount() {
   const session = await auth();
   

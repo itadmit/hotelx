@@ -10,59 +10,62 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export function Pricing() {
+  const { translate } = useLanguage();
+  const t = (key: string) => translate(`pricing.${key}`);
   const [rooms, setRooms] = useState([50]);
   
   const roomCount = rooms[0];
   
   const plans = [
     {
-      name: "Self Service",
-      description: "Perfect for hotels that want full control and setup themselves.",
+      name: t("plans.basic.name"),
+      description: t("plans.basic.desc"),
       pricePerRoom: 2.0,
       features: [
-        { name: "Unlimited QR Scans", included: true },
-        { name: "Staff Dashboard", included: true },
-        { name: "Guest Web App", included: true },
-        { name: "Basic Analytics", included: true },
-        { name: "Multi-language Support", included: false },
-        { name: "Full Content Setup by Us", included: false },
-        { name: "Priority Support", included: false },
+        { name: t("features.qr"), included: true },
+        { name: t("features.dashboard"), included: true },
+        { name: t("features.webapp"), included: true },
+        { name: t("features.basic_analytics"), included: true },
+        { name: t("features.multilang"), included: false },
+        { name: t("features.setup"), included: false },
+        { name: t("features.support_basic"), included: false },
       ],
-      cta: "Start Free Trial",
+      cta: t("plans.basic.cta"),
       highlight: false,
     },
     {
-      name: "Growth",
-      description: "Best for growing hotels needing automation and language support.",
+      name: t("plans.pro.name"),
+      description: t("plans.pro.desc"),
       pricePerRoom: 3.5,
       features: [
-        { name: "Unlimited QR Scans", included: true },
-        { name: "Staff Dashboard", included: true },
-        { name: "Guest Web App", included: true },
-        { name: "Advanced Analytics", included: true },
-        { name: "Multi-language Support", included: true },
-        { name: "Full Content Setup by Us", included: false },
-        { name: "Standard Support", included: true },
+        { name: t("features.qr"), included: true },
+        { name: t("features.dashboard"), included: true },
+        { name: t("features.webapp"), included: true },
+        { name: t("features.adv_analytics"), included: true },
+        { name: t("features.multilang"), included: true },
+        { name: t("features.setup"), included: false },
+        { name: t("features.support_std"), included: true },
       ],
-      cta: "Get Started",
+      cta: t("plans.pro.cta"),
       highlight: true,
     },
     {
-      name: "Managed VIP",
-      description: "We do everything for you. Full menu entry, translations, and setup.",
+      name: t("plans.premium.name"),
+      description: t("plans.premium.desc"),
       pricePerRoom: 6.0,
       features: [
-        { name: "Unlimited QR Scans", included: true },
-        { name: "Staff Dashboard", included: true },
-        { name: "Guest Web App", included: true },
-        { name: "Advanced Analytics", included: true },
-        { name: "Multi-language Support", included: true },
-        { name: "Full Content Setup by Us", included: true, tooltip: "Send us your PDF menus, we digitize everything." },
-        { name: "24/7 Priority VIP Support", included: true },
+        { name: t("features.qr"), included: true },
+        { name: t("features.dashboard"), included: true },
+        { name: t("features.webapp"), included: true },
+        { name: t("features.adv_analytics"), included: true },
+        { name: t("features.multilang"), included: true },
+        { name: t("features.setup"), included: true, tooltip: t("features.setup_tooltip") },
+        { name: t("features.support_vip"), included: true },
       ],
-      cta: "Contact Sales",
+      cta: t("plans.premium.cta"),
       highlight: false,
     }
   ];
@@ -72,18 +75,18 @@ export function Pricing() {
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold font-heading text-gray-900 mb-4">
-            Simple Pricing Per Room
+            {t("title")}
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-12">
-            Transparent pricing that scales with your hotel size. No hidden fees.
+            {t("subtitle")}
           </p>
 
           {/* Slider Section */}
           <div className="max-w-xl mx-auto bg-white p-8 rounded-3xl shadow-sm border border-gray-100 mb-16">
             <div className="flex justify-between items-end mb-6">
               <div>
-                <label className="text-sm font-bold text-gray-500 uppercase tracking-wider">Number of Rooms</label>
-                <div className="text-4xl font-bold text-primary mt-1">{roomCount} <span className="text-lg text-gray-400 font-medium">rooms</span></div>
+                <label className="text-sm font-bold text-gray-500 uppercase tracking-wider">{t("slider_label")}</label>
+                <div className="text-4xl font-bold text-primary mt-1">{roomCount} <span className="text-lg text-gray-400 font-medium">{t("rooms")}</span></div>
               </div>
             </div>
             <Slider
@@ -95,9 +98,9 @@ export function Pricing() {
               className="py-4"
             />
             <div className="flex justify-between text-xs text-gray-400 font-medium mt-2">
-              <span>10 rooms</span>
-              <span>250 rooms</span>
-              <span>500+ rooms</span>
+              <span>10 {t("rooms")}</span>
+              <span>250 {t("rooms")}</span>
+              <span>500+ {t("rooms")}</span>
             </div>
           </div>
         </div>
@@ -117,7 +120,7 @@ export function Pricing() {
               >
                 {plan.highlight && (
                   <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-white px-4 py-1 rounded-full text-sm font-bold">
-                    Most Popular
+                    {t("plans.pro.badge")}
                   </div>
                 )}
 
@@ -129,10 +132,10 @@ export function Pricing() {
                 <div className="mb-8 pb-8 border-b border-gray-100">
                   <div className="flex items-baseline">
                     <span className="text-4xl font-bold text-gray-900">${monthlyPrice}</span>
-                    <span className="text-gray-500 ml-2">/month</span>
+                    <span className="text-gray-500 ml-2">{t("month")}</span>
                   </div>
                   <div className="text-sm text-gray-500 mt-1">
-                    ${plan.pricePerRoom.toFixed(2)} per room
+                    ${plan.pricePerRoom.toFixed(2)} {t("per_room")}
                   </div>
                 </div>
 
@@ -179,7 +182,7 @@ export function Pricing() {
         
         <div className="mt-16 text-center">
           <p className="text-gray-500">
-            Need a custom solution for a hotel chain? <a href="#" className="text-primary font-bold hover:underline">Contact Enterprise Sales</a>
+            {t("enterprise")} <a href="#" className="text-primary font-bold hover:underline">{t("contact_sales")}</a>
           </p>
         </div>
       </div>
