@@ -43,7 +43,7 @@ export function Navbar() {
         {/* Mobile Menu Button with Animation */}
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="md:hidden relative p-2.5 rounded-xl bg-slate-50 hover:bg-blue-50 text-slate-700 hover:text-blue-600 transition-all active:scale-95 border border-slate-200 hover:border-blue-200"
+          className="md:hidden relative p-2 text-slate-700 hover:text-blue-600 transition-colors active:scale-95"
           aria-label="Toggle menu"
         >
           <div className="relative w-6 h-6">
