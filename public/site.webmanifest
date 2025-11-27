@@ -1,0 +1,29 @@
+{
+  "name": "HotelX - Digital Guest Service Platform",
+  "short_name": "HotelX",
+  "description": "Transform your hotel operations with digital guest service platform",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/apple-touch-icon.svg",
+      "sizes": "180x180",
+      "type": "image/svg+xml"
+    }
+  ],
+  "categories": [
+    "business",
+    "productivity",
+    "hospitality"
+  ],
+  "orientation": "portrait-primary"
+}
+

@@ -1,0 +1,17 @@
+# HotelX - Robots.txt
+User-agent: *
+Allow: /
+Allow: /features
+Allow: /pricing
+Allow: /about
+Allow: /demo
+Disallow: /dashboard/
+Disallow: /api/
+Disallow: /g/*/
+Disallow: /onboarding/
+Disallow: /login
+Disallow: /signup
+
+# Sitemap
+Sitemap: https://hotelx.app/sitemap.xml
+
