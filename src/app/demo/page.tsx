@@ -98,9 +98,9 @@ export default function DemoPage() {
               <div className="grid md:grid-cols-2 gap-6 mb-8">
                 {/* Guest View */}
                 <Link 
-                  href="/g/hilton/HIL101"
+                  href="/g/demo-hotel/201"
                   target="_blank"
-                  className="group bg-white rounded-2xl p-6 border border-slate-200 hover:border-blue-300 hover:shadow-lg transition-all"
+                  className="group bg-white rounded-2xl p-6 border border-slate-200 hover:border-blue-300 hover:shadow-lg transition-all cursor-pointer"
                 >
                   <div className="flex items-center gap-3 mb-4">
                     <div className="h-10 w-10 rounded-lg bg-blue-50 flex items-center justify-center group-hover:bg-blue-100 transition-colors">
