@@ -117,3 +117,8 @@ button:disabled,
     transform: translateX(100%);
   }
 }
+
+/* Add pointer cursor to all links */
+a, a[href], button[type="button"], button[type="submit"], [role="button"] {
+  cursor: pointer;
+}

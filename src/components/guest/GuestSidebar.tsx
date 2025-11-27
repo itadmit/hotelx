@@ -112,7 +112,7 @@ export function GuestSidebar({ hotelSlug, roomCode, hotelName, primaryColor, cur
                 key={item.href}
                 href={item.href}
                 onClick={() => setIsOpen(false)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all cursor-pointer ${
                   active
                     ? "bg-blue-50 text-blue-700 font-medium"
                     : "text-gray-700 hover:bg-gray-100"

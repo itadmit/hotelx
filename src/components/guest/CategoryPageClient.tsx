@@ -277,7 +277,7 @@ export function CategoryPageClient({
 
                 <Link
                   href={`/g/${hotelSlug}/${roomCode}/service/${service.slug || service.id}`}
-                  className="mt-2 w-full"
+                  className="mt-2 w-full cursor-pointer"
                 >
                   <Button
                     size="sm"

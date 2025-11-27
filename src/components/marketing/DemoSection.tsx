@@ -56,7 +56,7 @@ export function DemoSection() {
           <Link 
             href="/g/demo-hotel/201"
             target="_blank"
-            className="group bg-white border-2 border-blue-100 rounded-2xl p-8 hover:border-blue-300 hover:shadow-xl transition-all hover:-translate-y-1 shadow-lg"
+            className="group bg-white border-2 border-blue-100 rounded-2xl p-8 hover:border-blue-300 hover:shadow-xl transition-all hover:-translate-y-1 shadow-lg cursor-pointer"
           >
             <div className="h-16 w-16 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center mb-6 shadow-lg shadow-blue-500/30 group-hover:scale-110 transition-transform">
               <QrCode className="h-8 w-8 text-white" />
@@ -101,7 +101,7 @@ export function DemoSection() {
             
             <Link 
               href="/login"
-              className="inline-flex items-center text-blue-600 font-semibold hover:text-blue-700 hover:gap-2 transition-all"
+              className="inline-flex items-center text-blue-600 font-semibold hover:text-blue-700 hover:gap-2 transition-all cursor-pointer"
             >
               {t("dashboard_cta")}
               <ArrowRight className="ml-1 h-5 w-5 group-hover:translate-x-1 transition-transform" />

@@ -356,7 +356,7 @@ export function GuestHomeClient({
                 <Link
                   key={request.id}
                   href={`/g/${hotelSlug}/${roomCode}/request/${request.id}`}
-                  className="flex items-center justify-between p-3 rounded-xl bg-white border border-gray-200 active:bg-gray-50 transition-all duration-200 shadow-sm"
+                  className="flex items-center justify-between p-3 rounded-xl bg-white border border-gray-200 active:bg-gray-50 transition-all duration-200 shadow-sm cursor-pointer"
                 >
                   <div className="flex items-center gap-3 flex-1 min-w-0">
                     <div className={`h-10 w-10 rounded-full flex items-center justify-center shadow-sm ${statusConfig.iconBg}`}>
@@ -420,7 +420,7 @@ export function GuestHomeClient({
               <Link 
                 key={category.id}
                 href={`/g/${hotelSlug}/${roomCode}/category/${category.slug}`}
-                className={`relative flex flex-col items-center justify-center rounded-xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-200 text-center group overflow-hidden active:scale-[0.97] animate-in fade-in slide-in-from-bottom-4 ${
+                className={`relative flex flex-col items-center justify-center rounded-xl border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-200 text-center group overflow-hidden active:scale-[0.97] animate-in fade-in slide-in-from-bottom-4 cursor-pointer ${
                   category.bgImage ? 'min-h-[160px] h-[160px]' : 'bg-white p-6 min-h-[140px]'
                 }`}
                 style={{ animationDelay: `${index * 50}ms` }}
@@ -469,7 +469,7 @@ export function GuestHomeClient({
             <Link 
               key={service.id}
               href={`/g/${hotelSlug}/${roomCode}/service/${service.slug || service.id}`}
-              className="flex items-center justify-between p-3 rounded-lg bg-white border border-gray-100 active:bg-gray-50 active:scale-[0.98] transition-all duration-200 shadow-sm hover:shadow-md hover:border-gray-200 animate-in fade-in slide-in-from-right-4"
+              className="flex items-center justify-between p-3 rounded-lg bg-white border border-gray-100 active:bg-gray-50 active:scale-[0.98] transition-all duration-200 shadow-sm hover:shadow-md hover:border-gray-200 animate-in fade-in slide-in-from-right-4 cursor-pointer"
               style={{ animationDelay: `${index * 30}ms` }}
             >
               <div className="text-left flex-1 min-w-0">

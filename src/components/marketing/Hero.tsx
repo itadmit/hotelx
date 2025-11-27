@@ -59,7 +59,7 @@ export function Hero() {
         <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto mb-8">
           <Link 
             href="/signup"
-            className="group inline-flex items-center justify-center h-14 px-8 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-xl shadow-blue-600/30 hover:shadow-blue-600/50 hover:-translate-y-1 relative overflow-hidden"
+            className="group inline-flex items-center justify-center h-14 px-8 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-xl shadow-blue-600/30 hover:shadow-blue-600/50 hover:-translate-y-1 relative overflow-hidden cursor-pointer"
           >
             <span className="relative z-10 flex items-center">
               {t("cta_primary")}
@@ -69,7 +69,7 @@ export function Hero() {
           </Link>
           <Link 
             href="/demo"
-            className="inline-flex items-center justify-center h-14 px-8 rounded-xl border-2 border-slate-300 bg-white text-slate-900 font-semibold text-lg hover:bg-slate-50 hover:border-blue-400 transition-all shadow-lg hover:shadow-xl"
+            className="inline-flex items-center justify-center h-14 px-8 rounded-xl border-2 border-slate-300 bg-white text-slate-900 font-semibold text-lg hover:bg-slate-50 hover:border-blue-400 transition-all shadow-lg hover:shadow-xl cursor-pointer"
           >
             {t("cta_secondary")}
           </Link>

@@ -52,7 +52,7 @@ export function AllOrdersClient({
         {/* Header */}
         <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
           <div className="max-w-2xl mx-auto px-6 py-4">
-            <Link href={`/g/${hotelSlug}/${roomCode}`}>
+            <Link href={`/g/${hotelSlug}/${roomCode}`} className="cursor-pointer">
               <Button variant="ghost" size="sm" className="mb-2">
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 {t("back_to_home")}
@@ -106,7 +106,7 @@ export function AllOrdersClient({
                   <Link
                     key={request.id}
                     href={`/g/${hotelSlug}/${roomCode}/request/${request.id}`}
-                    className="flex items-center justify-between p-4 rounded-xl bg-white border border-gray-200 hover:border-gray-300 active:bg-gray-50 transition-all duration-200 shadow-sm hover:shadow-md"
+                    className="flex items-center justify-between p-4 rounded-xl bg-white border border-gray-200 hover:border-gray-300 active:bg-gray-50 transition-all duration-200 shadow-sm hover:shadow-md cursor-pointer"
                   >
                     <div className="flex items-center gap-3 flex-1 min-w-0">
                       <div className={`h-10 w-10 rounded-full flex items-center justify-center shadow-sm ${statusConfig.iconBg}`}>
