@@ -17,7 +17,7 @@ export function Footer() {
             
             <div className="mb-6">
               <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Choose Language</p>
-              <LanguageSwitcher mode="flags" />
+              <LanguageSwitcher mode="dropdown" className="bg-gray-800 hover:bg-gray-700 text-gray-200 border-gray-700" />
             </div>
           </div>
           
