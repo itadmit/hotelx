@@ -2,13 +2,43 @@
 
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { sendEmail, sendAdminNotification, emailTemplates } from "@/lib/email";
 
 export async function updateRequestStatus(requestId: string, status: string) {
   try {
-    await prisma.request.update({
+    const request = await prisma.request.update({
       where: { id: requestId },
       data: { status: status as any },
+      include: {
+        hotel: true,
+        room: true,
+        service: true,
+      },
     });
+
+    // Send email notification to guest if they have a session with email
+    if (request.roomId) {
+      const guestSession = await prisma.guestSession.findFirst({
+        where: {
+          hotelId: request.hotelId,
+          roomCode: request.room.code,
+          email: { not: null },
+        },
+        orderBy: { lastActive: "desc" },
+      });
+
+      if (guestSession?.email) {
+        await sendEmail({
+          to: guestSession.email,
+          ...emailTemplates.requestStatusUpdate(
+            guestSession.email,
+            request.hotel.name,
+            request.service.name,
+            status
+          ),
+        });
+      }
+    }
     
     revalidatePath("/dashboard/requests");
     return { success: true };

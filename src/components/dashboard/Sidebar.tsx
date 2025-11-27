@@ -14,7 +14,9 @@ import {
   Settings,
   LogOut,
   Monitor,
-  Palette
+  Palette,
+  AlertTriangle,
+  Star
 } from "lucide-react";
 import { handleSignOut } from "@/app/actions/auth";
 import { Logo } from "@/components/Logo";
@@ -34,6 +36,16 @@ export function Sidebar() {
       title: translate("app.dashboard.sidebar.requests"),
       href: "/dashboard/requests",
       icon: ClipboardList,
+    },
+    {
+      title: translate("app.dashboard.sidebar.complaints"),
+      href: "/dashboard/complaints",
+      icon: AlertTriangle,
+    },
+    {
+      title: translate("app.dashboard.sidebar.reviews"),
+      href: "/dashboard/reviews",
+      icon: Star,
     },
     {
       title: translate("app.dashboard.sidebar.live_monitor"),

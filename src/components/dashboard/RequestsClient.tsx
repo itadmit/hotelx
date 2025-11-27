@@ -93,6 +93,7 @@ function RequestCard({ request, staff, onAssign, onDelete, onEdit }: {
       ref={setNodeRef}
       style={style}
       className="group bg-white rounded-2xl p-5 shadow-sm hover:shadow-md transition-all duration-200 cursor-grab active:cursor-grabbing border border-transparent hover:border-indigo-100"
+      suppressHydrationWarning
       {...attributes}
       {...listeners}
     >

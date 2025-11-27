@@ -48,16 +48,26 @@ export function ServiceRequestFormWrapper(props: ServiceRequestFormWrapperProps)
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() => setQuantity(Math.max(1, quantity - 1))}
-              className="w-8 h-8 rounded-lg border border-gray-300 flex items-center justify-center hover:bg-gray-50 active:bg-gray-100 transition-colors"
+              onClick={() => {
+                setQuantity(Math.max(1, quantity - 1));
+                if (typeof window !== "undefined" && "vibrate" in navigator) {
+                  navigator.vibrate(10);
+                }
+              }}
+              className="w-8 h-8 rounded-lg border border-gray-300 flex items-center justify-center hover:bg-gray-50 active:bg-gray-100 active:scale-95 transition-all duration-150"
             >
               <span className="text-lg font-semibold text-gray-700">−</span>
             </button>
-            <span className="text-lg font-bold text-gray-900 w-8 text-center">{quantity}</span>
+            <span className="text-lg font-bold text-gray-900 w-8 text-center transition-all duration-200">{quantity}</span>
             <button
               type="button"
-              onClick={() => setQuantity(quantity + 1)}
-              className="w-8 h-8 rounded-lg border border-gray-300 flex items-center justify-center hover:bg-gray-50 active:bg-gray-100 transition-colors"
+              onClick={() => {
+                setQuantity(quantity + 1);
+                if (typeof window !== "undefined" && "vibrate" in navigator) {
+                  navigator.vibrate(10);
+                }
+              }}
+              className="w-8 h-8 rounded-lg border border-gray-300 flex items-center justify-center hover:bg-gray-50 active:bg-gray-100 active:scale-95 transition-all duration-150"
             >
               <span className="text-lg font-semibold text-gray-700">+</span>
             </button>

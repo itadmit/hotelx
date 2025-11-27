@@ -41,23 +41,23 @@ export function Features() {
   ];
 
   return (
-    <section className="py-24 bg-gray-50">
+    <section className="py-32 bg-white">
       <div className="max-w-7xl mx-auto px-6">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold font-heading text-gray-900 mb-4">{t("title")}</h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+        <div className="text-center mb-20">
+          <h2 className="text-3xl md:text-5xl font-bold font-heading text-slate-900 mb-6">{t("title")}</h2>
+          <p className="text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
             {t("subtitle")}
           </p>
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {features.map((feature, index) => (
-            <div key={index} className="p-8 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-lg transition-all hover:-translate-y-1 group">
-              <div className="h-14 w-14 rounded-2xl bg-blue-50 flex items-center justify-center mb-6 text-primary group-hover:scale-110 transition-transform">
+            <div key={index} className="p-8 rounded-2xl bg-white border border-slate-100 shadow-lg shadow-slate-200/40 hover:shadow-xl hover:shadow-blue-900/5 transition-all hover:-translate-y-1 group">
+              <div className="h-14 w-14 rounded-xl bg-blue-50 flex items-center justify-center mb-6 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-300">
                 <feature.icon className="h-7 w-7" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">{feature.title}</h3>
-              <p className="text-gray-600 leading-relaxed">{feature.description}</p>
+              <h3 className="text-xl font-bold text-slate-900 mb-3">{feature.title}</h3>
+              <p className="text-slate-600 leading-relaxed">{feature.description}</p>
             </div>
           ))}
         </div>

@@ -2,7 +2,6 @@
 
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { Header } from "@/components/dashboard/Header";
-import { Toaster } from "sonner";
 import { useNewRequests } from "@/hooks/useNewRequests";
 import { useSession } from "next-auth/react";
 
@@ -30,7 +29,6 @@ export default function DashboardLayout({
           </div>
         </main>
       </div>
-      <Toaster position="top-right" richColors />
     </div>
   );
 }

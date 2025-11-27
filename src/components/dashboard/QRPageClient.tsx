@@ -34,3 +34,5 @@ export function QRPageClient({ hotelSlug, hotelName, wifiName, baseUrl }: QRPage
   );
 }
 
+
+

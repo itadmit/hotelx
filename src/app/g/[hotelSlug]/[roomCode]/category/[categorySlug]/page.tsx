@@ -36,15 +36,7 @@ async function CategoryPageContent({
       hotel: true,
       services: {
         where: { isActive: true },
-      },
-      subCategories: {
-        where: { isActive: true },
-        orderBy: { order: 'asc' },
-        include: {
-          services: {
-            where: { isActive: true },
-          },
-        },
+        orderBy: { name: 'asc' },
       },
     },
   });
@@ -53,24 +45,57 @@ async function CategoryPageContent({
     return notFound();
   }
 
-  // Get all services from this category and its sub-categories
+  // Group services by type for Food & Drinks
+  // For Food category, we'll create virtual subcategories based on service names/types
+  const subcategories: {id: string, name: string, customName: string | null}[] = [];
+  
+  if (category.slug === 'food-drinks' && category.services.length > 0) {
+    // Create subcategories based on common patterns
+    const hasBreakfast = category.services.some(s => 
+      s.name.toLowerCase().includes('breakfast') || 
+      s.name.toLowerCase().includes('continental') ||
+      s.name.toLowerCase().includes('american')
+    );
+    const hasMain = category.services.some(s => 
+      s.name.toLowerCase().includes('salmon') || 
+      s.name.toLowerCase().includes('beef') ||
+      s.name.toLowerCase().includes('pasta') ||
+      s.name.toLowerCase().includes('burger')
+    );
+    const hasBeverages = category.services.some(s => 
+      s.name.toLowerCase().includes('juice') || 
+      s.name.toLowerCase().includes('coffee') ||
+      s.name.toLowerCase().includes('cappuccino')
+    );
+    const hasDesserts = category.services.some(s => 
+      s.name.toLowerCase().includes('cake') || 
+      s.name.toLowerCase().includes('fruit platter') ||
+      s.name.toLowerCase().includes('ice cream')
+    );
+    
+    if (hasBreakfast) subcategories.push({id: 'breakfast', name: 'Breakfast', customName: null});
+    if (hasMain) subcategories.push({id: 'main-dishes', name: 'Main Dishes', customName: null});
+    if (hasBeverages) subcategories.push({id: 'beverages', name: 'Beverages', customName: null});
+    if (hasDesserts) subcategories.push({id: 'desserts', name: 'Desserts', customName: null});
+  }
+
   // Convert Decimal to number and Dates to strings for Client Components
-  const allServices = [
-    ...category.services,
-    ...category.subCategories.flatMap((sub: any) => sub.services),
-  ].map(service => ({
+  const allServices = category.services.map(service => ({
     ...service,
     price: service.price ? Number(service.price) : null,
     createdAt: service.createdAt.toISOString(),
     updatedAt: service.updatedAt.toISOString(),
+    // Add subcategory ID based on service name
+    subcategoryId: category.slug === 'food-drinks' ? (
+      service.name.toLowerCase().includes('breakfast') || service.name.toLowerCase().includes('continental') || service.name.toLowerCase().includes('american') ? 'breakfast' :
+      service.name.toLowerCase().includes('salmon') || service.name.toLowerCase().includes('beef') || service.name.toLowerCase().includes('pasta') || service.name.toLowerCase().includes('burger') ? 'main-dishes' :
+      service.name.toLowerCase().includes('juice') || service.name.toLowerCase().includes('coffee') || service.name.toLowerCase().includes('cappuccino') ? 'beverages' :
+      service.name.toLowerCase().includes('cake') || service.name.toLowerCase().includes('fruit') || service.name.toLowerCase().includes('ice cream') ? 'desserts' :
+      null
+    ) : null,
   }));
 
-  // Also serialize subCategories to remove Decimal and Date objects
-  const serializedSubCategories = category.subCategories.map((sub: any) => ({
-    id: sub.id,
-    name: sub.name,
-    customName: sub.customName,
-  }));
+  const serializedSubCategories = subcategories;
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">

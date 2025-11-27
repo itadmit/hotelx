@@ -1,41 +1,45 @@
 export function GuestHomeSkeleton() {
   return (
-    <div className="flex flex-col h-full min-h-screen bg-white animate-pulse">
+    <div className="flex flex-col h-full min-h-screen bg-white">
       {/* Hero Section Skeleton */}
-      <div className="relative h-48 bg-gray-200">
+      <div className="relative h-48 bg-gray-200 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 animate-[shimmer_2s_infinite] bg-[length:200%_100%]" />
         <div className="absolute bottom-0 left-0 p-6 w-full">
-          <div className="h-3 bg-gray-300 rounded w-24 mb-2"></div>
-          <div className="h-7 bg-gray-300 rounded w-40 mb-3"></div>
-          <div className="h-5 bg-gray-300 rounded-full w-20"></div>
+          <div className="h-3 bg-gray-300/50 rounded w-24 mb-2 animate-pulse"></div>
+          <div className="h-7 bg-gray-300/50 rounded w-40 mb-3 animate-pulse"></div>
+          <div className="h-5 bg-gray-300/50 rounded-full w-20 animate-pulse"></div>
         </div>
       </div>
 
       {/* Greeting Skeleton */}
       <div className="p-6 pb-2">
-        <div className="h-6 bg-gray-200 rounded w-56 mb-2"></div>
-        <div className="h-4 bg-gray-200 rounded w-72"></div>
+        <div className="h-6 bg-gray-200 rounded w-56 mb-2 animate-pulse"></div>
+        <div className="h-4 bg-gray-200 rounded w-72 animate-pulse"></div>
       </div>
 
       {/* Categories Grid Skeleton */}
       <div className="p-6 grid grid-cols-2 gap-4">
         {[...Array(6)].map((_, i) => (
-          <div key={i} className="bg-gray-200 rounded-xl min-h-[160px]"></div>
+          <div key={i} className="bg-gray-200 rounded-xl min-h-[160px] relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 animate-[shimmer_2s_infinite] bg-[length:200%_100%]" />
+          </div>
         ))}
       </div>
 
       {/* Popular Services Skeleton */}
       <div className="px-6 mt-2 mb-8">
-        <div className="h-4 bg-gray-200 rounded w-32 mb-3"></div>
+        <div className="h-4 bg-gray-200 rounded w-32 mb-3 animate-pulse"></div>
         <div className="space-y-3">
           {[...Array(3)].map((_, i) => (
-            <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-gray-100 border border-gray-200">
-              <div className="flex-1">
-                <div className="h-5 bg-gray-200 rounded w-32 mb-2"></div>
-                <div className="h-3 bg-gray-200 rounded w-24"></div>
+            <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-gray-100 border border-gray-200 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-gray-100 via-gray-50 to-gray-100 animate-[shimmer_2s_infinite] bg-[length:200%_100%]" />
+              <div className="flex-1 relative z-10">
+                <div className="h-5 bg-gray-200/50 rounded w-32 mb-2 animate-pulse"></div>
+                <div className="h-3 bg-gray-200/50 rounded w-24 animate-pulse"></div>
               </div>
-              <div className="flex items-center gap-3">
-                <div className="h-5 bg-gray-200 rounded w-16"></div>
-                <div className="h-8 w-8 rounded-full bg-gray-200"></div>
+              <div className="flex items-center gap-3 relative z-10">
+                <div className="h-5 bg-gray-200/50 rounded w-16 animate-pulse"></div>
+                <div className="h-8 w-8 rounded-full bg-gray-200/50 animate-pulse"></div>
               </div>
             </div>
           ))}

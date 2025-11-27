@@ -32,7 +32,7 @@ export function RoomsClient({ rooms, hotelSlug }: RoomsClientProps) {
   const { showTranslatedSuccess, showTranslatedError } = useToast();
   const [isAddRoomOpen, setIsAddRoomOpen] = useState(false);
   const [isImportOpen, setIsImportOpen] = useState(false);
-  const [selectedQrRoom, setSelectedQrRoom] = useState<{ number: string; code: string } | null>(null);
+  const [selectedQrRoom, setSelectedQrRoom] = useState<{ number: string } | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
@@ -53,8 +53,8 @@ export function RoomsClient({ rooms, hotelSlug }: RoomsClientProps) {
     });
   };
 
-  const copyGuestLink = (roomCode: string) => {
-    const guestUrl = `${baseUrl}/g/${hotelSlug}/${roomCode}`;
+  const copyGuestLink = (roomNumber: string) => {
+    const guestUrl = `${baseUrl}/g/${hotelSlug}/${roomNumber}`;
     navigator.clipboard.writeText(guestUrl);
     showTranslatedSuccess("app.toast.success.link_copied");
   };
@@ -146,7 +146,7 @@ export function RoomsClient({ rooms, hotelSlug }: RoomsClientProps) {
             <div className="flex justify-center py-6">
                <div className="bg-white p-4 rounded-xl shadow-inner border">
                   <QRCodeSVG 
-                    value={`${baseUrl}/g/${hotelSlug}/${selectedQrRoom?.code}`}
+                    value={`${baseUrl}/g/${hotelSlug}/${selectedQrRoom?.number}`}
                     size={192}
                   />
                </div>
@@ -234,7 +234,7 @@ export function RoomsClient({ rooms, hotelSlug }: RoomsClientProps) {
                         variant="ghost" 
                         size="sm" 
                         className="h-8 gap-2 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-lg font-medium"
-                        onClick={() => setSelectedQrRoom({ number: room.number, code: room.code })}
+                        onClick={() => setSelectedQrRoom({ number: room.number })}
                       >
                         <QrCode className="h-4 w-4" /> View
                       </Button>
@@ -242,7 +242,7 @@ export function RoomsClient({ rooms, hotelSlug }: RoomsClientProps) {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         <Link 
-                          href={`/g/${hotelSlug}/${room.code}`}
+                          href={`/g/${hotelSlug}/${room.number}`}
                           target="_blank"
                           className="text-sm text-indigo-600 hover:text-indigo-700 hover:underline flex items-center gap-1 font-medium"
                         >
@@ -253,7 +253,7 @@ export function RoomsClient({ rooms, hotelSlug }: RoomsClientProps) {
                           variant="ghost"
                           size="sm"
                           className="h-7 w-7 p-0 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg"
-                          onClick={() => copyGuestLink(room.code)}
+                          onClick={() => copyGuestLink(room.number)}
                         >
                           <Copy className="h-3.5 w-3.5" />
                         </Button>

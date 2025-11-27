@@ -68,6 +68,12 @@ body {
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
+/* Hebrew font for Hebrew language */
+:root.lang-he body,
+:root.lang-he * {
+  font-family: var(--font-hebrew), var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
 }
@@ -101,4 +107,13 @@ button:disabled,
 
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
 }

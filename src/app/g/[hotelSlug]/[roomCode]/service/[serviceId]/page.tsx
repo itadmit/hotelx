@@ -15,25 +15,49 @@ async function ServicePageContent({
   serviceId: string;
 }) {
 
-  const service = await prisma.service.findUnique({
-    where: { id: serviceId },
+  // Try to find service by slug first, then by ID (for backwards compatibility)
+  let service = await prisma.service.findFirst({
+    where: { 
+      slug: serviceId,
+      hotel: {
+        slug: hotelSlug
+      }
+    },
     include: {
       hotel: true,
+      category: true,
       customFields: {
         orderBy: { order: 'asc' },
       },
     },
   });
 
+  // If not found by slug, try by ID
+  if (!service) {
+    service = await prisma.service.findUnique({
+      where: { id: serviceId },
+      include: {
+        hotel: true,
+        category: true,
+        customFields: {
+          orderBy: { order: 'asc' },
+        },
+      },
+    });
+  }
+
   if (!service || service.hotel.slug !== hotelSlug) {
     return notFound();
   }
 
-  const room = await prisma.room.findUnique({
-    where: { code: roomCode },
+  const room = await prisma.room.findFirst({
+    where: { 
+      number: roomCode,
+      hotelId: service.hotel.id
+    },
   });
 
-  if (!room || room.hotelId !== service.hotel.id) {
+  if (!room) {
     return notFound();
   }
 
@@ -55,6 +79,7 @@ async function ServicePageContent({
         roomNumber={room.number}
         primaryColor={service.hotel.primaryColor}
         customFields={service.customFields}
+        categorySlug={service.category.slug}
       />
     </GuestLayout>
   );

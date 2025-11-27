@@ -34,13 +34,20 @@ function playNotificationSound() {
 }
 
 export function useNewRequests(hotelId?: string, enabled: boolean = true) {
-  const [lastChecked, setLastChecked] = useState<string>(
-    new Date().toISOString()
-  );
+  const [lastChecked, setLastChecked] = useState<string>("");
   const isPollingRef = useRef<boolean>(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const processedIdsRef = useRef<Set<string>>(new Set());
   const lastCheckedRef = useRef<string>(lastChecked);
+
+  // Initialize lastChecked only on client side
+  useEffect(() => {
+    if (lastChecked === "") {
+      const now = new Date().toISOString();
+      setLastChecked(now);
+      lastCheckedRef.current = now;
+    }
+  }, [lastChecked]);
 
   // עדכון ה-ref כשהמצב משתנה
   useEffect(() => {
@@ -48,7 +55,7 @@ export function useNewRequests(hotelId?: string, enabled: boolean = true) {
   }, [lastChecked]);
 
   useEffect(() => {
-    if (!enabled || !hotelId) return;
+    if (!enabled || !hotelId || lastChecked === "") return;
 
     const checkNewRequests = async () => {
       if (isPollingRef.current) return; // מונע קריאות מקבילות
@@ -103,10 +110,10 @@ export function useNewRequests(hotelId?: string, enabled: boolean = true) {
       }
     };
 
-    // בדיקה ראשונית
-    checkNewRequests();
-
-    // בדיקה כל 5 שניות
+    // Skip initial check - only start polling
+    // This prevents showing alerts for old requests when page loads
+    
+    // בדיקה כל 5 שניות (ללא בדיקה ראשונית)
     intervalRef.current = setInterval(checkNewRequests, 5000);
 
     return () => {
@@ -114,7 +121,7 @@ export function useNewRequests(hotelId?: string, enabled: boolean = true) {
         clearInterval(intervalRef.current);
       }
     };
-  }, [hotelId, enabled]);
+  }, [enabled, hotelId, lastChecked]);
 
   const isPolling = isPollingRef.current;
 

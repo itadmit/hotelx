@@ -1,16 +1,59 @@
 services:
-  postgres:
-    image: postgres:15
-    container_name: hotelx-db
-    restart: always
+  hotelx-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.prebuilt
+    container_name: hotelx-app
+    restart: unless-stopped
+    ports:
+      - "3005:3000"
+    env_file:
+      - .env
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password123
-      POSTGRES_DB: hotelx
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://hotelx:HotelX2025SecureDB!@hotelx-db:5432/hotelx?schema=public
+      - NEXTAUTH_URL=https://hotelx.app
+      - NEXTAUTH_SECRET=Smh8DNK10YtC4CkfHkO3512S5ikz1cVk7Z2i995QQl8=
+      - SMTP_HOST=smtp.gmail.com
+      - SMTP_PORT=587
+      - SMTP_USER=itadmit@gmail.com
+      - SMTP_PASSWORD=CHANGE_THIS_TO_YOUR_APP_PASSWORD
+      - SMTP_FROM=info@hotelx.app
+      - ADMIN_EMAIL=info@hotelx.app
+      - CRON_SECRET=aeTGUSzAbg+MsZiDxIiY6vgg0xKgj/BLJB+EgAR7HVM=
+    depends_on:
+      hotelx-db:
+        condition: service_healthy
+    networks:
+      - hotelx-network
+    volumes:
+      - ./prisma:/app/prisma
+
+  hotelx-db:
+    image: postgres:15-alpine
+    container_name: hotelx-db
+    restart: unless-stopped
     ports:
       - "5435:5432"
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_USER=hotelx
+      - POSTGRES_PASSWORD=HotelX2025SecureDB!
+      - POSTGRES_DB=hotelx
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - hotelx-db-data:/var/lib/postgresql/data
+    networks:
+      - hotelx-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hotelx"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  hotelx-network:
+    driver: bridge
 
 volumes:
-  postgres_data:
+  hotelx-db-data:

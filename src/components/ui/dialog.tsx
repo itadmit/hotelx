@@ -9,9 +9,10 @@ interface DialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   children: React.ReactNode;
+  dir?: "ltr" | "rtl";
 }
 
-export function Dialog({ open, onOpenChange, children }: DialogProps) {
+export function Dialog({ open, onOpenChange, children, dir = "ltr" }: DialogProps) {
   if (!open) return null;
 
   return (
@@ -23,15 +24,15 @@ export function Dialog({ open, onOpenChange, children }: DialogProps) {
       />
       
       {/* Dialog Content */}
-      <div className="relative z-50 w-full max-w-lg mx-4 sm:mx-0 bg-white p-6 shadow-lg rounded-3xl animate-in fade-in zoom-in-95 duration-200">
+      <div className="relative z-50 w-full max-w-lg mx-4 sm:mx-0 bg-white p-6 shadow-lg rounded-3xl animate-in fade-in zoom-in-95 duration-200" dir={dir}>
         {children}
       </div>
     </div>
   );
 }
 
-export function DialogContent({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <div className={cn("grid gap-4", className)}>{children}</div>;
+export function DialogContent({ children, className, dir }: { children: React.ReactNode; className?: string; dir?: "ltr" | "rtl" }) {
+  return <div className={cn("grid gap-4", className)} dir={dir}>{children}</div>;
 }
 
 export function DialogHeader({ children, className }: { children: React.ReactNode; className?: string }) {

@@ -40,6 +40,13 @@ export function formatTimeAgo(date: Date, language: string = "en"): string {
       h_ago: "{h} h fa",
       d_ago: "{d} g fa",
       long_time_ago: "Molto tempo fa"
+    },
+    he: {
+      just_now: "הרגע",
+      m_ago: "לפני {m} דק׳",
+      h_ago: "לפני {h} שעות",
+      d_ago: "לפני {d} ימים",
+      long_time_ago: "מזמן"
     }
   };
 

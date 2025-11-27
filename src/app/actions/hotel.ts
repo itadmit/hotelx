@@ -3,6 +3,7 @@
 import { auth } from "@/app/api/auth/[...nextauth]/route";
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { initializeHotelDefaults } from "@/lib/initializeHotelDefaults";
 
 export async function updateHotelSettings(formData: FormData) {
   const session = await auth();
@@ -115,8 +116,9 @@ export async function createHotel(formData: FormData) {
     },
   };
 
-  // Create hotel and update user in a transaction
+  // Create hotel and initialize with default categories/services
   const result = await prisma.$transaction(async (tx) => {
+    // Create the hotel
     const hotel = await tx.hotel.create({
       data: {
         name: name.trim(),
@@ -126,45 +128,6 @@ export async function createHotel(formData: FormData) {
       },
     });
 
-    // Create categories and services based on selected services
-    const categoryMap = new Map<string, string>(); // category name -> category id
-    
-    for (const serviceId of selectedServices) {
-      const serviceDef = serviceDefinitions[serviceId];
-      if (!serviceDef) continue;
-
-      // Create or get category
-      let categoryId = categoryMap.get(serviceDef.category);
-      if (!categoryId) {
-        const categorySlug = serviceDef.category
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, "-")
-          .replace(/^-+|-+$/g, "");
-        const category = await tx.category.create({
-          data: {
-            name: serviceDef.category,
-            slug: categorySlug,
-            icon: serviceDef.categoryIcon,
-            order: categoryMap.size,
-            hotelId: hotel.id,
-          },
-        });
-        categoryId = category.id;
-        categoryMap.set(serviceDef.category, categoryId);
-      }
-
-      // Create service
-      await tx.service.create({
-        data: {
-          name: serviceDef.name,
-          icon: serviceDef.icon,
-          isActive: true,
-          hotelId: hotel.id,
-          categoryId: categoryId,
-        },
-      });
-    }
-
     // Update user with hotelId
     await tx.user.update({
       where: { id: userId },
@@ -173,6 +136,10 @@ export async function createHotel(formData: FormData) {
 
     return hotel;
   });
+
+  // Initialize default categories and services with full translations
+  // This runs outside the transaction to avoid conflicts
+  await initializeHotelDefaults(prisma, result.id);
 
   revalidatePath("/dashboard");
   revalidatePath("/onboarding");
@@ -931,7 +898,7 @@ export async function importFullDemoData() {
       }),
     ]);
 
-    // יצירת פניות פתוחות (NEW status)
+    // יצירת פניות לדמו (מיקס של סטטוסים כדי להראות board מלא)
     const now = new Date();
     const requests = await Promise.all([
       tx.request.create({
@@ -939,7 +906,7 @@ export async function importFullDemoData() {
           hotelId: hotelId,
           roomId: rooms[0].id,
           serviceId: services[0].id,
-          status: 'NEW',
+          status: 'IN_PROGRESS', // לא NEW כדי למנוע התראות
           notes: 'Please deliver to room 101',
           createdAt: new Date(now.getTime() - 10 * 60000), // 10 minutes ago
         },
@@ -949,7 +916,7 @@ export async function importFullDemoData() {
           hotelId: hotelId,
           roomId: rooms[1].id,
           serviceId: services[1].id,
-          status: 'NEW',
+          status: 'IN_PROGRESS',
           notes: 'Extra mayo please',
           createdAt: new Date(now.getTime() - 5 * 60000), // 5 minutes ago
         },
@@ -959,9 +926,10 @@ export async function importFullDemoData() {
           hotelId: hotelId,
           roomId: rooms[2].id,
           serviceId: services[3].id,
-          status: 'NEW',
+          status: 'COMPLETED',
           notes: 'Room cleaning requested',
           createdAt: new Date(now.getTime() - 15 * 60000), // 15 minutes ago
+          completedAt: new Date(now.getTime() - 2 * 60000), // 2 minutes ago
         },
       }),
       tx.request.create({
@@ -969,9 +937,10 @@ export async function importFullDemoData() {
           hotelId: hotelId,
           roomId: rooms[0].id,
           serviceId: services[5].id,
-          status: 'NEW',
+          status: 'COMPLETED',
           notes: 'Massage appointment',
           createdAt: new Date(now.getTime() - 20 * 60000), // 20 minutes ago
+          completedAt: new Date(now.getTime() - 8 * 60000), // 8 minutes ago
         },
       }),
       tx.request.create({
@@ -979,9 +948,10 @@ export async function importFullDemoData() {
           hotelId: hotelId,
           roomId: rooms[3].id,
           serviceId: services[7].id,
-          status: 'NEW',
+          status: 'COMPLETED',
           notes: 'AC not working properly',
           createdAt: new Date(now.getTime() - 30 * 60000), // 30 minutes ago
+          completedAt: new Date(now.getTime() - 12 * 60000), // 12 minutes ago
         },
       }),
     ]);

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { ChevronLeft, Clock } from "lucide-react";
 import { ServiceRequestFormWrapper } from "./ServiceRequestFormWrapper";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -18,6 +19,7 @@ interface ServicePageClientProps {
   roomNumber: string;
   primaryColor: string | null;
   customFields: CustomField[];
+  categorySlug: string;
 }
 
 export function ServicePageClient({
@@ -32,6 +34,7 @@ export function ServicePageClient({
   roomNumber,
   primaryColor,
   customFields,
+  categorySlug,
 }: ServicePageClientProps) {
   const { translate } = useLanguage();
   const t = (key: string) => translate(`app.guest.${key}`);
@@ -39,18 +42,21 @@ export function ServicePageClient({
   return (
     <>
       {/* Image Header */}
-      <div className="relative h-56 bg-gray-200">
+      <div className="relative h-56 bg-gray-200 overflow-hidden">
         <Link 
-          href={`/g/${hotelSlug}/${roomCode}`}
-          className="absolute top-4 left-4 z-10 p-2 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-colors shadow-lg"
+          href={`/g/${hotelSlug}/${roomCode}/category/${categorySlug}`}
+          className="absolute top-4 left-4 z-10 p-2 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-all duration-200 shadow-lg hover:scale-105 active:scale-95"
         >
           <ChevronLeft className="h-6 w-6 text-gray-900" />
         </Link>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img 
-          src={serviceImage || "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=800&q=80"} 
-          alt={serviceName} 
-          className="absolute inset-0 w-full h-full object-cover"
+        <Image
+          src={serviceImage || "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=800&q=80"}
+          alt={serviceName}
+          fill
+          className="object-cover"
+          priority
+          sizes="100vw"
+          quality={90}
         />
       </div>
 

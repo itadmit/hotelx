@@ -7,14 +7,14 @@ import { Toaster } from "sonner";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <ErrorBoundary>
-      <SessionProvider>
-        <LanguageProvider>
+    <SessionProvider>
+      <LanguageProvider>
+        <ErrorBoundary>
           {children}
           <Toaster position="top-right" richColors />
-        </LanguageProvider>
-      </SessionProvider>
-    </ErrorBoundary>
+        </ErrorBoundary>
+      </LanguageProvider>
+    </SessionProvider>
   );
 }
 

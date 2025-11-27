@@ -31,6 +31,8 @@ async function RequestStatusContent({
     <RequestStatusClient
       hotelSlug={hotelSlug}
       roomCode={roomCode}
+      hotelName={request.hotel.name}
+      requestId={request.id}
       status={request.status}
       serviceName={request.service.name}
       roomNumber={request.room.number}

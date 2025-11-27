@@ -8,7 +8,7 @@ import { Upload, Globe, Palette, Building2, Save, Trash2, Star, Download, Rotate
 import { updateHotelSettings, deleteAccount, importFullDemoData, resetHotelData } from "@/app/actions/hotel";
 import { signOut } from "next-auth/react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { useLanguage } from "@/contexts/LanguageContext";
+import { useLanguage, languages } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/useToast";
 import { toast } from "sonner";
 
@@ -368,11 +368,11 @@ export function HotelSettingsClient({ hotel }: { hotel: Hotel }) {
                     onChange={(e) => setLanguage(e.target.value)}
                     className="flex h-11 w-full rounded-xl border-none bg-gray-50 px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-200 cursor-pointer hover:bg-gray-100 transition-colors"
                   >
-                    <option value="en">🇺🇸 English</option>
-                    <option value="bg">🇧🇬 Български</option>
-                    <option value="de">🇩🇪 Deutsch</option>
-                    <option value="fr">🇫🇷 Français</option>
-                    <option value="it">🇮🇹 Italiano</option>
+                    {languages.map((lang) => (
+                      <option key={lang.code} value={lang.code}>
+                        {lang.flag} {lang.name}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 <div className="grid gap-2">
@@ -568,6 +568,7 @@ export function HotelSettingsClient({ hotel }: { hotel: Hotel }) {
         </DialogContent>
       </Dialog>
     </div>
+    </>
   );
 }
 

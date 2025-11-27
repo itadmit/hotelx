@@ -27,3 +27,5 @@ export default async function OnboardingPage() {
   return <OnboardingClient userEmail={session.user.email || ""} />;
 }
 
+
+

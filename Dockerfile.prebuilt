@@ -1,0 +1,31 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install OpenSSL for Prisma
+RUN apk add --no-cache libc6-compat openssl
+
+# Copy package files first
+COPY package*.json ./
+COPY prisma ./prisma/
+
+# Install all dependencies (including devDependencies needed for Prisma)
+RUN npm ci
+
+# Generate Prisma Client
+RUN npx prisma generate
+
+# Copy pre-built .next and other files
+COPY .next ./.next
+COPY public ./public
+COPY next.config.ts ./
+COPY tsconfig.json ./
+COPY src ./src
+
+EXPOSE 3000
+
+ENV NODE_ENV=production
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+CMD ["npm", "start"]

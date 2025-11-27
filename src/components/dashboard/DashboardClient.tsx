@@ -56,12 +56,15 @@ export function DashboardClient({ stats, recentRequests, monthlyRevenue = [] }: 
   const [isAddServiceOpen, setIsAddServiceOpen] = useState(false);
   const [timeRange, setTimeRange] = useState<TimeRange>("weekly");
   const [showWhatsNew, setShowWhatsNew] = useState(false);
+  const [currentDate, setCurrentDate] = useState<string>("");
 
   useEffect(() => {
     const shouldShowWhatsNew = localStorage.getItem("showWhatsNew");
     if (shouldShowWhatsNew === "true") {
       setShowWhatsNew(true);
     }
+    // Set current date only on client
+    setCurrentDate(new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
   }, []);
 
   const handleCloseWhatsNew = () => {
@@ -123,9 +126,9 @@ export function DashboardClient({ stats, recentRequests, monthlyRevenue = [] }: 
           <p className="text-gray-500 mt-1">{t("overview")}</p>
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="outline" className="bg-white border-none shadow-sm text-gray-600 hover:bg-gray-50 gap-2 rounded-xl">
+          <Button variant="outline" className="bg-white border-none shadow-sm text-gray-600 hover:bg-gray-50 gap-2 rounded-xl" suppressHydrationWarning>
             <CalendarRange className="h-4 w-4" />
-            {t("today")}: {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+            {t("today")}: {currentDate || "..."}
           </Button>
           <Button 
             onClick={() => setIsAddServiceOpen(true)}

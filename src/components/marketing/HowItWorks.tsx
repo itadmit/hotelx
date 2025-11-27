@@ -1,21 +1,27 @@
+"use client";
+
 import { ScanLine, MessageSquare, BarChart3 } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export function HowItWorks() {
+  const { translate } = useLanguage();
+  const t = (key: string) => translate(`how_it_works.${key}`);
+  
   const steps = [
     {
       icon: ScanLine,
-      title: "1. Guest Scans",
-      description: "A simple scan of the QR code in the room opens the service menu. No app download or registration required.",
+      title: t("step_1_title"),
+      description: t("step_1_desc"),
     },
     {
       icon: MessageSquare,
-      title: "2. Staff Receives",
-      description: "The request appears instantly on the tablet or mobile of the relevant staff member (Reception, Housekeeping, Kitchen).",
+      title: t("step_2_title"),
+      description: t("step_2_desc"),
     },
     {
       icon: BarChart3,
-      title: "3. Manager Analyzes",
-      description: "Get business insights in real-time: response times, satisfaction, and upsell opportunities.",
+      title: t("step_3_title"),
+      description: t("step_3_desc"),
     },
   ];
 
@@ -23,9 +29,9 @@ export function HowItWorks() {
     <section className="py-24 bg-white">
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold font-heading text-gray-900 mb-4">How It Works</h2>
+          <h2 className="text-3xl md:text-4xl font-bold font-heading text-gray-900 mb-4">{t("title")}</h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            A simple process with quick implementation that upgrades your hotel in minutes.
+            {t("subtitle")}
           </p>
         </div>
 

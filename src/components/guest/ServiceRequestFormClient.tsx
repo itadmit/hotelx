@@ -18,6 +18,8 @@ import { CustomField } from "./CustomFieldRenderer";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useToast } from "@/hooks/useToast";
 import { toast } from "sonner";
+import { CheckCircle2 } from "lucide-react";
+import { useHaptic } from "@/hooks/useHaptic";
 
 interface ServiceRequestFormClientProps {
   hotelSlug: string;
@@ -45,12 +47,62 @@ export function ServiceRequestFormClient({
   const router = useRouter();
   const { translate } = useLanguage();
   const { showTranslatedSuccess, showTranslatedError, showTranslatedWarning } = useToast();
+  const { trigger: haptic } = useHaptic();
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [isSuccessOpen, setIsSuccessOpen] = useState(false);
+  const [requestId, setRequestId] = useState<string | null>(null);
   const [notes, setNotes] = useState("");
   const [guestName, setGuestName] = useState("");
   const [guestPhone, setGuestPhone] = useState("");
   const [guestEmail, setGuestEmail] = useState("");
   const [isPending, setIsPending] = useState(false);
+
+  // Check if all required fields are filled
+  const isFormValid = () => {
+    // Check guest name (always required)
+    if (!guestName.trim()) {
+      return false;
+    }
+    
+    // Check required custom fields
+    for (const field of customFields) {
+      if (field.isRequired) {
+        const value = customFieldValues[field.id];
+        // For checkbox fields, check if at least one option is selected
+        if (field.fieldType === "CHECKBOX") {
+          if (!value || !Array.isArray(value) || value.length === 0) {
+            return false;
+          }
+        } else {
+          // For radio and select fields, check if value exists and is not empty
+          if (!value || (typeof value === 'string' && !value.trim())) {
+            return false;
+          }
+        }
+      }
+    }
+    
+    return true;
+  };
+
+  // Check if required custom fields are filled (for the main button)
+  const areRequiredCustomFieldsFilled = () => {
+    for (const field of customFields) {
+      if (field.isRequired) {
+        const value = customFieldValues[field.id];
+        if (field.fieldType === "CHECKBOX") {
+          if (!value || !Array.isArray(value) || value.length === 0) {
+            return false;
+          }
+        } else {
+          if (!value || (typeof value === 'string' && !value.trim())) {
+            return false;
+          }
+        }
+      }
+    }
+    return true;
+  };
 
   const handleConfirm = async () => {
     if (!guestName.trim()) {
@@ -82,23 +134,46 @@ export function ServiceRequestFormClient({
     formData.append("notes", notes);
 
     try {
-      await createRequest(formData);
+      const result = await createRequest(formData);
       setIsConfirmOpen(false);
-      showTranslatedSuccess("app.toast.success.request_created");
-      router.refresh();
+      setIsPending(false);
+      
+      if (result && result.requestId) {
+        setRequestId(result.requestId);
+        setIsSuccessOpen(true);
+        haptic("success");
+      } else {
+        showTranslatedError("app.toast.error.request_create_failed");
+      }
     } catch (error) {
       console.error("Error creating request:", error);
-      showTranslatedError("app.toast.error.request_create_failed");
-    } finally {
       setIsPending(false);
+      showTranslatedError("app.toast.error.request_create_failed");
     }
   };
+
+  const canOpenDialog = areRequiredCustomFieldsFilled();
 
   return (
     <>
       <Button 
-        onClick={() => setIsConfirmOpen(true)}
-        className="w-full h-12 text-lg rounded-xl shadow-lg transition-all"
+        onClick={() => {
+          if (!canOpenDialog) {
+            // Show warning for missing required custom fields
+            for (const field of customFields) {
+              if (field.isRequired && !customFieldValues[field.id]) {
+                toast.warning(translate("app.toast.warning.custom_field_required"), {
+                  description: translate("app.toast.warning.custom_field_required").replace("{field}", field.label),
+                });
+                break;
+              }
+            }
+            return;
+          }
+          setIsConfirmOpen(true);
+        }}
+        disabled={!canOpenDialog}
+        className="w-full h-12 text-lg rounded-xl shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-lg"
         style={{ backgroundColor: primaryColor || undefined }}
       >
         Confirm Order • {price}
@@ -192,11 +267,58 @@ export function ServiceRequestFormClient({
             </Button>
             <Button 
               onClick={handleConfirm}
-              disabled={isPending}
-              className="w-full sm:w-auto rounded-md"
+              disabled={!isFormValid() || isPending}
+              className="w-full sm:w-auto rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
               style={{ backgroundColor: primaryColor || undefined }}
             >
               {isPending ? translate("app.dashboard.common.processing") : translate("app.dashboard.common.confirm_order")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Success Modal */}
+      <Dialog open={isSuccessOpen} onOpenChange={setIsSuccessOpen}>
+        <DialogContent className="mx-4 sm:mx-0 max-w-md">
+          <DialogHeader>
+            <div className="flex flex-col items-center text-center mb-4">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4 animate-in zoom-in duration-500">
+                <CheckCircle2 className="h-8 w-8 text-green-600" />
+              </div>
+              <DialogTitle className="text-xl font-bold">{translate("app.guest.order_confirmed")}</DialogTitle>
+              <DialogDescription className="text-base mt-2">
+                {translate("app.guest.order_confirmed_msg")}
+              </DialogDescription>
+            </div>
+          </DialogHeader>
+
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setIsSuccessOpen(false);
+                // Reset form
+                setGuestName("");
+                setGuestPhone("");
+                setGuestEmail("");
+                setNotes("");
+              }} 
+              className="w-full sm:w-auto"
+            >
+              {translate("app.guest.order_another")}
+            </Button>
+            <Button 
+              onClick={() => {
+                if (requestId) {
+                  router.push(`/g/${hotelSlug}/${roomCode}/request/${requestId}`);
+                } else {
+                  setIsSuccessOpen(false);
+                }
+              }}
+              className="w-full sm:w-auto"
+              style={{ backgroundColor: primaryColor || undefined }}
+            >
+              {translate("app.guest.view_order_status")}
             </Button>
           </DialogFooter>
         </DialogContent>

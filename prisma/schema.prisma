@@ -25,6 +25,7 @@ model User {
   hotelId       String?
   hotel         Hotel?    @relation(fields: [hotelId], references: [id])
   assignedRequests Request[]
+  assignedComplaints Complaint[]
 }
 
 model Hotel {
@@ -47,6 +48,9 @@ model Hotel {
   requests      Request[]
   categories    Category[]
   translations  Translation[]
+  complaints    Complaint[]
+  reviews       Review[]
+  guestSessions GuestSession[]
 }
 
 model Room {
@@ -62,6 +66,8 @@ model Room {
   hotelId       String
   hotel         Hotel     @relation(fields: [hotelId], references: [id])
   requests      Request[]
+  complaints    Complaint[]
+  reviews       Review[]
 
   @@unique([hotelId, number])
 }
@@ -93,6 +99,7 @@ model Category {
 model Service {
   id            String    @id @default(cuid())
   name          String
+  slug          String?   // URL-friendly identifier
   description   String?
   price         Decimal?  @db.Decimal(10, 2)
   currency      String    @default("USD")
@@ -117,6 +124,9 @@ model Service {
   category      Category  @relation(fields: [categoryId], references: [id])
   requests      Request[]
   customFields  ServiceCustomField[]
+  
+  @@unique([hotelId, slug])
+  @@index([slug])
 }
 
 model Translation {
@@ -161,6 +171,8 @@ model Request {
   service       Service   @relation(fields: [serviceId], references: [id])
   assigneeId    String?
   assignee      User?     @relation(fields: [assigneeId], references: [id])
+  complaints    Complaint[]
+  reviews       Review[]
 }
 
 model ServiceCustomField {
@@ -203,4 +215,102 @@ enum CustomFieldType {
   RADIO      // Single choice
   CHECKBOX   // Multiple choice
   SELECT     // Dropdown single choice
+}
+
+model Complaint {
+  id            String    @id @default(cuid())
+  type          ComplaintType
+  description   String
+  status        ComplaintStatus @default(NEW)
+  priority      ComplaintPriority @default(MEDIUM)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  resolvedAt    DateTime?
+
+  // Relations
+  hotelId       String
+  hotel         Hotel     @relation(fields: [hotelId], references: [id])
+  roomId        String
+  room          Room      @relation(fields: [roomId], references: [id])
+  requestId     String?   // Optional - if related to a specific request
+  request       Request?  @relation(fields: [requestId], references: [id])
+  assigneeId    String?   // Staff member handling the complaint
+  assignee      User?     @relation(fields: [assigneeId], references: [id])
+
+  @@index([hotelId])
+  @@index([status])
+  @@index([priority])
+  @@index([roomId])
+}
+
+model Review {
+  id            String    @id @default(cuid())
+  rating        Int       // 1-5 stars
+  comment       String?
+  category      ReviewCategory
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  hotelId       String
+  hotel         Hotel     @relation(fields: [hotelId], references: [id])
+  roomId        String
+  room          Room      @relation(fields: [roomId], references: [id])
+  requestId     String    // Always linked to a completed request
+  request       Request   @relation(fields: [requestId], references: [id])
+
+  @@index([hotelId])
+  @@index([rating])
+  @@index([requestId])
+}
+
+enum ComplaintType {
+  ORDER_ISSUE      // Problem with order (food quality, wrong item, etc.)
+  ROOM_ISSUE       // Room problems (AC, cleanliness, amenities)
+  NOISE            // Noise complaints
+  CLEANLINESS      // Cleanliness issues
+  STAFF            // Staff behavior issues
+  DELAY            // Service delays
+  OTHER            // Other complaints
+}
+
+enum ComplaintStatus {
+  NEW
+  IN_PROGRESS
+  RESOLVED
+  CANCELLED
+}
+
+enum ComplaintPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum ReviewCategory {
+  QUALITY          // Food/service quality
+  SPEED            // Delivery speed
+  STAFF            // Staff friendliness
+  VALUE            // Value for money
+  OVERALL          // Overall experience
+}
+
+model GuestSession {
+  id            String    @id @default(cuid())
+  hotelId       String
+  hotel         Hotel     @relation(fields: [hotelId], references: [id])
+  roomCode      String
+  phoneNumber   String    // Unique identifier for guest
+  fullName      String
+  email         String?
+  createdAt     DateTime  @default(now())
+  lastActive    DateTime  @updatedAt
+  expiresAt     DateTime  // 7 days from creation or 24h if guest mode
+  isGuestMode   Boolean   @default(false) // true = 24h expiry, false = 7 days
+  
+  @@unique([hotelId, roomCode, phoneNumber])
+  @@index([phoneNumber])
+  @@index([expiresAt])
+  @@index([hotelId, roomCode])
 }
