@@ -72,6 +72,7 @@ export default async function HotelInfoIndex({
       eyebrow={bundle.hotelName}
       title="Hotel info"
       intro="Everything you need to know about your stay — at a glance."
+      backTo="home"
     >
       <div className="grid grid-cols-1 gap-2.5">
         {TILES.map((tile) => {

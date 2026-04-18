@@ -8,6 +8,13 @@ type Props = {
   eyebrow?: string;
   title: string;
   intro?: string;
+  /**
+   * Where the back arrow leads. Defaults to the hotel-info index
+   * (`/g/[slug]/[room]/info`) so sub-pages return to the menu. The index
+   * page itself should pass `home` so the arrow returns the guest to
+   * their room home (`/g/[slug]/[room]`).
+   */
+  backTo?: "info" | "home";
   children: ReactNode;
 };
 
@@ -22,14 +29,22 @@ export function GuestInfoPageShell({
   eyebrow,
   title,
   intro,
+  backTo = "info",
   children,
 }: Props) {
+  const backHref =
+    backTo === "home"
+      ? `/g/${hotelSlug}/${roomCode}`
+      : `/g/${hotelSlug}/${roomCode}/info`;
+  const backLabel =
+    backTo === "home" ? "Back to your room" : "Back to hotel info";
+
   return (
     <main className="mx-auto w-full max-w-[480px] min-h-screen sm:min-h-[calc(100vh-3rem)] sm:my-6 bg-background text-ink flex flex-col pb-12 sm:pb-10 sm:rounded-[28px] sm:border sm:border-[color:var(--border)]/70 sm:shadow-[0_20px_60px_-30px_rgba(31,41,28,0.25)] sm:overflow-hidden">
       <header className="sticky top-0 z-30 px-5 pt-6 pb-3 bg-background/85 backdrop-blur-md border-b border-[color:var(--border)]/60 flex items-center gap-3">
         <Link
-          href={`/g/${hotelSlug}/${roomCode}/info`}
-          aria-label="Back to hotel info"
+          href={backHref}
+          aria-label={backLabel}
           className="h-9 w-9 rounded-full border border-[color:var(--border)] flex items-center justify-center bg-background hover:bg-surface transition-colors text-foreground/75"
         >
           <ChevronLeft className="h-4 w-4" />
