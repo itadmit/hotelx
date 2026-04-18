@@ -11,7 +11,6 @@ import { InsightsSection } from "@/components/marketing/InsightsSection";
 import { FeedbackLoopSection } from "@/components/marketing/FeedbackLoopSection";
 import { Audiences } from "@/components/marketing/Audiences";
 import { Stats } from "@/components/marketing/Stats";
-import { OfferSection } from "@/components/marketing/OfferSection";
 import { PricingTeaser } from "@/components/marketing/PricingTeaser";
 import { SupportSection } from "@/components/marketing/SupportSection";
 import { CTA } from "@/components/marketing/CTA";
@@ -34,7 +33,6 @@ export default function Home() {
         <FeedbackLoopSection />
         <Audiences />
         <Stats />
-        <OfferSection />
         <PricingTeaser />
         <SupportSection />
         <CTA />

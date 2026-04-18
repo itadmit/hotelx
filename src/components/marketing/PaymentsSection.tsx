@@ -152,28 +152,54 @@ export function PaymentsSection() {
                 })}
               </div>
 
-              <div className="mt-6 rounded-xl bg-ink text-[#f1ebde] p-5 font-mono text-[12px] leading-relaxed overflow-hidden">
-                <p className="text-foreground/40">
-                  <span className="text-amber-soft">// one interface, any processor</span>
-                </p>
-                <p>
-                  <span className="text-amber-soft">interface</span>{" "}
-                  <span className="text-emerald-soft">PaymentProvider</span>{" "}
-                  &#123;
-                </p>
-                <p className="pl-3">
-                  createIntent(input):{" "}
-                  <span className="text-emerald-soft">Promise&lt;Intent&gt;</span>;
-                </p>
-                <p className="pl-3">
-                  confirm(input):{" "}
-                  <span className="text-emerald-soft">Promise&lt;Result&gt;</span>;
-                </p>
-                <p className="pl-3">
-                  handleWebhook(body, headers):{" "}
-                  <span className="text-emerald-soft">Promise&lt;Event&gt;</span>;
-                </p>
-                <p>&#125;</p>
+              <div className="mt-6 card-surface p-5 sm:p-6">
+                <div className="flex items-center justify-between">
+                  <p className="eyebrow">How it connects</p>
+                  <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-emerald-brand">
+                    Switch processors anytime
+                  </span>
+                </div>
+                <ol className="mt-4 grid sm:grid-cols-2 gap-3">
+                  {[
+                    {
+                      step: "01",
+                      title: "Pick your processor",
+                      body: "Stripe, PayPal, Adyen — or your local acquirer.",
+                    },
+                    {
+                      step: "02",
+                      title: "Drop in your keys",
+                      body: "We store them encrypted, per property.",
+                    },
+                    {
+                      step: "03",
+                      title: "We handle the rest",
+                      body: "Intents, webhooks, retries, refunds. All you.",
+                    },
+                    {
+                      step: "04",
+                      title: "Guests pay in-room",
+                      body: "Your branding, their language, instant settlement.",
+                    },
+                  ].map((s) => (
+                    <li
+                      key={s.step}
+                      className="rounded-xl border border-[color:var(--border)] bg-card p-4 flex gap-3"
+                    >
+                      <span className="font-mono text-[11px] text-emerald-brand mt-0.5">
+                        {s.step}
+                      </span>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-ink leading-tight">
+                          {s.title}
+                        </p>
+                        <p className="text-[12.5px] text-foreground/65 mt-1 leading-relaxed">
+                          {s.body}
+                        </p>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
               </div>
 
               <div className="mt-5 grid grid-cols-3 gap-3">

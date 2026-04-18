@@ -177,24 +177,47 @@ export function SupportSection() {
               })}
             </div>
 
-            <div className="mt-6 rounded-xl bg-ink text-[#f1ebde] p-5 font-mono text-[12px] leading-relaxed">
-              <p className="text-foreground/40">
-                <span className="text-amber-soft">// what happens next</span>
+            <div className="mt-6 card-surface p-5 sm:p-6">
+              <p className="eyebrow flex items-center gap-1.5">
+                <Clock4 className="h-3 w-3 text-emerald-brand" />
+                What happens after you reach out
               </p>
-              <p className="mt-1.5">
-                <span className="text-amber-soft">on</span>{" "}
-                <span className="text-emerald-soft">contact</span> &#123;
-              </p>
-              <p className="pl-3">
-                ack <span className="text-amber-soft">within</span>{" "}
-                <span className="text-emerald-soft">6 min</span>;
-              </p>
-              <p className="pl-3">
-                resolve <span className="text-amber-soft">remote</span>{" "}
-                <span className="text-emerald-soft">||</span>{" "}
-                <span className="text-amber-soft">on-site</span>;
-              </p>
-              <p>&#125;</p>
+              <ol className="mt-4 space-y-3">
+                {[
+                  {
+                    badge: "06:00",
+                    title: "We acknowledge",
+                    body: "Average response time is six minutes — even on weekends.",
+                  },
+                  {
+                    badge: "Remote",
+                    title: "We try to resolve from here",
+                    body: "Secure screen-share, live walk-through, fix together.",
+                  },
+                  {
+                    badge: "On-site",
+                    title: "If it really needs us, we come",
+                    body: "Selected destinations included in your plan.",
+                  },
+                ].map((s) => (
+                  <li
+                    key={s.title}
+                    className="flex items-start gap-3 rounded-xl border border-[color:var(--border)] bg-card p-3"
+                  >
+                    <span className="inline-flex items-center justify-center min-w-[64px] h-7 rounded-full bg-emerald-soft text-emerald-brand font-mono text-[10px] uppercase tracking-[0.16em] px-2 shrink-0">
+                      {s.badge}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-ink leading-tight">
+                        {s.title}
+                      </p>
+                      <p className="text-[12.5px] text-foreground/65 mt-1 leading-relaxed">
+                        {s.body}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
             </div>
           </div>
 

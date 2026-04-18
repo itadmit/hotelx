@@ -175,29 +175,35 @@ export function InsightsSection() {
                 })}
               </ul>
 
-              {/* AI suggestion block — dark on bone like the showcase pattern */}
-              <div className="mt-5 rounded-xl bg-ink text-[#f1ebde] p-5 font-mono text-[12px] leading-relaxed overflow-hidden">
-                <p className="text-foreground/40">
-                  <span className="text-amber-soft">
-                    // suggestion · weekly digest
+              {/* Weekly digest — narrative, not code */}
+              <div className="mt-5 card-surface p-5 sm:p-6 relative overflow-hidden">
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-amber-soft/50 blur-2xl"
+                />
+                <div className="relative flex items-start gap-3">
+                  <span className="inline-flex h-10 w-10 rounded-lg bg-amber-soft text-amber-brand items-center justify-center shrink-0">
+                    <Sparkles className="h-5 w-5" strokeWidth={2} />
                   </span>
-                </p>
-                <p className="mt-1.5">
-                  <span className="text-amber-soft">if</span>{" "}
-                  <span className="text-emerald-soft">demand</span> &gt;{" "}
-                  <span className="text-emerald-soft">price</span> &amp;&amp;{" "}
-                  <span className="text-emerald-soft">stock</span> ==={" "}
-                  <span className="text-amber-soft">&apos;sells-out&apos;</span>
-                  &nbsp;&#123;
-                </p>
-                <p className="pl-3">
-                  suggest(<span className="text-amber-soft">&apos;raise&apos;</span>,{" "}
-                  <span className="text-emerald-soft">+€4</span>);
-                </p>
-                <p>&#125;</p>
-                <p className="mt-2 text-[#f1ebde]/60">
-                  Truffle pasta · last 4 Fridays sold out by 23:14
-                </p>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-amber-brand">
+                      Weekly suggestion
+                    </p>
+                    <p className="font-display text-lg sm:text-xl text-ink mt-1.5 leading-snug">
+                      Try{" "}
+                      <span className="text-emerald-brand">+€4</span> on the
+                      truffle pasta
+                    </p>
+                    <p className="text-sm text-foreground/65 mt-1.5 leading-relaxed">
+                      It sold out by 23:14 on the last 4 Fridays. Demand is
+                      ahead of price — guests will still order.
+                    </p>
+                    <div className="mt-3 inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-soft text-emerald-brand font-mono text-[10px] uppercase tracking-[0.16em]">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-brand" />
+                      projected uplift · +€312 / week
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {/* Footer chips */}

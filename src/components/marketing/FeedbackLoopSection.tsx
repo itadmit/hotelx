@@ -167,20 +167,24 @@ export function FeedbackLoopSection() {
         </div>
 
         {/* Email layer note */}
-        <div className="mt-12 rounded-2xl border border-[color:var(--border)] bg-ink text-[#f1ebde] p-6 sm:p-8 grid gap-6 lg:grid-cols-[1.1fr_1fr] items-center">
-          <div>
-            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber-soft/80 flex items-center gap-2">
-              <Mail className="h-3.5 w-3.5" />
+        <div className="mt-12 card-elev p-6 sm:p-8 grid gap-6 lg:grid-cols-[1.1fr_1fr] items-center relative overflow-hidden">
+          <span
+            aria-hidden
+            className="pointer-events-none absolute -top-32 -right-20 h-[360px] w-[520px] bg-emerald-soft/40 blur-3xl rounded-full"
+          />
+          <div className="relative">
+            <p className="eyebrow flex items-center gap-2">
+              <Mail className="h-3.5 w-3.5 text-emerald-brand" />
               One email layer for everything
             </p>
-            <h3 className="font-display text-2xl sm:text-3xl mt-3 leading-tight text-[#f7f3ec]">
+            <h3 className="font-display text-2xl sm:text-3xl mt-3 leading-tight text-ink">
               Transactional, recovery and campaigns —
               <br />
-              <span className="display-italic text-emerald-soft">
+              <span className="display-italic text-emerald-brand">
                 from a single mailbox.
               </span>
             </h3>
-            <p className="mt-3 text-sm text-[#f1ebde]/70 max-w-xl leading-relaxed">
+            <p className="mt-3 text-sm text-foreground/70 max-w-xl leading-relaxed">
               Powered by Resend. Every message — feedback replies, password
               resets, team invites and your future newsletters — flows through
               one branded sender, one delivery log, one set of templates you
@@ -189,65 +193,63 @@ export function FeedbackLoopSection() {
             <div className="mt-5 flex flex-wrap items-center gap-3">
               <Link
                 href="/dashboard/email-templates"
-                className="group inline-flex items-center gap-2 h-10 px-4 rounded-full bg-emerald-brand text-primary-foreground text-sm font-medium hover:bg-[#0a3f31] transition-colors"
+                className="group inline-flex items-center gap-2 h-10 px-4 rounded-full bg-emerald-brand text-primary-foreground text-sm font-medium hover:bg-ink transition-colors"
               >
                 Edit templates
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </Link>
               <Link
                 href="/dashboard/feedback"
-                className="inline-flex items-center gap-2 h-10 px-4 rounded-full border border-white/15 text-sm text-[#f7f3ec] hover:bg-white/5 transition-colors"
+                className="inline-flex items-center gap-2 h-10 px-4 rounded-full border border-[color:var(--border)] bg-card text-sm text-ink hover:bg-surface transition-colors"
               >
                 Open recovery desk
               </Link>
             </div>
           </div>
 
-          <div className="rounded-xl border border-white/10 bg-[#0a0f0d] p-4 font-mono text-[12px] leading-relaxed text-[#f1ebde]/85 overflow-hidden">
-            <div className="flex items-center gap-1.5 mb-3">
-              <span className="h-2 w-2 rounded-full bg-clay/70" />
-              <span className="h-2 w-2 rounded-full bg-amber-brand/70" />
-              <span className="h-2 w-2 rounded-full bg-emerald-brand/70" />
-              <span className="ml-2 text-[10px] uppercase tracking-[0.18em] text-amber-soft/70">
-                pipeline.ts
+          {/* Pipeline as a visual flow, not as code */}
+          <div className="relative rounded-2xl border border-[color:var(--border)] bg-card p-5">
+            <div className="flex items-center justify-between mb-4">
+              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-foreground/55">
+                The flow, in plain words
+              </p>
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-soft text-emerald-brand font-mono text-[10px] uppercase tracking-[0.16em]">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                99.98% delivered
               </span>
             </div>
-            <pre className="whitespace-pre-wrap">
-              <span className="text-amber-soft">// 1 — guest rates</span>
-              {"\n"}
-              {"const "}
-              <span className="text-emerald-soft">feedback</span>
-              {" = "}
-              <span className="text-emerald-soft">await</span>
-              {" rate({ "}
-              <span className="text-emerald-soft">requestId</span>
-              {", rating });"}
-              {"\n\n"}
-              <span className="text-amber-soft">// 2 — route by sentiment</span>
-              {"\n"}
-              {"if (feedback.rating >= "}
-              <span className="text-amber-brand">4</span>
-              {") {"}
-              {"\n  "}
-              {"sendEmail({ template: "}
-              <span className="text-emerald-soft">"FEEDBACK_THANKS"</span>
-              {", reviewUrl });"}
-              {"\n} "}
-              {"else {"}
-              {"\n  "}
-              {"sendEmail({ template: "}
-              <span className="text-emerald-soft">"FEEDBACK_APOLOGY"</span>
-              {" });"}
-              {"\n  "}
-              {"openRecovery({ feedback, sla: "}
-              <span className="text-amber-brand">"30m"</span>
-              {" });"}
-              {"\n}"}
-            </pre>
-            <div className="mt-4 flex items-center gap-2 text-[10px] uppercase tracking-[0.18em] text-emerald-soft/80">
-              <Loader2 className="h-3 w-3 animate-spin" />
-              live · resend · 99.98% delivered
-            </div>
+
+            <ol className="space-y-2.5">
+              <FlowStep
+                step="01"
+                title="Guest rates the request"
+                body="One tap. 1–5 stars. Optional note."
+                tone="emerald"
+              />
+              <FlowStep
+                step="02"
+                title="Sentiment is decided"
+                body="4–5 stars → happy. 1–3 stars → service recovery."
+                tone="amber"
+              />
+              <FlowStep
+                step="03a"
+                title="Happy guest gets a thank-you"
+                body="Branded email with your Google or Booking review link."
+                tone="emerald"
+              />
+              <FlowStep
+                step="03b"
+                title="Unhappy guest gets a private apology"
+                body="Same beat. A task opens on your recovery desk with full context."
+                tone="clay"
+              />
+            </ol>
+
+            <p className="mt-4 text-[11.5px] text-foreground/55 leading-relaxed">
+              All four messages — and every other system email — leave from the
+              same Resend pipeline you control.
+            </p>
           </div>
         </div>
       </div>
@@ -310,5 +312,39 @@ function Outcome({
         </div>
       </div>
     </div>
+  );
+}
+
+function FlowStep({
+  step,
+  title,
+  body,
+  tone,
+}: {
+  step: string;
+  title: string;
+  body: string;
+  tone: "emerald" | "amber" | "clay";
+}) {
+  const toneClass =
+    tone === "emerald"
+      ? "bg-emerald-soft text-emerald-brand"
+      : tone === "amber"
+      ? "bg-amber-soft text-amber-brand"
+      : "bg-[#f3d8cf] text-clay";
+  return (
+    <li className="flex items-start gap-3 rounded-xl border border-[color:var(--border)] bg-surface/60 p-3">
+      <span
+        className={`inline-flex items-center justify-center min-w-[40px] h-7 rounded-full font-mono text-[10px] uppercase tracking-[0.16em] px-2 shrink-0 ${toneClass}`}
+      >
+        {step}
+      </span>
+      <div className="min-w-0">
+        <p className="text-sm font-medium text-ink leading-tight">{title}</p>
+        <p className="text-[12.5px] text-foreground/65 mt-0.5 leading-relaxed">
+          {body}
+        </p>
+      </div>
+    </li>
   );
 }
