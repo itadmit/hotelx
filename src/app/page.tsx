@@ -5,9 +5,12 @@ import { HowItWorks } from "@/components/marketing/HowItWorks";
 import { LivePreview } from "@/components/marketing/LivePreview";
 import { Features } from "@/components/marketing/Features";
 import { PaymentsSection } from "@/components/marketing/PaymentsSection";
+import { InsightsSection } from "@/components/marketing/InsightsSection";
 import { Audiences } from "@/components/marketing/Audiences";
 import { Stats } from "@/components/marketing/Stats";
+import { OfferSection } from "@/components/marketing/OfferSection";
 import { PricingTeaser } from "@/components/marketing/PricingTeaser";
+import { SupportSection } from "@/components/marketing/SupportSection";
 import { CTA } from "@/components/marketing/CTA";
 import { Footer } from "@/components/marketing/Footer";
 
@@ -22,9 +25,12 @@ export default function Home() {
         <LivePreview />
         <Features />
         <PaymentsSection />
+        <InsightsSection />
         <Audiences />
         <Stats />
+        <OfferSection />
         <PricingTeaser />
+        <SupportSection />
         <CTA />
       </main>
       <Footer />
