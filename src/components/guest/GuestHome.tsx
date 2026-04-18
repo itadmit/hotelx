@@ -1,10 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronRight, Clock, Wine, LogOut, KeyRound } from "lucide-react";
+import {
+  ChevronRight,
+  Clock,
+  Wine,
+  LogOut,
+  KeyRound,
+  Info,
+  Sparkles,
+} from "lucide-react";
 import { GuestNotificationsBell } from "@/components/guest/NotificationsBell";
+import { ActiveRequestsStrip } from "@/components/guest/ActiveRequestsStrip";
 import { guestCategoryIcon } from "@/lib/guest-category-icons";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Dialog,
@@ -39,6 +48,8 @@ type Props = {
   roomNumber: string;
   categories: Category[];
   services: Service[];
+  featuredServiceIds?: string[];
+  activeServiceIds?: string[];
   logoLetter?: string;
   guestFirstName?: string | null;
 };
@@ -58,6 +69,8 @@ export function GuestHome({
   roomNumber,
   categories,
   services,
+  featuredServiceIds = [],
+  activeServiceIds = [],
   logoLetter,
   guestFirstName,
 }: Props) {
@@ -66,8 +79,34 @@ export function GuestHome({
   const greet =
     hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 
-  const featuredService = services[0];
-  const restServices = services.slice(1, 5);
+  // Pick the featured service:
+  // 1. Prefer something the hotel explicitly starred…
+  // 2. …unless the guest already has an active request for it (smart hide).
+  // 3. If multiple candidates remain, rotate randomly each visit.
+  // 4. Fall back to whatever the server marked as services[0].
+  const eligibleFeatured = useMemo(() => {
+    const idSet = new Set(featuredServiceIds);
+    const activeSet = new Set(activeServiceIds);
+    return services.filter(
+      (s) => idSet.has(s.id) && !activeSet.has(s.id)
+    );
+  }, [services, featuredServiceIds, activeServiceIds]);
+
+  const [featuredIndex, setFeaturedIndex] = useState(0);
+  useEffect(() => {
+    if (eligibleFeatured.length > 1) {
+      setFeaturedIndex(Math.floor(Math.random() * eligibleFeatured.length));
+    } else {
+      setFeaturedIndex(0);
+    }
+  }, [eligibleFeatured.length]);
+
+  const featuredService =
+    eligibleFeatured[featuredIndex] ?? eligibleFeatured[0] ?? services[0];
+  // Don't repeat the featured service in the "Popular now" list below.
+  const restServices = services
+    .filter((s) => s.id !== featuredService?.id)
+    .slice(0, 4);
   const initials = (logoLetter ?? hotelName.slice(0, 1)).toUpperCase();
   const greetingTarget = guestFirstName ?? "our guest";
   const [isLogoutOpen, setIsLogoutOpen] = useState(false);
@@ -130,7 +169,15 @@ export function GuestHome({
           </div>
         </div>
         <div className="flex items-center gap-2">
-        <GuestNotificationsBell hotelSlug={hotelSlug} roomCode={roomCode} />
+          <Link
+            href={`/g/${hotelSlug}/${roomCode}/info`}
+            aria-label="Hotel info"
+            prefetch={false}
+            className="h-9 w-9 rounded-full border border-[color:var(--border)] flex items-center justify-center bg-background hover:bg-surface transition-colors text-foreground/75"
+          >
+            <Info className="h-4 w-4" />
+          </Link>
+          <GuestNotificationsBell hotelSlug={hotelSlug} roomCode={roomCode} />
           <button
             type="button"
             onClick={() => {
@@ -165,6 +212,9 @@ export function GuestHome({
         </p>
       </section>
 
+      {/* Active requests — anything still NEW or IN_PROGRESS for this room */}
+      <ActiveRequestsStrip hotelSlug={hotelSlug} roomCode={roomCode} />
+
       {/* Featured offer */}
       {featuredService ? (
         <Link
@@ -192,15 +242,35 @@ export function GuestHome({
         </Link>
       ) : null}
 
-      {/* Categories — root departments (grid) */}
+      {/* Categories — root departments (grid).
+          The first tile is the built-in "Hotel info" hub (Wi-Fi, About, etc.) */}
       <section className="px-5 mt-7">
         <div className="flex items-center justify-between">
           <p className="eyebrow">Concierge</p>
           <span className="font-mono text-[10px] text-foreground/40">
-            {categories.length} categories
+            {categories.length + 1} categories
           </span>
         </div>
         <div className="mt-3 grid grid-cols-2 gap-2.5">
+          <Link
+            href={`/g/${hotelSlug}/${roomCode}/info`}
+            prefetch={true}
+            className="group rounded-xl p-3.5 border border-emerald-brand/25 bg-emerald-soft/40 active:scale-[0.98] transition-transform"
+          >
+            <div className="flex items-center justify-between">
+              <div className="inline-flex items-center justify-center h-10 w-10 rounded-lg bg-emerald-brand text-primary-foreground">
+                <Sparkles className="h-4 w-4" strokeWidth={2} />
+              </div>
+              <ChevronRight className="h-4 w-4 text-emerald-brand/60 group-hover:text-emerald-brand transition-colors" />
+            </div>
+            <p className="mt-3 text-sm font-medium text-ink leading-tight">
+              Hotel info
+            </p>
+            <p className="text-[10px] text-emerald-brand mt-0.5 font-mono uppercase tracking-[0.1em]">
+              Wi-Fi · about · amenities
+            </p>
+          </Link>
+
           {categories.map((category, index) => {
             const Icon = guestCategoryIcon(category.icon);
             const accent = categoryAccents[index % categoryAccents.length];

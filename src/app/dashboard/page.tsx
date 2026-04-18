@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DashboardPageLoading } from "@/components/dashboard/DashboardPageLoading";
+import { GuestInfoOnboarding } from "@/components/dashboard/GuestInfoOnboarding";
 
 type RequestStatus = "NEW" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
 
@@ -182,6 +183,9 @@ export default function DashboardPage() {
           </Button>
         </div>
       </div>
+
+      {/* Onboarding nudge — only renders if any of the 4 guest-info pieces are missing. */}
+      <GuestInfoOnboarding />
 
       {/* KPI Grid */}
       <div className="grid gap-3 sm:gap-4 grid-cols-2 xl:grid-cols-4">

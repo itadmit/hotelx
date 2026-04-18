@@ -41,6 +41,35 @@ model Hotel {
   paymentProviders PaymentProvider[]
   payments        Payment[]
   notifications   Notification[]
+  info            HotelInfo?
+  amenities       HotelAmenity[]
+}
+
+model HotelInfo {
+  hotelId      String   @id
+  wifiName     String?
+  wifiPassword String?
+  wifiNotes    String?
+  about        String?
+  helpfulInfo  String?
+  updatedAt    DateTime @updatedAt
+  hotel        Hotel    @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+}
+
+model HotelAmenity {
+  id          String   @id @default(cuid())
+  hotelId     String
+  name        String
+  description String?
+  icon        String?
+  hours       String?
+  location    String?
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  hotel       Hotel    @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+
+  @@index([hotelId, order])
 }
 
 model Room {
@@ -85,6 +114,7 @@ model Service {
   estimatedTime  String?
   image          String?
   isActive       Boolean   @default(true)
+  isFeatured     Boolean   @default(false)
   requirePayment Boolean   @default(false)
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
@@ -94,6 +124,8 @@ model Service {
   payments       Payment[]
   category       Category  @relation(fields: [categoryId], references: [id])
   hotel          Hotel     @relation(fields: [hotelId], references: [id])
+
+  @@index([hotelId, isFeatured])
 }
 
 model Request {

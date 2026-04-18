@@ -10,6 +10,7 @@ const updateServiceSchema = z.object({
   price: z.number().nonnegative().nullable().optional(),
   estimatedTime: z.string().nullable().optional(),
   isActive: z.boolean().optional(),
+  isFeatured: z.boolean().optional(),
   requirePayment: z.boolean().optional(),
 })
 

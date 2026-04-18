@@ -72,8 +72,36 @@ export default function RequestsPage() {
 
   useEffect(() => {
     loadData();
-    const interval = setInterval(loadData, 8000);
-    return () => clearInterval(interval);
+    let interval: ReturnType<typeof setInterval> | null = null;
+
+    const start = () => {
+      if (interval) return;
+      interval = setInterval(loadData, 15000);
+    };
+    const stop = () => {
+      if (!interval) return;
+      clearInterval(interval);
+      interval = null;
+    };
+
+    if (typeof document !== "undefined" && document.visibilityState === "visible") {
+      start();
+    }
+
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") {
+        loadData();
+        start();
+      } else {
+        stop();
+      }
+    };
+
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      stop();
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
   }, []);
 
   async function createRequest() {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export type NotificationItem = {
   id: string;
@@ -25,30 +25,43 @@ export function useNotifications(endpoints: Endpoints, enabled = true) {
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  const refresh = useCallback(async () => {
-    if (!enabled) return;
-    setLoading(true);
-    try {
-      const res = await fetch(endpoints.list, { cache: "no-store" });
-      if (!res.ok) return;
-      const data = await res.json();
-      setItems(data.items ?? []);
-      setUnreadCount(data.unreadCount ?? 0);
-    } catch {
-      // ignore network errors
-    } finally {
-      setLoading(false);
-    }
-  }, [enabled, endpoints.list]);
+  const refresh = useCallback(
+    async (signal?: AbortSignal) => {
+      if (!enabled) return;
+      setLoading(true);
+      try {
+        const res = await fetch(endpoints.list, { cache: "no-store", signal });
+        if (!res.ok) return;
+        const data = await res.json();
+        setItems(data.items ?? []);
+        setUnreadCount(data.unreadCount ?? 0);
+      } catch {
+        // ignore network errors / aborts
+      } finally {
+        setLoading(false);
+      }
+    },
+    [enabled, endpoints.list]
+  );
 
+  // Initial + on-endpoint-change fetch — tolerant to React StrictMode (which
+  // double-invokes effects in dev) by aborting the first call when the cleanup
+  // runs immediately afterwards.
   useEffect(() => {
     if (!enabled) return;
-    void refresh();
+    const controller = new AbortController();
+    void refresh(controller.signal);
+    return () => controller.abort();
   }, [enabled, refresh]);
 
+  // Persistent SSE connection. We keep it stable across re-renders by storing
+  // the URL in a ref and only reconnecting when the actual URL string changes.
+  const streamUrlRef = useRef<string | null>(null);
   useEffect(() => {
     if (!enabled) return;
     if (typeof window === "undefined") return;
+    if (streamUrlRef.current === endpoints.stream) return;
+    streamUrlRef.current = endpoints.stream;
 
     const source = new EventSource(endpoints.stream);
 
@@ -72,6 +85,7 @@ export function useNotifications(endpoints: Endpoints, enabled = true) {
     };
 
     return () => {
+      streamUrlRef.current = null;
       source.close();
     };
   }, [enabled, endpoints.stream]);

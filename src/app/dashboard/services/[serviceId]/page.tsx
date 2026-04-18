@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft, Save, Star } from "lucide-react";
 import Link from "next/link";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
 import { DashboardPageLoading } from "@/components/dashboard/DashboardPageLoading";
@@ -27,6 +27,7 @@ export default function ServiceEditorPage({
     price: "",
     estimatedTime: "",
     isActive: true,
+    isFeatured: false,
     requirePayment: false,
   });
   const [paymentsEnabled, setPaymentsEnabled] = useState(false);
@@ -75,6 +76,7 @@ export default function ServiceEditorPage({
             price: service.price ?? "",
             estimatedTime: service.estimatedTime ?? "",
             isActive: Boolean(service.isActive),
+            isFeatured: Boolean(service.isFeatured),
             requirePayment: Boolean(service.requirePayment),
           });
         }
@@ -205,6 +207,31 @@ export default function ServiceEditorPage({
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
               </Select>
+            </div>
+            <div className="rounded-lg border border-[color:var(--border)] bg-surface p-3">
+              <label className="flex items-start gap-3 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  className="mt-0.5 h-4 w-4 rounded border-[color:var(--border)] accent-[color:var(--primary)]"
+                  checked={form.isFeatured}
+                  onChange={(event) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      isFeatured: event.target.checked,
+                    }))
+                  }
+                />
+                <span className="leading-tight">
+                  <span className="text-sm text-ink font-medium inline-flex items-center gap-1.5">
+                    <Star className="h-3.5 w-3.5 text-amber-brand fill-amber-brand" />
+                    Featured upsell
+                  </span>
+                  <span className="block text-[11px] text-foreground/60 mt-0.5">
+                    Appears as the green daily recommendation on every guest&apos;s
+                    home screen. Mark several services to rotate them randomly.
+                  </span>
+                </span>
+              </label>
             </div>
             <div className="rounded-lg border border-[color:var(--border)] bg-surface p-3">
               <label className="flex items-start gap-3 cursor-pointer select-none">

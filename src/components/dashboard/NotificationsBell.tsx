@@ -17,7 +17,7 @@ export function NotificationsBell() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
-  const { items, unreadCount, loading, markRead, markAllRead, refresh } =
+  const { items, unreadCount, loading, markRead, markAllRead } =
     useNotifications(ENDPOINTS);
 
   useEffect(() => {
@@ -45,10 +45,7 @@ export function NotificationsBell() {
         type="button"
         aria-label="Notifications"
         aria-expanded={open}
-        onClick={() => {
-          setOpen((v) => !v);
-          if (!open) void refresh();
-        }}
+        onClick={() => setOpen((v) => !v)}
         className="relative h-10 w-10 rounded-md flex items-center justify-center hover:bg-surface text-foreground/70"
       >
         <Bell className="h-4.5 w-4.5" strokeWidth={2} />

@@ -11,6 +11,57 @@ const createPublicRequestSchema = z.object({
   notes: z.string().optional(),
 })
 
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const hotelSlug = searchParams.get("hotelSlug")?.trim()
+    const roomCode = searchParams.get("roomCode")?.trim()
+    const includeCompleted = searchParams.get("includeCompleted") === "1"
+
+    if (!hotelSlug || !roomCode) {
+      return NextResponse.json(
+        { error: "hotelSlug and roomCode are required" },
+        { status: 400 }
+      )
+    }
+
+    const room = await prisma.room.findFirst({
+      where: { code: roomCode, hotel: { slug: hotelSlug } },
+      select: { id: true },
+    })
+
+    if (!room) {
+      return NextResponse.json({ requests: [] })
+    }
+
+    const statusFilter = includeCompleted
+      ? undefined
+      : { in: [RequestStatus.NEW, RequestStatus.IN_PROGRESS] }
+
+    const requests = await prisma.request.findMany({
+      where: {
+        roomId: room.id,
+        ...(statusFilter ? { status: statusFilter } : {}),
+      },
+      select: {
+        id: true,
+        status: true,
+        createdAt: true,
+        service: { select: { name: true, estimatedTime: true } },
+      },
+      orderBy: { createdAt: "desc" },
+      take: 10,
+    })
+
+    return NextResponse.json({ requests })
+  } catch {
+    return NextResponse.json(
+      { error: "Failed to load requests" },
+      { status: 500 }
+    )
+  }
+}
+
 async function getPublicService(
   hotelSlug: string,
   serviceId: string

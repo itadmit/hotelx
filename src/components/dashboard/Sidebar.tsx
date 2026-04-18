@@ -17,6 +17,10 @@ import {
   LogOut,
   X,
   ChevronRight,
+  Wifi,
+  Sparkles,
+  BookOpen,
+  Info,
 } from "lucide-react";
 
 const sidebarSections: {
@@ -37,6 +41,15 @@ const sidebarSections: {
       { title: "Services", href: "/dashboard/services", icon: ConciergeBell },
       { title: "QR Codes", href: "/dashboard/qr", icon: QrCode },
       { title: "Payments", href: "/dashboard/payments", icon: CreditCard },
+    ],
+  },
+  {
+    label: "Guest info",
+    items: [
+      { title: "Wi-Fi", href: "/dashboard/guest-info/wifi", icon: Wifi },
+      { title: "About", href: "/dashboard/guest-info/about", icon: BookOpen },
+      { title: "Amenities", href: "/dashboard/guest-info/amenities", icon: Sparkles },
+      { title: "Helpful info", href: "/dashboard/guest-info/helpful", icon: Info },
     ],
   },
   {

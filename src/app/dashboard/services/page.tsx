@@ -16,7 +16,8 @@ import {
 } from "@/components/ui/dialog";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
 import { ServicesPageSkeleton } from "@/components/dashboard/ServicesPageSkeleton";
-import { Search, Plus, MoreHorizontal, Filter, Clock, DollarSign } from "lucide-react";
+import { Search, Plus, MoreHorizontal, Filter, Clock, DollarSign, Star, Info } from "lucide-react";
+import { InfoTooltip } from "@/components/ui/info-tooltip";
 import Link from "next/link";
 
 export default function ServicesPage() {
@@ -32,6 +33,7 @@ export default function ServicesPage() {
       price: string | null;
       estimatedTime: string | null;
       isActive: boolean;
+      isFeatured: boolean;
       category: { id: string; name: string };
     }>
   >([]);
@@ -100,6 +102,24 @@ export default function ServicesPage() {
     await loadData();
   }
 
+  async function toggleFeatured(serviceId: string, next: boolean) {
+    setServices((prev) =>
+      prev.map((s) => (s.id === serviceId ? { ...s, isFeatured: next } : s))
+    );
+    try {
+      await fetch(`/api/services/${serviceId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isFeatured: next }),
+      });
+    } catch {
+      // Roll back if the request failed.
+      setServices((prev) =>
+        prev.map((s) => (s.id === serviceId ? { ...s, isFeatured: !next } : s))
+      );
+    }
+  }
+
   async function createCategory() {
     const name = newCategory.name.trim();
     if (!name) return;
@@ -144,6 +164,10 @@ export default function ServicesPage() {
 
   const activeCount = useMemo(
     () => services.filter((s) => s.isActive).length,
+    [services]
+  );
+  const featuredCount = useMemo(
+    () => services.filter((s) => s.isFeatured).length,
     [services]
   );
 
@@ -390,6 +414,29 @@ export default function ServicesPage() {
                 </div>
                 <div className="numeral text-xl text-ink">{categories.length}</div>
               </div>
+              <div className="bg-surface p-3 rounded-md border border-[color:var(--border)] col-span-2 flex items-center justify-between">
+                <div>
+                  <div className="text-[10px] font-mono uppercase tracking-wider text-foreground/50 mb-1 inline-flex items-center gap-1">
+                    <Star className="h-3 w-3 text-amber-brand fill-amber-brand" />
+                    Featured upsells
+                  </div>
+                  <div className="numeral text-xl text-ink">{featuredCount}</div>
+                </div>
+                <InfoTooltip
+                  content={
+                    <>
+                      Featured services rotate randomly as the green daily
+                      recommendation on the guest home screen. Star at least one
+                      to enable.
+                    </>
+                  }
+                  side="left"
+                >
+                  <span className="text-foreground/40 hover:text-foreground/70">
+                    <Info className="h-3.5 w-3.5" />
+                  </span>
+                </InfoTooltip>
+              </div>
             </div>
           </div>
         </div>
@@ -424,10 +471,46 @@ export default function ServicesPage() {
             {filteredServices.map((service) => (
               <div
                 key={service.id}
-                className="group card-surface p-5 border border-[color:var(--border)] hover:border-primary/20 transition-colors relative"
+                className={`group card-surface p-5 border transition-colors relative ${
+                  service.isFeatured
+                    ? "border-amber-brand/40 bg-amber-soft/30"
+                    : "border-[color:var(--border)] hover:border-primary/20"
+                }`}
               >
-                <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-foreground/40">
+                <div className="absolute top-3 right-3 flex items-center gap-1">
+                  <InfoTooltip
+                    content={
+                      service.isFeatured
+                        ? "Featured upsell — appears as the green daily recommendation on the guest home screen. Click to remove."
+                        : "Click to feature this as the green daily recommendation. If multiple are starred, they rotate randomly."
+                    }
+                  >
+                    <button
+                      type="button"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        toggleFeatured(service.id, !service.isFeatured);
+                      }}
+                      aria-pressed={service.isFeatured}
+                      aria-label={service.isFeatured ? "Unstar" : "Star as featured"}
+                      className={`h-8 w-8 rounded-md flex items-center justify-center transition-colors ${
+                        service.isFeatured
+                          ? "text-amber-brand bg-amber-soft hover:bg-amber-soft/80"
+                          : "text-foreground/40 hover:text-amber-brand hover:bg-amber-soft/40"
+                      }`}
+                    >
+                      <Star
+                        className="h-4 w-4"
+                        strokeWidth={2}
+                        fill={service.isFeatured ? "currentColor" : "none"}
+                      />
+                    </button>
+                  </InfoTooltip>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-foreground/40 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
                     <MoreHorizontal className="h-4 w-4" />
                   </Button>
                 </div>

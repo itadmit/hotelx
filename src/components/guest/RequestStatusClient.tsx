@@ -102,10 +102,41 @@ export function RequestStatusClient({
       }
     }
 
-    const interval = setInterval(loadRequest, 8000);
+    let interval: ReturnType<typeof setInterval> | null = null;
+    const start = () => {
+      if (interval) return;
+      interval = setInterval(loadRequest, 12000);
+    };
+    const stop = () => {
+      if (!interval) return;
+      clearInterval(interval);
+      interval = null;
+    };
+
+    if (typeof document !== "undefined" && document.visibilityState === "visible") {
+      start();
+    }
+
+    const onVisibility = () => {
+      if (typeof document === "undefined") return;
+      if (document.visibilityState === "visible") {
+        loadRequest();
+        start();
+      } else {
+        stop();
+      }
+    };
+
+    if (typeof document !== "undefined") {
+      document.addEventListener("visibilitychange", onVisibility);
+    }
+
     return () => {
       cancelled = true;
-      clearInterval(interval);
+      stop();
+      if (typeof document !== "undefined") {
+        document.removeEventListener("visibilitychange", onVisibility);
+      }
     };
   }, [requestId]);
 
