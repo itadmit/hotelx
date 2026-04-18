@@ -1,3 +1,5 @@
+import { Globe } from "lucide-react";
+
 const greetings = [
   { lang: "EN", text: "Welcome" },
   { lang: "FR", text: "Bienvenue" },
@@ -18,7 +20,16 @@ const greetings = [
 export function LanguagesMarquee() {
   const items = [...greetings, ...greetings];
   return (
-    <section className="relative py-8 border-y border-[color:var(--border)] bg-surface overflow-hidden">
+    <section
+      aria-label="14 guest languages, auto-translated"
+      className="relative py-8 border-b border-[color:var(--border)] bg-surface overflow-hidden"
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-5">
+        <p className="eyebrow flex items-center gap-2">
+          <Globe className="h-3 w-3 text-emerald-brand" />
+          We greet your guest in their language &middot; 14 supported, auto-translated
+        </p>
+      </div>
       <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-surface to-transparent z-10" />
       <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-surface to-transparent z-10" />
       <div className="flex animate-marquee whitespace-nowrap will-change-transform">

@@ -1,4 +1,4 @@
-import { Quote, Star, Globe } from "lucide-react";
+import { Quote, Star } from "lucide-react";
 
 const HOTELS = [
   "Plaza Hotel \u2022 Milan",
@@ -7,23 +7,6 @@ const HOTELS = [
   "Vela Bay \u2022 Limassol",
   "The Sundial \u2022 Tel Aviv",
   "Casa Vinea \u2022 Paphos",
-];
-
-const LANGS = [
-  "EN",
-  "FR",
-  "ES",
-  "IT",
-  "DE",
-  "AR",
-  "JP",
-  "CN",
-  "RU",
-  "PT",
-  "TR",
-  "KR",
-  "GR",
-  "HE",
 ];
 
 export function TrustBar() {
@@ -57,8 +40,8 @@ export function TrustBar() {
             <div className="card-surface p-5 sm:p-6 relative">
               <Quote className="absolute -top-3 left-5 h-6 w-6 text-emerald-brand bg-card rounded-full p-1 border border-[color:var(--border)]" />
               <p className="text-ink text-base leading-relaxed">
-                "Our Booking score went from 8.4 to 8.9 in three months. The
-                review loop alone paid for the platform."
+                &ldquo;Our Booking score went from 8.4 to 8.9 in three months.
+                The review loop alone paid for the platform.&rdquo;
               </p>
               <div className="mt-4 flex items-center gap-3">
                 <div className="h-8 w-8 rounded-full bg-emerald-brand text-primary-foreground flex items-center justify-center font-mono text-[11px]">
@@ -74,24 +57,6 @@ export function TrustBar() {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Languages strip */}
-        <div className="mt-8 pt-6 border-t border-[color:var(--border)] flex items-center gap-4 flex-wrap">
-          <span className="eyebrow flex items-center gap-2">
-            <Globe className="h-3 w-3 text-emerald-brand" />
-            14 guest languages
-          </span>
-          <div className="flex flex-wrap gap-x-3 gap-y-1.5">
-            {LANGS.map((l) => (
-              <span
-                key={l}
-                className="font-mono text-[10px] uppercase tracking-[0.18em] text-foreground/55"
-              >
-                {l}
-              </span>
-            ))}
           </div>
         </div>
       </div>

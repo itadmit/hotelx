@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Navbar } from "@/components/marketing/Navbar";
 import { Hero } from "@/components/marketing/Hero";
 import { TrustBar } from "@/components/marketing/TrustBar";
+import { LanguagesMarquee } from "@/components/marketing/LanguagesMarquee";
 import { OutcomesSection } from "@/components/marketing/OutcomesSection";
 import { LivePreview } from "@/components/marketing/LivePreview";
 import { HowItWorks } from "@/components/marketing/HowItWorks";
@@ -77,9 +78,11 @@ export default function Home() {
       <main className="flex-grow">
         {/* 1. Hero — outcome H1 + 2 KPI chips */}
         <Hero />
-        {/* 2. Trust strip — hotels + quote + 14 languages */}
+        {/* 2. Trust strip — hotels + marketing-manager quote */}
         <TrustBar />
-        {/* 3. Outcomes — the 3 numbers a marketing manager cares about */}
+        {/* 3. Languages marquee — 14 welcomes, "we speak your guests' language" */}
+        <LanguagesMarquee />
+        {/* 4. Outcomes — the 3 numbers a marketing manager cares about */}
         <OutcomesSection />
         {/* 4. Live preview — the dashboard your team uses */}
         <LivePreview />
