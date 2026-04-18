@@ -1,0 +1,144 @@
+---
+description: Marketing site section patterns — hero, features, payments, CTA structure.
+globs: src/components/marketing/**/*.tsx,src/app/page.tsx,src/app/demo/**/*.tsx
+alwaysApply: false
+---
+
+# Marketing section patterns
+
+The marketing site lives in `src/components/marketing/`. Compose the homepage from these sections in `src/app/page.tsx`. Always follow the shared scaffold below — it is what gives the site its visual rhythm.
+
+## Section scaffold
+
+Every section is its own component, exports a named function, no default export, server-renderable when possible.
+
+```tsx
+export function PaymentsSection() {
+  return (
+    <section className="relative py-20 sm:py-28 overflow-hidden">
+      {/* Optional backdrop layer */}
+      <div className="absolute inset-0 bg-grid opacity-30 pointer-events-none" />
+      <div className="absolute -top-32 right-1/3 h-72 w-72 rounded-full bg-amber-soft blur-3xl opacity-60 pointer-events-none" />
+
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6">
+        {/* content */}
+      </div>
+    </section>
+  );
+}
+```
+
+Rules:
+
+- Vertical rhythm: `py-20 sm:py-28`. Hero gets `pt-24 sm:pt-32`.
+- Outer container: `max-w-7xl mx-auto px-4 sm:px-6`. **Do not** widen.
+- Backdrops are `absolute inset-0 pointer-events-none`. Use `bg-grid`, `bg-wash`, or a single soft `blur-3xl` color blob.
+
+## Eyebrow + display title
+
+Open every section with the same header rhythm:
+
+```tsx
+<span className="pill">
+  <CreditCard className="h-3 w-3" />
+  Payments
+</span>
+<h2 className="mt-5 font-display text-4xl sm:text-5xl tracking-tight leading-[1.05] text-ink">
+  Connect any
+  <br />
+  <span className="display-italic text-emerald-brand">payment processor.</span>
+</h2>
+<p className="mt-5 text-base sm:text-lg text-foreground/70 leading-relaxed max-w-md">
+  Subhead. Two sentences max. End with a sharp claim.
+</p>
+```
+
+- Pill variants: `.pill` (emerald), `.pill-amber`, `.pill-clay`. For hero / pricing use `<span className="pill pill-amber">// pricing · per property</span>`.
+- The italic accent is **mandatory** on H2s — it carries the brand voice.
+- Body copy uses `text-foreground/70` (never `text-gray-*`) and `max-w-md` / `max-w-2xl` to keep measure tight.
+
+## Two-column feature layout (copy + visual)
+
+Use `grid lg:grid-cols-12` and split 5/7. Copy left, visual right.
+
+```tsx
+<div className="grid lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+  <div className="lg:col-span-5">{/* eyebrow + h2 + bullets + CTAs */}</div>
+  <div className="lg:col-span-7">{/* card-elev showcase */}</div>
+</div>
+```
+
+Bullets pattern (icon badge + title + body):
+
+```tsx
+{POINTS.map((p) => {
+  const Icon = p.icon;
+  return (
+    <div key={p.title} className="flex items-start gap-3">
+      <span className="inline-flex h-9 w-9 rounded-lg bg-emerald-soft text-emerald-brand items-center justify-center shrink-0">
+        <Icon className="h-4 w-4" strokeWidth={2} />
+      </span>
+      <div className="leading-snug">
+        <p className="font-medium text-ink text-[15px]">{p.title}</p>
+        <p className="text-sm text-foreground/65 mt-1 max-w-md">{p.body}</p>
+      </div>
+    </div>
+  );
+})}
+```
+
+## Showcase card (right column)
+
+Wrap content in `card-elev p-6 sm:p-8`. Inside, build a mini-product preview:
+
+1. Header row: small mono label + display title + animated `live` pill.
+2. Grid of mini-tiles (`grid grid-cols-2 sm:grid-cols-3 gap-3`) with `card-surface`-style inner blocks: small icon badge, label, mono confirmation line.
+3. Code/terminal block — `bg-ink text-[#f1ebde] rounded-xl p-5 font-mono text-[12px]`. Comments in `text-amber-soft`, type names in `text-emerald-soft`.
+4. Stats trio at the bottom: three `card-surface` chips with mono eyebrow + `.numeral` value.
+
+This is the formula behind the Payments and LivePreview sections — reuse it for any new feature highlight.
+
+## CTAs in sections
+
+Pair primary + secondary, always rounded-full, side by side:
+
+```tsx
+<div className="mt-8 flex flex-wrap items-center gap-3">
+  <Link href="/demo" className="group inline-flex items-center justify-center gap-2 h-11 px-5 rounded-full bg-emerald-brand text-primary-foreground font-medium hover:bg-ink transition-colors">
+    Try the checkout
+    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+  </Link>
+  <Link href="/dashboard/payments" className="inline-flex items-center justify-center h-11 px-5 rounded-full border border-[color:var(--border)] bg-card text-ink font-medium hover:bg-surface transition-colors">
+    View admin
+  </Link>
+</div>
+```
+
+Section-level CTA copy is direct, single verb-led: "Try now", "Try the checkout", "Talk to sales". Avoid "Learn more" / "Click here".
+
+## Mobile
+
+- Stack columns at `lg:` breakpoint.
+- Drop one type step on mobile (`text-4xl sm:text-5xl`, `py-20 sm:py-28`).
+- Horizontal scrollers (Kanban, marquees): wrap with `overflow-x-auto scrollbar-none` and `snap-x snap-mandatory` if appropriate.
+
+## Page composition
+
+`src/app/page.tsx` order is intentional and shouldn't be reshuffled without reason:
+
+```
+<Navbar />
+<Hero />
+<LanguagesMarquee />
+<HowItWorks />
+<LivePreview />
+<Features />
+<PaymentsSection />
+<Audiences />
+<Stats />
+<PricingTeaser />
+<CTA />
+<Footer />
+```
+
+When adding a new section, place it after the closest topical sibling and follow the same scaffold above — that is what keeps the page coherent.

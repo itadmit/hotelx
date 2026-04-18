@@ -5,20 +5,27 @@ import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { Download, Copy } from "lucide-react";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
+import { QrPageSkeleton } from "@/components/dashboard/QrPageSkeleton";
 
 export default function QRPage() {
   const [rooms, setRooms] = useState<Array<{ id: string; number: string; code: string }>>([]);
   const [selectedRoomId, setSelectedRoomId] = useState("");
   const [qr, setQr] = useState<{ dataUrl: string; guestUrl: string } | null>(null);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   useEffect(() => {
     async function loadRooms() {
-      const response = await fetch("/api/rooms", { cache: "no-store" });
-      const data = await response.json();
-      const roomList = data.rooms ?? [];
-      setRooms(roomList);
-      if (roomList[0]?.id) {
-        setSelectedRoomId(roomList[0].id);
+      setIsInitialLoading(true);
+      try {
+        const response = await fetch("/api/rooms", { cache: "no-store" });
+        const data = await response.json();
+        const roomList = data.rooms ?? [];
+        setRooms(roomList);
+        if (roomList[0]?.id) {
+          setSelectedRoomId(roomList[0].id);
+        }
+      } finally {
+        setIsInitialLoading(false);
       }
     }
     loadRooms();
@@ -36,6 +43,10 @@ export default function QRPage() {
 
   return (
     <div className="space-y-8">
+      {isInitialLoading ? (
+        <QrPageSkeleton />
+      ) : (
+        <>
       <DashboardPageHeader
         eyebrow="Hotel · access"
         title="QR codes"
@@ -97,6 +108,8 @@ export default function QRPage() {
           )}
         </div>
       </div>
+        </>
+      )}
     </div>
   );
 }

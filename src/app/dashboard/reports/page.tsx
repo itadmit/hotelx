@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Download, TrendingUp } from "lucide-react";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
+import { DashboardPageLoading } from "@/components/dashboard/DashboardPageLoading";
 
 type AnalyticsResponse = {
   stats: {
@@ -18,12 +19,18 @@ type AnalyticsResponse = {
 
 export default function ReportsPage() {
   const [data, setData] = useState<AnalyticsResponse | null>(null);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
-      const response = await fetch("/api/analytics/overview", { cache: "no-store" });
-      const json = await response.json();
-      setData(json);
+      setIsInitialLoading(true);
+      try {
+        const response = await fetch("/api/analytics/overview", { cache: "no-store" });
+        const json = await response.json();
+        setData(json);
+      } finally {
+        setIsInitialLoading(false);
+      }
     }
     load();
   }, []);
@@ -32,6 +39,10 @@ export default function ReportsPage() {
 
   return (
     <div className="space-y-8">
+      {isInitialLoading ? (
+        <DashboardPageLoading variant="analytics" />
+      ) : (
+        <>
       <DashboardPageHeader
         eyebrow="Insights · analytics"
         title="Reports"
@@ -102,6 +113,8 @@ export default function ReportsPage() {
           later.
         </p>
       </div>
+        </>
+      )}
     </div>
   );
 }

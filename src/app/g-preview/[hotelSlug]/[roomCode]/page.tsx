@@ -13,11 +13,12 @@ export default async function GuestPreviewPage({
     where: { slug: hotelSlug },
     include: {
       categories: {
+        where: { parentId: null },
         orderBy: [{ order: "asc" }, { name: "asc" }],
       },
       services: {
         where: { isActive: true },
-        take: 5,
+        take: 12,
         orderBy: { name: "asc" },
       },
       rooms: {
@@ -44,6 +45,7 @@ export default async function GuestPreviewPage({
         id: c.id,
         name: c.name,
         icon: c.icon,
+        slug: c.slug,
       }))}
       services={hotel.services.map((s) => ({
         id: s.id,

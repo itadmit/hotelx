@@ -1,13 +1,17 @@
 "use client";
 
-import { Bell, Search, Menu, Command } from "lucide-react";
+import Link from "next/link";
+import { Search, Menu, Command, ExternalLink } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { ThemeToggle } from "@/components/dashboard/ThemeToggle";
+import { NotificationsBell } from "@/components/dashboard/NotificationsBell";
+
 
 export function Header({ onOpenMobile }: { onOpenMobile: () => void }) {
   const { data } = useSession();
   const userName = data?.user?.name ?? "Hotel User";
   const role = (data?.user?.role ?? "Manager").toString();
+  const hotelSlug = data?.user?.hotelSlug ?? null;
   const initials = userName
     .split(" ")
     .map((part) => part[0])
@@ -16,7 +20,7 @@ export function Header({ onOpenMobile }: { onOpenMobile: () => void }) {
     .toUpperCase();
 
   return (
-    <header className="sticky top-0 z-30 h-16 px-4 sm:px-6 lg:px-8 flex items-center gap-3 bg-background/80 backdrop-blur-md border-b border-[color:var(--border)]">
+    <header className="sticky top-0 z-40 h-16 w-full px-4 sm:px-6 lg:px-8 flex items-center gap-3 bg-background/85 backdrop-blur-md border-b border-[color:var(--border)]">
       {/* Mobile menu trigger */}
       <button
         type="button"
@@ -28,7 +32,7 @@ export function Header({ onOpenMobile }: { onOpenMobile: () => void }) {
       </button>
 
       {/* Search */}
-      <div className="flex-1 max-w-xl">
+      <div className="flex-1 min-w-0 max-w-xl">
         <label className="group relative flex items-center h-10 rounded-md bg-surface border border-[color:var(--border)] focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/15 transition-all">
           <Search className="absolute left-3 h-4 w-4 text-foreground/40 group-focus-within:text-primary transition-colors" />
           <input
@@ -43,17 +47,24 @@ export function Header({ onOpenMobile }: { onOpenMobile: () => void }) {
       </div>
 
       {/* Right side */}
-      <div className="flex items-center gap-2 sm:gap-3">
+      <div className="ml-auto shrink-0 flex items-center gap-2 sm:gap-3">
+        {hotelSlug ? (
+          <Link
+            href={`/g/${hotelSlug}`}
+            target="_blank"
+            rel="noreferrer noopener"
+            aria-label="Open guest hotel page in a new tab"
+            title="View your guest hotel page"
+            className="group hidden sm:inline-flex items-center gap-1.5 h-9 px-3 rounded-md border border-[color:var(--border)] bg-surface hover:bg-background hover:border-primary/30 text-foreground/75 hover:text-ink text-[13px] font-medium transition-colors"
+          >
+            <ExternalLink className="h-3.5 w-3.5 text-primary" strokeWidth={2} />
+            <span className="hidden md:inline">Visit hotel page</span>
+          </Link>
+        ) : null}
+
         <ThemeToggle />
 
-        <button
-          type="button"
-          aria-label="Notifications"
-          className="relative h-10 w-10 rounded-md flex items-center justify-center hover:bg-surface text-foreground/70"
-        >
-          <Bell className="h-4.5 w-4.5" strokeWidth={2} />
-          <span className="absolute top-2 right-2.5 h-2 w-2 rounded-full bg-clay ring-2 ring-background" />
-        </button>
+        <NotificationsBell />
 
         <div className="hidden sm:block w-px h-6 bg-[color:var(--border)]" />
 

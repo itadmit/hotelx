@@ -9,7 +9,11 @@ export async function GET(
     const { requestId } = await params
     const request = await prisma.request.findUnique({
       where: { id: requestId },
-      include: {
+      select: {
+        id: true,
+        status: true,
+        createdAt: true,
+        notes: true,
         room: { select: { number: true, code: true } },
         service: { select: { name: true, estimatedTime: true } },
         hotel: { select: { name: true, slug: true } },

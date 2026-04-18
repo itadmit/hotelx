@@ -26,6 +26,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { DashboardPageLoading } from "@/components/dashboard/DashboardPageLoading";
 
 type RequestStatus = "NEW" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
 
@@ -67,27 +68,38 @@ export default function DashboardPage() {
   } | null>(null);
   const [form, setForm] = useState({ roomId: "", serviceId: "", notes: "" });
   const [loading, setLoading] = useState(true);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
-  async function loadData() {
+  async function loadData(options?: { initial?: boolean }) {
+    const isInitial = options?.initial ?? false;
+    if (isInitial) {
+      setIsInitialLoading(true);
+    }
     setLoading(true);
-    const [analyticsRes, reqRes, roomsRes, servicesRes] = await Promise.all([
-      fetch("/api/analytics/overview", { cache: "no-store" }),
-      fetch("/api/requests", { cache: "no-store" }),
-      fetch("/api/rooms", { cache: "no-store" }),
-      fetch("/api/services", { cache: "no-store" }),
-    ]);
+    try {
+      const [analyticsRes, reqRes, roomsRes, servicesRes] = await Promise.all([
+        fetch("/api/analytics/overview", { cache: "no-store" }),
+        fetch("/api/requests", { cache: "no-store" }),
+        fetch("/api/rooms", { cache: "no-store" }),
+        fetch("/api/services", { cache: "no-store" }),
+      ]);
 
-    const analyticsData = await analyticsRes.json();
-    const reqData = await reqRes.json();
-    const roomData = await roomsRes.json();
-    const serviceData = await servicesRes.json();
+      const analyticsData = await analyticsRes.json();
+      const reqData = await reqRes.json();
+      const roomData = await roomsRes.json();
+      const serviceData = await servicesRes.json();
 
-    setStats(analyticsData.stats ?? null);
-    setRequests(reqData.requests ?? []);
-    setRooms(roomData.rooms ?? []);
-    setServices(serviceData.services ?? []);
-    setLoading(false);
+      setStats(analyticsData.stats ?? null);
+      setRequests(reqData.requests ?? []);
+      setRooms(roomData.rooms ?? []);
+      setServices(serviceData.services ?? []);
+    } finally {
+      setLoading(false);
+      if (isInitial) {
+        setIsInitialLoading(false);
+      }
+    }
   }
 
   async function importDemoData() {
@@ -115,7 +127,7 @@ export default function DashboardPage() {
   }
 
   useEffect(() => {
-    loadData();
+    loadData({ initial: true });
   }, []);
 
   const latestRequests = requests.slice(0, 8);
@@ -127,6 +139,10 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
+      {isInitialLoading ? (
+        <DashboardPageLoading variant="overview" />
+      ) : (
+        <>
       {/* Page header */}
       <div className="flex flex-wrap items-end justify-between gap-4 pt-2">
         <div>
@@ -422,6 +438,8 @@ export default function DashboardPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+        </>
+      )}
     </div>
   );
 }

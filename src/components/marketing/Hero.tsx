@@ -157,7 +157,7 @@ function HeroComposition() {
                       <div className="flex items-center gap-1.5">
                         <span className="relative h-5 w-5 rounded-md bg-emerald-brand flex items-center justify-center">
                           <span className="font-display text-[10px] leading-none text-primary-foreground">H</span>
-                          <span className="absolute -bottom-0.5 -right-0.5 h-1.5 w-1.5 rounded-full bg-amber-brand border border-background" />
+                          <span className="absolute -bottom-0.5 -right-0.5 h-1.5 w-1.5 rounded-full bg-emerald-brand border border-background" />
                         </span>
                         <span className="font-display text-[13px] tracking-tight text-ink leading-none">
                           Hotel<span className="text-emerald-brand">X</span>

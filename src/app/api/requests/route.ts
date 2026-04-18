@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma"
 import { ApiAuthError, requireSessionUser } from "@/lib/server-auth"
 import { RequestStatus } from "@prisma/client"
 import { z } from "zod"
+import { emitForBoth } from "@/lib/notifications/emit"
 
 const createRequestSchema = z.object({
   roomId: z.string().min(1),
@@ -21,9 +22,31 @@ export async function GET(request: Request) {
         hotelId: user.hotelId!,
         status: status ?? undefined,
       },
-      include: {
-        room: true,
-        service: true,
+      select: {
+        id: true,
+        status: true,
+        notes: true,
+        createdAt: true,
+        updatedAt: true,
+        completedAt: true,
+        room: {
+          select: {
+            id: true,
+            number: true,
+          },
+        },
+        service: {
+          select: {
+            id: true,
+            name: true,
+            category: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
         assignee: {
           select: { id: true, name: true, email: true, role: true },
         },
@@ -81,7 +104,26 @@ export async function POST(request: Request) {
         notes: parsed.data.notes ?? null,
         status: RequestStatus.NEW,
       },
-      include: { room: true, service: true, assignee: true },
+      include: {
+        room: true,
+        service: true,
+        assignee: true,
+        hotel: { select: { slug: true } },
+      },
+    })
+
+    void emitForBoth({
+      hotelId: user.hotelId!,
+      type: "REQUEST_CREATED",
+      roomId: createdRequest.roomId,
+      requestId: createdRequest.id,
+      context: {
+        serviceName: createdRequest.service.name,
+        roomNumber: createdRequest.room.number,
+        hotelSlug: createdRequest.hotel.slug,
+        roomCode: createdRequest.room.code,
+        requestId: createdRequest.id,
+      },
     })
 
     return NextResponse.json({ request: createdRequest }, { status: 201 })

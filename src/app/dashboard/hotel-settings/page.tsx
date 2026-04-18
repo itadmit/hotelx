@@ -4,29 +4,56 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Upload, Globe, Palette, Building2, Save, Trash2 } from "lucide-react";
+import {
+  Upload,
+  Globe,
+  Palette,
+  Building2,
+  Save,
+  Trash2,
+  Wallet,
+  Power,
+} from "lucide-react";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
 import { cn } from "@/lib/utils";
+import { HotelSettingsSkeleton } from "@/components/dashboard/HotelSettingsSkeleton";
 
 export default function HotelSettingsPage() {
   const [activeTab, setActiveTab] = useState("general");
   const [primaryColor, setPrimaryColor] = useState("#0e5240");
   const [name, setName] = useState("");
+  const [slug, setSlug] = useState("");
   const [logo, setLogo] = useState("");
+  const [defaultCurrency, setDefaultCurrency] = useState("USD");
+  const [paymentsEnabled, setPaymentsEnabled] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
-  async function loadHotel() {
-    const response = await fetch("/api/hotel", { cache: "no-store" });
-    const data = await response.json();
-    if (data.hotel) {
-      setName(data.hotel.name ?? "");
-      setLogo(data.hotel.logo ?? "");
-      setPrimaryColor(data.hotel.primaryColor ?? "#0e5240");
+  async function loadHotel(options?: { initial?: boolean }) {
+    const isInitial = options?.initial ?? false;
+    if (isInitial) {
+      setIsInitialLoading(true);
+    }
+    try {
+      const response = await fetch("/api/hotel", { cache: "no-store" });
+      const data = await response.json();
+      if (data.hotel) {
+        setName(data.hotel.name ?? "");
+        setSlug(data.hotel.slug ?? "");
+        setLogo(data.hotel.logo ?? "");
+        setPrimaryColor(data.hotel.primaryColor ?? "#0e5240");
+        setDefaultCurrency(data.hotel.defaultCurrency ?? "USD");
+        setPaymentsEnabled(Boolean(data.hotel.paymentsEnabled));
+      }
+    } finally {
+      if (isInitial) {
+        setIsInitialLoading(false);
+      }
     }
   }
 
   useEffect(() => {
-    loadHotel();
+    loadHotel({ initial: true });
   }, []);
 
   async function saveSettings() {
@@ -36,8 +63,11 @@ export default function HotelSettingsPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         name,
+        slug,
         logo: logo || null,
         primaryColor,
+        defaultCurrency,
+        paymentsEnabled,
       }),
     });
     setSaving(false);
@@ -68,13 +98,21 @@ export default function HotelSettingsPage() {
 
   return (
     <div className="space-y-8 max-w-5xl mx-auto pb-20">
+      {isInitialLoading ? (
+        <HotelSettingsSkeleton />
+      ) : (
+        <>
       <div className="sticky top-0 z-10 bg-background/90 backdrop-blur-md py-4 -mx-4 px-4 sm:mx-0 border-b border-[color:var(--border)] sm:border-0">
         <DashboardPageHeader
           eyebrow="Workspace · identity"
           title="Hotel settings"
           description="Name, branding, and guest-facing preferences for your property."
         >
-          <Button variant="outline" onClick={loadHotel} className="h-9 text-xs rounded-md">
+          <Button
+            variant="outline"
+            onClick={() => loadHotel()}
+            className="h-9 text-xs rounded-md"
+          >
             Discard
           </Button>
           <Button
@@ -94,6 +132,7 @@ export default function HotelSettingsPage() {
               {navBtn("general", "General", Building2)}
               {navBtn("branding", "Branding", Palette)}
               {navBtn("localization", "Localization", Globe)}
+              {navBtn("payments", "Payments", Wallet)}
             </nav>
           </div>
         </div>
@@ -114,6 +153,25 @@ export default function HotelSettingsPage() {
                   onChange={(event) => setName(event.target.value)}
                   className="bg-surface border-[color:var(--border)] rounded-md"
                 />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="hotelSlug">Hotel URL slug</Label>
+                <Input
+                  id="hotelSlug"
+                  value={slug}
+                  onChange={(event) =>
+                    setSlug(
+                      event.target.value
+                        .toLowerCase()
+                        .replace(/[^a-z0-9-]/g, "")
+                        .replace(/-{2,}/g, "-")
+                    )
+                  }
+                  className="bg-surface border-[color:var(--border)] rounded-md font-mono"
+                />
+                <p className="text-xs text-foreground/45">
+                  Guest URL: <span className="font-mono">/g/{slug || "your-hotel"}</span>
+                </p>
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="logo">Logo</Label>
@@ -182,32 +240,54 @@ export default function HotelSettingsPage() {
           <div id="localization" className="card-surface p-6 lg:p-8 space-y-6 scroll-mt-28">
             <div>
               <h3 className="font-display text-lg text-ink">Localization</h3>
-              <p className="text-sm text-foreground/55 mt-0.5">Default language and currency for quotes.</p>
+              <p className="text-sm text-foreground/55 mt-0.5">Currency used in payments and service pricing defaults.</p>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-5">
-              <div className="grid gap-2">
-                <Label htmlFor="language">Default language</Label>
-                <select
-                  id="language"
-                  className="flex h-10 w-full rounded-md border border-[color:var(--border)] bg-surface px-3 py-2 text-sm"
-                >
-                  <option>English</option>
-                  <option>Hebrew</option>
-                  <option>Spanish</option>
-                </select>
-              </div>
+            <div className="grid md:grid-cols-1 gap-5">
               <div className="grid gap-2">
                 <Label htmlFor="currency">Currency</Label>
                 <select
                   id="currency"
+                  value={defaultCurrency}
+                  onChange={(event) => setDefaultCurrency(event.target.value)}
                   className="flex h-10 w-full rounded-md border border-[color:var(--border)] bg-surface px-3 py-2 text-sm"
                 >
-                  <option>USD ($)</option>
-                  <option>ILS (₪)</option>
-                  <option>EUR (€)</option>
+                  <option value="USD">USD ($)</option>
+                  <option value="ILS">ILS (₪)</option>
+                  <option value="EUR">EUR (€)</option>
+                  <option value="GBP">GBP (£)</option>
                 </select>
               </div>
+            </div>
+          </div>
+
+          <div id="payments" className="card-surface p-6 lg:p-8 space-y-6 scroll-mt-28">
+            <div>
+              <h3 className="font-display text-lg text-ink">Payments</h3>
+              <p className="text-sm text-foreground/55 mt-0.5">
+                Master toggle for payment-required services across the hotel.
+              </p>
+            </div>
+            <div className="rounded-lg border border-[color:var(--border)] bg-surface p-4 flex items-center justify-between gap-4">
+              <div>
+                <p className="text-sm font-medium text-ink">Accept guest payments</p>
+                <p className="text-xs text-foreground/55 mt-0.5">
+                  When off, all requests are treated as pay-later to room.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPaymentsEnabled((prev) => !prev)}
+                className={cn(
+                  "inline-flex items-center gap-2 h-9 px-3 rounded-md border text-xs font-medium transition-colors",
+                  paymentsEnabled
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-background text-foreground/65 border-[color:var(--border)]"
+                )}
+              >
+                <Power className="h-3.5 w-3.5" />
+                {paymentsEnabled ? "Enabled" : "Disabled"}
+              </button>
             </div>
           </div>
 
@@ -227,6 +307,8 @@ export default function HotelSettingsPage() {
           </div>
         </div>
       </div>
+        </>
+      )}
     </div>
   );
 }

@@ -32,7 +32,10 @@ export function Navbar() {
         <Link href="/" className="flex items-center gap-2.5">
           <span className="relative w-8 h-8 rounded-md bg-emerald-brand flex items-center justify-center text-primary-foreground">
             <span className="font-display text-base leading-none">H</span>
-            <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full bg-amber-brand border-2 border-background" />
+            <span className="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5">
+              <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-brand opacity-60 animate-ping" />
+              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-brand border-2 border-background" />
+            </span>
           </span>
           <span className="font-display text-xl tracking-tight text-ink">
             Hotel<span className="text-emerald-brand">X</span>

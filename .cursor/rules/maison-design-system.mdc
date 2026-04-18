@@ -1,0 +1,125 @@
+---
+description: HotelX Maison + Tech design system — color tokens, typography, surfaces, motifs.
+alwaysApply: true
+---
+
+# HotelX design system — Maison (default) + Tech
+
+The product runs in **two themes** swapped via `data-theme` on `<html>`. Same tokens, same components — only CSS variables change. Never hardcode colors; use the tokens.
+
+## Theme switch
+
+- `data-theme="maison"` (default, also `:root`) — warm light: bone cream, deep emerald, warm amber. The marketing site, the guest app (`/g/...`), and dashboard "Maison" mode.
+- `data-theme="tech"` — minimalist grayscale, single near-black accent. Optional dashboard mode.
+- The guest layout (`src/app/g/layout.tsx`) is **locked** to `data-theme="maison"`. Never let it inherit.
+
+## Color tokens (use these names, not hex)
+
+| Token | Maison | Tech | Use |
+|---|---|---|---|
+| `bg-background` | `#f7f3ec` warm bone | `#fafafa` | Page bg |
+| `bg-surface` | `#f1ebde` ivory paper | `#ffffff` | Subtle panels |
+| `bg-card` | `#fbf8f1` | `#ffffff` | Cards |
+| `text-ink` | `#0c1715` near-black | `#0a0a0a` | Headings, primary text |
+| `text-foreground` | `#15201c` | `#52525b` | Body text |
+| `text-foreground/65` | — | — | Secondary copy (use `/55`, `/65`, `/75`) |
+| `bg-primary` / `text-primary` | deep emerald `#0e5240` | near-black `#0a0a0a` | Brand actions, active nav |
+| `bg-emerald-soft` / `text-emerald-brand` | `#d4e3d9` / `#0e5240` | `#d1fae5` / `#10b981` | Success pills, live status |
+| `bg-amber-soft` / `text-amber-brand` | `#f0d9b8` / `#b96b2a` | `#fef3c7` / `#f59e0b` | Warm highlights, eyebrow accents |
+| `text-clay` | `#b8543d` terracotta | `#ef4444` | Errors, destructive |
+| `border-[color:var(--border)]` | hairline ink | `#ececec` | All borders |
+
+Use opacity suffixes for emphasis (`/10`, `/40`, `/65`). **Never** use raw `text-gray-*` / `bg-zinc-*` — they break the theme swap.
+
+## Typography
+
+Three fonts, loaded in `src/app/layout.tsx`:
+
+- `font-sans` (Manrope) — default body & UI.
+- `font-display` (Fraunces, with `opsz` + `SOFT` axes) — applied automatically to `h1-h6`. Use `font-display` for hero titles in marketing & guest. Pair with `tracking-tight` and `leading-[1.05]`.
+- `font-mono` (JetBrains Mono) — only for eyebrows, badges, numerals labels, code.
+
+Italic accents: append a single italic phrase using `<span className="display-italic text-emerald-brand">…</span>` to soften display headings. This is the signature move:
+
+```tsx
+<h1 className="font-display text-5xl tracking-tight leading-[1.05] text-ink">
+  Connect any
+  <br />
+  <span className="display-italic text-emerald-brand">payment processor.</span>
+</h1>
+```
+
+Numerals (KPIs, prices, stats) — wrap in `.numeral` so they pick the serif treatment in Maison and tighten in Tech automatically.
+
+## Custom utilities (defined in `globals.css`)
+
+| Class | Purpose |
+|---|---|
+| `.bg-grid` | Hairline 64px grid backdrop |
+| `.bg-wash` | Soft warm radial gradient (hero backdrops) |
+| `.paper` | Subtle paper-dot texture |
+| `.card-surface` | Standard card (`var(--card)` + border + radius) |
+| `.card-elev` | Elevated card with soft shadow (flat in Tech) |
+| `.hairline` | 1px gradient divider |
+| `.pill` / `.pill-amber` / `.pill-clay` | Mono uppercase chip |
+| `.eyebrow` | Mono uppercase section label, `tracking: 0.18em` |
+| `.numeral` | Serif tabular figures |
+| `.display-italic` | Italic phrase inside display headings |
+| `.scrollbar-none` | Hide scrollbars on horizontal scroll containers |
+| `.animate-marquee` / `.pulse-ring` / `.reveal` | Stock motion |
+
+Always reach for these before writing new CSS.
+
+## Surfaces & elevation
+
+- Default container: `card-surface p-5 sm:p-6`.
+- Hero / feature card: `card-elev p-6 sm:p-8`.
+- Dark-on-bone "code"/showcase block: `bg-ink text-[#f1ebde] rounded-xl p-5 font-mono text-[12px]` with `text-amber-soft` for comments and `text-emerald-soft` for type names.
+- Borders: always `border border-[color:var(--border)]`.
+- Radii: `rounded-xl` for inner cards, `rounded-2xl` for hero cards, `rounded-full` for primary CTAs.
+
+## Buttons
+
+Primary CTA (Maison "concierge button"):
+
+```tsx
+<button className="group inline-flex items-center justify-center gap-2 h-11 px-5 rounded-full bg-emerald-brand text-primary-foreground font-medium hover:bg-ink transition-colors">
+  Try the checkout
+  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+</button>
+```
+
+Secondary:
+
+```tsx
+<button className="inline-flex items-center justify-center h-11 px-5 rounded-full border border-[color:var(--border)] bg-card text-ink font-medium hover:bg-surface transition-colors">
+  View admin
+</button>
+```
+
+In Tech mode the same classes resolve to a near-black primary automatically.
+
+## Iconography
+
+Lucide React only. Stroke `2`, sizes `h-3` / `h-3.5` / `h-4` / `h-5`. Inside circular badges:
+
+```tsx
+<span className="inline-flex h-9 w-9 rounded-lg bg-emerald-soft text-emerald-brand items-center justify-center">
+  <ShieldCheck className="h-4 w-4" strokeWidth={2} />
+</span>
+```
+
+## Motifs to reuse
+
+- **Live pill**: `<span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-soft text-emerald-brand font-mono text-[10px] uppercase tracking-[0.16em]"><span className="h-1.5 w-1.5 rounded-full bg-emerald-brand animate-pulse" />live</span>`
+- **Eyebrow + display title + italic accent** opens every section.
+- **Stat chips** trio at bottom of feature cards (`Latency · Encryption · Webhooks` style).
+- **iPhone mockup** in marketing hero — keep proportions, bubbles always above the device.
+
+## Anti-patterns
+
+- ❌ `bg-white`, `bg-black`, `text-gray-500`, raw hex in JSX.
+- ❌ `font-bold` on display headings (use `font-medium` + Fraunces weight).
+- ❌ Generic icons from emoji or other libraries.
+- ❌ Square corners on CTAs (`rounded-md` only on inputs / dashboard buttons).
+- ❌ Hard shadows. Use `card-elev` or nothing.

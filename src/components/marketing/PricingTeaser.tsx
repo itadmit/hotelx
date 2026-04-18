@@ -7,7 +7,13 @@ const plans = [
     price: "€89",
     suffix: "/mo",
     description: "Up to 30 rooms. Everything to launch beautifully.",
-    features: ["Guest QR app", "Staff dashboard", "5 staff seats", "Email support"],
+    features: [
+      "Guest QR app",
+      "Staff dashboard",
+      "5 staff seats",
+      "Bring any payment provider · 0% fee",
+      "Email support",
+    ],
     cta: "Start free trial",
     href: "/signup",
     highlight: false,
@@ -56,7 +62,9 @@ export function PricingTeaser() {
             <span className="display-italic text-emerald-brand">your suites.</span>
           </h2>
           <p className="mt-4 text-foreground/70">
-            Honest pricing. No per-request fees. Cancel anytime.
+            Honest pricing. No per-request fees.{" "}
+            <span className="text-ink font-medium">0% transaction fees</span>{" "}
+            during launch. Cancel anytime.
           </p>
         </div>
 

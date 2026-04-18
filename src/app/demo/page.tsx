@@ -35,7 +35,7 @@ async function pickDemoTarget() {
 
 export default async function DemoPage() {
   const target = await pickDemoTarget();
-  const demoUrl = target ? `/g/${target.hotelSlug}/${target.roomCode}` : null;
+  const demoUrl = target ? `/g/${target.hotelSlug}/${target.roomCode}?demo=1` : null;
 
   return (
     <div className="min-h-screen bg-background flex flex-col">

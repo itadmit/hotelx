@@ -15,6 +15,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
+import { RoomsPageSkeleton } from "@/components/dashboard/RoomsPageSkeleton";
 import { Search, Plus, QrCode, Download, Trash2 } from "lucide-react";
 import Link from "next/link";
 
@@ -37,17 +38,28 @@ export default function RoomsPage() {
   );
   const [newRoom, setNewRoom] = useState({ number: "", type: "Standard" });
   const [loading, setLoading] = useState(true);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
-  async function loadRooms() {
+  async function loadRooms(options?: { initial?: boolean }) {
+    const isInitial = options?.initial ?? false;
+    if (isInitial) {
+      setIsInitialLoading(true);
+    }
     setLoading(true);
-    const response = await fetch("/api/rooms", { cache: "no-store" });
-    const data = await response.json();
-    setRooms(data.rooms ?? []);
-    setLoading(false);
+    try {
+      const response = await fetch("/api/rooms", { cache: "no-store" });
+      const data = await response.json();
+      setRooms(data.rooms ?? []);
+    } finally {
+      setLoading(false);
+      if (isInitial) {
+        setIsInitialLoading(false);
+      }
+    }
   }
 
   useEffect(() => {
-    loadRooms();
+    loadRooms({ initial: true });
   }, []);
 
   async function createRoom() {
@@ -171,6 +183,9 @@ export default function RoomsPage() {
         </DialogContent>
       </Dialog>
 
+      {isInitialLoading ? (
+        <RoomsPageSkeleton />
+      ) : (
       <div className="card-surface overflow-hidden">
         <div className="p-5 border-b border-[color:var(--border)] flex flex-col md:flex-row gap-4 justify-between items-center">
           <div className="relative w-full md:max-w-sm">
@@ -267,6 +282,7 @@ export default function RoomsPage() {
           </table>
         </div>
       </div>
+      )}
     </div>
   );
 }

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import prisma from "@/lib/prisma"
 import { ApiAuthError, requireSessionUser } from "@/lib/server-auth"
 import { demoCategories, demoRooms, demoServices } from "@/lib/demo-data"
+import { encryptJson } from "@/lib/crypto"
 import { RequestStatus } from "@prisma/client"
 
 export async function POST() {
@@ -40,10 +41,38 @@ export async function POST() {
       const slugToCategory = new Map<string, string>()
       existingCategories.forEach((cat) => slugToCategory.set(cat.slug, cat.id))
 
-      for (const category of demoCategories) {
+      const roots = demoCategories.filter((c) => !c.parentSlug)
+      const children = demoCategories.filter((c) => c.parentSlug)
+
+      for (const category of roots) {
         if (!slugToCategory.has(category.slug)) {
           const created = await tx.category.create({
-            data: { ...category, hotelId },
+            data: {
+              name: category.name,
+              slug: category.slug,
+              icon: category.icon,
+              order: category.order,
+              hotelId,
+              parentId: null,
+            },
+          })
+          slugToCategory.set(created.slug, created.id)
+        }
+      }
+
+      for (const category of children) {
+        if (!slugToCategory.has(category.slug)) {
+          const parentId = slugToCategory.get(category.parentSlug!)
+          if (!parentId) continue
+          const created = await tx.category.create({
+            data: {
+              name: category.name,
+              slug: category.slug,
+              icon: category.icon,
+              order: category.order,
+              hotelId,
+              parentId,
+            },
           })
           slugToCategory.set(created.slug, created.id)
         }
@@ -83,6 +112,8 @@ export async function POST() {
                 description: service.description,
                 price: service.price,
                 estimatedTime: service.estimatedTime,
+                requirePayment: service.requirePayment ?? false,
+                image: service.image ?? null,
                 categoryId,
                 hotelId,
               },
@@ -90,6 +121,34 @@ export async function POST() {
           )
         }
       }
+
+      // Provision a MOCK payment provider so demo flows are end-to-end
+      // without real keys. Also enable payments at the hotel level.
+      const existingMock = await tx.paymentProvider.findFirst({
+        where: { hotelId, type: "MOCK" },
+        select: { id: true },
+      })
+      if (!existingMock) {
+        await tx.paymentProvider.updateMany({
+          where: { hotelId },
+          data: { isDefault: false },
+        })
+        await tx.paymentProvider.create({
+          data: {
+            hotelId,
+            type: "MOCK",
+            displayName: "Demo processor",
+            isActive: true,
+            isDefault: true,
+            publicConfig: {},
+            secretConfig: encryptJson({}),
+          },
+        })
+      }
+      await tx.hotel.update({
+        where: { id: hotelId },
+        data: { paymentsEnabled: true },
+      })
 
       const allRooms = await tx.room.findMany({ where: { hotelId }, take: 3 })
       const allServices = await tx.service.findMany({ where: { hotelId }, take: 3 })

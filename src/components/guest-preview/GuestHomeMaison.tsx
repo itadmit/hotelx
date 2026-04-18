@@ -1,29 +1,16 @@
 import Link from "next/link";
 import {
-  ConciergeBell,
-  Utensils,
-  Sparkles,
-  Car,
-  Info,
-  Wrench,
   ChevronRight,
   Clock,
   Wine,
   Bell,
   Home,
   MessageCircle,
+  Sparkles,
   User,
   Wifi,
 } from "lucide-react";
-
-const iconMap: Record<string, typeof Utensils> = {
-  Utensils,
-  Sparkles,
-  ConciergeBell,
-  Car,
-  Wrench,
-  Info,
-};
+import { guestCategoryIcon } from "@/lib/guest-category-icons";
 
 /** Rotating accent surfaces — same palette as Hero mockup categories */
 const categoryAccents = [
@@ -35,7 +22,7 @@ const categoryAccents = [
   "bg-emerald-soft/80 text-emerald-brand",
 ] as const;
 
-type Category = { id: string; name: string; icon: string | null };
+type Category = { id: string; name: string; icon: string | null; slug?: string | null };
 type Service = {
   id: string;
   name: string;
@@ -107,7 +94,10 @@ export function GuestHomeMaison({
             <span className="font-display text-base leading-none text-primary-foreground">
               {initials}
             </span>
-            <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full bg-amber-brand border-2 border-background" />
+            <span className="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5">
+              <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-brand opacity-60 animate-ping" />
+              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-brand border-2 border-background" />
+            </span>
           </span>
           <span className="font-display text-lg tracking-tight text-ink truncate">
             {hotelName}
@@ -144,6 +134,7 @@ export function GuestHomeMaison({
       {featuredService ? (
         <Link
           href={`/g/${hotelSlug}/${roomCode}/service/${featuredService.id}`}
+          prefetch={true}
           className="mx-5 mt-5 relative overflow-hidden rounded-2xl bg-emerald-brand text-primary-foreground p-4 active:scale-[0.99] transition-transform group"
         >
           <div className="absolute -top-10 -right-8 h-32 w-32 rounded-full bg-amber-brand/30 blur-2xl pointer-events-none" />
@@ -177,12 +168,13 @@ export function GuestHomeMaison({
 
         <div className="mt-3 grid grid-cols-2 gap-2.5">
           {categories.map((category, index) => {
-            const Icon = iconMap[category.icon ?? "Info"] ?? Info;
+            const Icon = guestCategoryIcon(category.icon);
             const accent = categoryAccents[index % categoryAccents.length];
             return (
               <Link
                 key={category.id}
                 href={`/g/${hotelSlug}/${roomCode}/category/${category.id}`}
+                prefetch={index < 2}
                 className="group rounded-xl p-3 border border-[color:var(--border)] bg-card active:scale-[0.98] transition-transform"
               >
                 <div className="flex items-center justify-between">
@@ -219,6 +211,7 @@ export function GuestHomeMaison({
               <Link
                 key={item.id}
                 href={`/g/${hotelSlug}/${roomCode}/service/${item.id}`}
+                prefetch={false}
                 className="flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl border border-[color:var(--border)] bg-card hover:border-emerald-brand/25 transition-colors group"
               >
                 <div className="min-w-0 flex-1">

@@ -14,11 +14,14 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
+import { DashboardPageLoading } from "@/components/dashboard/DashboardPageLoading";
 import { Plus, Mail, MoreHorizontal, Search, Filter, Shield } from "lucide-react";
 
 export default function TeamPage() {
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const [roleFilter, setRoleFilter] = useState<"ALL" | "ADMIN" | "MANAGER" | "STAFF">("ALL");
+  const [accessFilter, setAccessFilter] = useState<"ALL" | "ELEVATED" | "LIMITED">("ALL");
   const [members, setMembers] = useState<
     Array<{
       id: string;
@@ -33,15 +36,26 @@ export default function TeamPage() {
     email: "",
     role: "STAFF",
   });
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
-  async function loadMembers() {
-    const response = await fetch("/api/team", { cache: "no-store" });
-    const data = await response.json();
-    setMembers(data.members ?? []);
+  async function loadMembers(options?: { initial?: boolean }) {
+    const isInitial = options?.initial ?? false;
+    if (isInitial) {
+      setIsInitialLoading(true);
+    }
+    try {
+      const response = await fetch("/api/team", { cache: "no-store" });
+      const data = await response.json();
+      setMembers(data.members ?? []);
+    } finally {
+      if (isInitial) {
+        setIsInitialLoading(false);
+      }
+    }
   }
 
   useEffect(() => {
-    loadMembers();
+    loadMembers({ initial: true });
   }, []);
 
   async function inviteMember() {
@@ -58,16 +72,45 @@ export default function TeamPage() {
 
   const filteredMembers = useMemo(() => {
     const term = search.trim().toLowerCase();
-    if (!term) return members;
-    return members.filter(
-      (member) =>
+    return members.filter((member) => {
+      const textMatch =
+        !term ||
         member.email.toLowerCase().includes(term) ||
-        (member.name ?? "").toLowerCase().includes(term)
-    );
-  }, [members, search]);
+        (member.name ?? "").toLowerCase().includes(term);
+      const roleMatch = roleFilter === "ALL" || member.role === roleFilter;
+      const accessMatch =
+        accessFilter === "ALL" ||
+        (accessFilter === "ELEVATED" &&
+          (member.role === "ADMIN" || member.role === "MANAGER")) ||
+        (accessFilter === "LIMITED" && member.role === "STAFF");
+
+      return textMatch && roleMatch && accessMatch;
+    });
+  }, [members, search, roleFilter, accessFilter]);
+
+  function cycleRoleFilter() {
+    setRoleFilter((prev) => {
+      if (prev === "ALL") return "ADMIN";
+      if (prev === "ADMIN") return "MANAGER";
+      if (prev === "MANAGER") return "STAFF";
+      return "ALL";
+    });
+  }
+
+  function cycleAccessFilter() {
+    setAccessFilter((prev) => {
+      if (prev === "ALL") return "ELEVATED";
+      if (prev === "ELEVATED") return "LIMITED";
+      return "ALL";
+    });
+  }
 
   return (
     <div className="space-y-8">
+      {isInitialLoading ? (
+        <DashboardPageLoading variant="list" />
+      ) : (
+        <>
       <DashboardPageHeader
         eyebrow="Workspace · people"
         title="Team"
@@ -145,11 +188,30 @@ export default function TeamPage() {
             />
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" className="text-foreground/55 rounded-md gap-2">
-              <Filter className="h-4 w-4" /> Role
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={cycleRoleFilter}
+              className="text-foreground/55 rounded-md gap-2"
+            >
+              <Filter className="h-4 w-4" />
+              Role: {roleFilter === "ALL" ? "all" : roleFilter.toLowerCase()}
             </Button>
-            <Button variant="ghost" size="sm" className="text-foreground/55 rounded-md gap-2">
-              <Shield className="h-4 w-4" /> Access
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={cycleAccessFilter}
+              className="text-foreground/55 rounded-md gap-2"
+            >
+              <Shield className="h-4 w-4" />
+              Access:{" "}
+              {accessFilter === "ALL"
+                ? "all"
+                : accessFilter === "ELEVATED"
+                  ? "elevated"
+                  : "limited"}
             </Button>
           </div>
         </div>
@@ -214,6 +276,8 @@ export default function TeamPage() {
           </table>
         </div>
       </div>
+        </>
+      )}
     </div>
   );
 }

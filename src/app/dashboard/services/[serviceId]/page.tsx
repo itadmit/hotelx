@@ -9,6 +9,7 @@ import { Select } from "@/components/ui/select";
 import { ArrowLeft, Save } from "lucide-react";
 import Link from "next/link";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
+import { DashboardPageLoading } from "@/components/dashboard/DashboardPageLoading";
 
 export default function ServiceEditorPage({
   params,
@@ -24,28 +25,40 @@ export default function ServiceEditorPage({
     price: "",
     estimatedTime: "",
     isActive: true,
+    requirePayment: false,
   });
+  const [paymentsEnabled, setPaymentsEnabled] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   useEffect(() => {
     async function init() {
-      const [serviceRes, categoriesRes] = await Promise.all([
-        fetch(`/api/services/${serviceId}`, { cache: "no-store" }),
-        fetch("/api/categories", { cache: "no-store" }),
-      ]);
-      const serviceData = await serviceRes.json();
-      const categoriesData = await categoriesRes.json();
-      const service = serviceData.service;
-      setCategories(categoriesData.categories ?? []);
+      setIsInitialLoading(true);
+      try {
+        const [serviceRes, categoriesRes, hotelRes] = await Promise.all([
+          fetch(`/api/services/${serviceId}`, { cache: "no-store" }),
+          fetch("/api/categories", { cache: "no-store" }),
+          fetch("/api/hotel", { cache: "no-store" }),
+        ]);
+        const serviceData = await serviceRes.json();
+        const categoriesData = await categoriesRes.json();
+        const hotelData = await hotelRes.json();
+        const service = serviceData.service;
+        setCategories(categoriesData.categories ?? []);
+        setPaymentsEnabled(Boolean(hotelData?.hotel?.paymentsEnabled));
 
-      if (service) {
-        setForm({
-          name: service.name ?? "",
-          description: service.description ?? "",
-          categoryId: service.categoryId ?? "",
-          price: service.price ?? "",
-          estimatedTime: service.estimatedTime ?? "",
-          isActive: Boolean(service.isActive),
-        });
+        if (service) {
+          setForm({
+            name: service.name ?? "",
+            description: service.description ?? "",
+            categoryId: service.categoryId ?? "",
+            price: service.price ?? "",
+            estimatedTime: service.estimatedTime ?? "",
+            isActive: Boolean(service.isActive),
+            requirePayment: Boolean(service.requirePayment),
+          });
+        }
+      } finally {
+        setIsInitialLoading(false);
       }
     }
     init();
@@ -64,6 +77,10 @@ export default function ServiceEditorPage({
 
   return (
     <div className="space-y-8">
+      {isInitialLoading ? (
+        <DashboardPageLoading variant="form" />
+      ) : (
+        <>
       <div className="flex flex-wrap items-center gap-3 pt-2">
         <Link href="/dashboard/services">
           <Button variant="ghost" size="icon" className="rounded-md">
@@ -168,6 +185,32 @@ export default function ServiceEditorPage({
                 <option value="inactive">Inactive</option>
               </Select>
             </div>
+            <div className="rounded-lg border border-[color:var(--border)] bg-surface p-3">
+              <label className="flex items-start gap-3 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  className="mt-0.5 h-4 w-4 rounded border-[color:var(--border)] accent-[color:var(--primary)]"
+                  checked={form.requirePayment}
+                  disabled={!paymentsEnabled}
+                  onChange={(event) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      requirePayment: event.target.checked,
+                    }))
+                  }
+                />
+                <span className="leading-tight">
+                  <span className="block text-sm text-ink font-medium">
+                    Require payment
+                  </span>
+                  <span className="block text-[11px] text-foreground/60 mt-0.5">
+                    {paymentsEnabled
+                      ? "Guests will pay before the request reaches staff."
+                      : "Enable payments in Settings → Payments to use this."}
+                  </span>
+                </span>
+              </label>
+            </div>
           </CardContent>
         </Card>
       </form>
@@ -182,6 +225,8 @@ export default function ServiceEditorPage({
           <Save className="h-4 w-4" /> Save
         </Button>
       </div>
+        </>
+      )}
     </div>
   );
 }

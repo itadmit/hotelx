@@ -4,6 +4,7 @@ import { LanguagesMarquee } from "@/components/marketing/LanguagesMarquee";
 import { HowItWorks } from "@/components/marketing/HowItWorks";
 import { LivePreview } from "@/components/marketing/LivePreview";
 import { Features } from "@/components/marketing/Features";
+import { PaymentsSection } from "@/components/marketing/PaymentsSection";
 import { Audiences } from "@/components/marketing/Audiences";
 import { Stats } from "@/components/marketing/Stats";
 import { PricingTeaser } from "@/components/marketing/PricingTeaser";
@@ -20,6 +21,7 @@ export default function Home() {
         <HowItWorks />
         <LivePreview />
         <Features />
+        <PaymentsSection />
         <Audiences />
         <Stats />
         <PricingTeaser />

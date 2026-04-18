@@ -15,11 +15,13 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
+import { ServicesPageSkeleton } from "@/components/dashboard/ServicesPageSkeleton";
 import { Search, Plus, MoreHorizontal, Filter, Clock, DollarSign } from "lucide-react";
 import Link from "next/link";
 
 export default function ServicesPage() {
   const [isAddServiceOpen, setIsAddServiceOpen] = useState(false);
+  const [activityFilter, setActivityFilter] = useState<"all" | "active" | "inactive">("all");
   const [services, setServices] = useState<
     Array<{
       id: string;
@@ -42,20 +44,31 @@ export default function ServicesPage() {
     estimatedTime: "",
     description: "",
   });
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
 
-  async function loadData() {
-    const [servicesRes, categoriesRes] = await Promise.all([
-      fetch("/api/services", { cache: "no-store" }),
-      fetch("/api/categories", { cache: "no-store" }),
-    ]);
-    const servicesData = await servicesRes.json();
-    const categoriesData = await categoriesRes.json();
-    setServices(servicesData.services ?? []);
-    setCategories(categoriesData.categories ?? []);
+  async function loadData(options?: { initial?: boolean }) {
+    const isInitial = options?.initial ?? false;
+    if (isInitial) {
+      setIsInitialLoading(true);
+    }
+    try {
+      const [servicesRes, categoriesRes] = await Promise.all([
+        fetch("/api/services", { cache: "no-store" }),
+        fetch("/api/categories", { cache: "no-store" }),
+      ]);
+      const servicesData = await servicesRes.json();
+      const categoriesData = await categoriesRes.json();
+      setServices(servicesData.services ?? []);
+      setCategories(categoriesData.categories ?? []);
+    } finally {
+      if (isInitial) {
+        setIsInitialLoading(false);
+      }
+    }
   }
 
   useEffect(() => {
-    loadData();
+    loadData({ initial: true });
   }, []);
 
   async function createService() {
@@ -84,21 +97,37 @@ export default function ServicesPage() {
     return services.filter((service) => {
       const categoryMatch =
         selectedCategory === "all" || service.categoryId === selectedCategory;
+      const activityMatch =
+        activityFilter === "all" ||
+        (activityFilter === "active" && service.isActive) ||
+        (activityFilter === "inactive" && !service.isActive);
       const textMatch =
         !text ||
         service.name.toLowerCase().includes(text) ||
         service.category.name.toLowerCase().includes(text);
-      return categoryMatch && textMatch;
+      return categoryMatch && activityMatch && textMatch;
     });
-  }, [services, search, selectedCategory]);
+  }, [services, search, selectedCategory, activityFilter]);
 
   const activeCount = useMemo(
     () => services.filter((s) => s.isActive).length,
     [services]
   );
 
+  function toggleActivityFilter() {
+    setActivityFilter((prev) => {
+      if (prev === "all") return "active";
+      if (prev === "active") return "inactive";
+      return "all";
+    });
+  }
+
   return (
     <div className="space-y-8">
+      {isInitialLoading ? (
+        <ServicesPageSkeleton />
+      ) : (
+        <>
       <DashboardPageHeader
         eyebrow="Hotel · menu"
         title="Services & menu"
@@ -254,8 +283,18 @@ export default function ServicesPage() {
                 className="pl-10 border-transparent bg-transparent rounded-md"
               />
             </div>
-            <Button variant="ghost" className="text-foreground/55 rounded-md gap-2 shrink-0">
-              <Filter className="h-4 w-4" /> Filter
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={toggleActivityFilter}
+              className="text-foreground/55 rounded-md gap-2 shrink-0"
+            >
+              <Filter className="h-4 w-4" />
+              {activityFilter === "all"
+                ? "Filter: all"
+                : activityFilter === "active"
+                  ? "Filter: active"
+                  : "Filter: inactive"}
             </Button>
           </div>
 
@@ -325,6 +364,8 @@ export default function ServicesPage() {
           </div>
         </div>
       </div>
+        </>
+      )}
     </div>
   );
 }

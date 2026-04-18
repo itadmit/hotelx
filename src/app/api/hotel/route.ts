@@ -5,8 +5,16 @@ import { z } from "zod"
 
 const updateHotelSchema = z.object({
   name: z.string().min(2).optional(),
+  slug: z
+    .string()
+    .min(2)
+    .max(64)
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
+    .optional(),
   logo: z.string().url().nullable().optional(),
   primaryColor: z.string().min(4).max(16).optional(),
+  paymentsEnabled: z.boolean().optional(),
+  defaultCurrency: z.string().min(3).max(8).optional(),
 })
 
 export async function GET() {
@@ -21,7 +29,10 @@ export async function GET() {
         slug: true,
         logo: true,
         primaryColor: true,
+        paymentsEnabled: true,
+        defaultCurrency: true,
         createdAt: true,
+        updatedAt: true,
       },
     })
 
@@ -59,6 +70,8 @@ export async function PUT(request: Request) {
         slug: true,
         logo: true,
         primaryColor: true,
+        paymentsEnabled: true,
+        defaultCurrency: true,
       },
     })
 

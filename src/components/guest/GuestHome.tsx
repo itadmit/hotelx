@@ -1,25 +1,19 @@
-import Link from "next/link";
-import {
-  ConciergeBell,
-  Utensils,
-  Sparkles,
-  Car,
-  Info,
-  Wrench,
-  ChevronRight,
-  Clock,
-  Wine,
-  Bell,
-} from "lucide-react";
+"use client";
 
-const iconMap: Record<string, typeof Utensils> = {
-  Utensils,
-  Sparkles,
-  ConciergeBell,
-  Car,
-  Wrench,
-  Info,
-};
+import Link from "next/link";
+import { ChevronRight, Clock, Wine, LogOut, KeyRound } from "lucide-react";
+import { GuestNotificationsBell } from "@/components/guest/NotificationsBell";
+import { guestCategoryIcon } from "@/lib/guest-category-icons";
+import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const categoryAccents = [
   "bg-amber-soft text-amber-brand",
@@ -30,7 +24,7 @@ const categoryAccents = [
   "bg-emerald-soft/80 text-emerald-brand",
 ] as const;
 
-type Category = { id: string; name: string; icon: string | null };
+type Category = { id: string; name: string; icon: string | null; slug?: string | null };
 type Service = {
   id: string;
   name: string;
@@ -45,6 +39,8 @@ type Props = {
   roomNumber: string;
   categories: Category[];
   services: Service[];
+  logoLetter?: string;
+  guestFirstName?: string | null;
 };
 
 function formatPrice(price: string | null): string {
@@ -62,17 +58,56 @@ export function GuestHome({
   roomNumber,
   categories,
   services,
+  logoLetter,
+  guestFirstName,
 }: Props) {
+  const router = useRouter();
   const hour = new Date().getHours();
   const greet =
     hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 
   const featuredService = services[0];
   const restServices = services.slice(1, 5);
-  const initials = hotelName.slice(0, 1).toUpperCase();
+  const initials = (logoLetter ?? hotelName.slice(0, 1)).toUpperCase();
+  const greetingTarget = guestFirstName ?? "our guest";
+  const [isLogoutOpen, setIsLogoutOpen] = useState(false);
+  const [confirmChecked, setConfirmChecked] = useState(false);
+  const [confirmRoomCode, setConfirmRoomCode] = useState("");
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [logoutError, setLogoutError] = useState<string | null>(null);
+
+  const canLogout = useMemo(
+    () =>
+      confirmChecked &&
+      confirmRoomCode.trim().toUpperCase() === roomCode.trim().toUpperCase(),
+    [confirmChecked, confirmRoomCode, roomCode]
+  );
+
+  async function logoutGuest() {
+    if (!canLogout) return;
+    setIsLoggingOut(true);
+    setLogoutError(null);
+    try {
+      await fetch("/api/public/check-in/logout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ hotelSlug }),
+      });
+      try {
+        window.localStorage.removeItem(`hotelx:guest:${hotelSlug}`);
+      } catch {
+        // Ignore localStorage issues (private mode / restricted browsers).
+      }
+      router.push(`/g/${hotelSlug}`);
+    } catch {
+      setLogoutError("Failed to log out. Please try again.");
+    } finally {
+      setIsLoggingOut(false);
+    }
+  }
 
   return (
-    <main className="mx-auto w-full max-w-[480px] min-h-screen bg-background text-ink flex flex-col pb-12">
+    <main className="mx-auto w-full max-w-[480px] min-h-screen sm:min-h-[calc(100vh-3rem)] sm:my-6 bg-background text-ink flex flex-col pb-12 sm:pb-10 sm:rounded-[28px] sm:border sm:border-[color:var(--border)]/70 sm:shadow-[0_20px_60px_-30px_rgba(31,41,28,0.25)] sm:overflow-hidden">
       {/* Sticky brand header */}
       <header className="sticky top-0 z-30 px-5 pt-6 pb-3 bg-background/85 backdrop-blur-md border-b border-[color:var(--border)]/60 flex items-center justify-between">
         <div className="flex items-center gap-2.5 min-w-0">
@@ -80,7 +115,10 @@ export function GuestHome({
             <span className="font-display text-base leading-none text-primary-foreground">
               {initials}
             </span>
-            <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full bg-amber-brand border-2 border-background" />
+            <span className="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5">
+              <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-brand opacity-60 animate-ping" />
+              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-brand border-2 border-background" />
+            </span>
           </span>
           <div className="leading-tight min-w-0">
             <p className="font-display text-base tracking-tight text-ink truncate">
@@ -91,14 +129,22 @@ export function GuestHome({
             </p>
           </div>
         </div>
-        <button
-          type="button"
-          aria-label="Notifications"
-          className="relative h-9 w-9 rounded-full border border-[color:var(--border)] flex items-center justify-center bg-background hover:bg-surface transition-colors"
-        >
-          <Bell className="h-4 w-4 text-ink" strokeWidth={2} />
-          <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-clay" />
-        </button>
+        <div className="flex items-center gap-2">
+        <GuestNotificationsBell hotelSlug={hotelSlug} roomCode={roomCode} />
+          <button
+            type="button"
+            onClick={() => {
+              setConfirmChecked(false);
+              setConfirmRoomCode("");
+              setLogoutError(null);
+              setIsLogoutOpen(true);
+            }}
+            aria-label="Log out"
+            className="h-9 w-9 rounded-full border border-[color:var(--border)] flex items-center justify-center bg-background hover:bg-surface transition-colors text-foreground/75"
+          >
+            <LogOut className="h-4 w-4" />
+          </button>
+        </div>
       </header>
 
       {/* Greeting */}
@@ -110,7 +156,9 @@ export function GuestHome({
         <h1 className="font-display text-[2.25rem] sm:text-4xl mt-3 leading-[1.05] text-ink tracking-tight">
           {greet},
           <br />
-          <span className="text-emerald-brand display-italic">our guest.</span>
+          <span className="text-emerald-brand display-italic">
+            {greetingTarget}.
+          </span>
         </h1>
         <p className="mt-2.5 text-sm text-foreground/65 leading-snug max-w-xs">
           How may we make today unforgettable?
@@ -121,6 +169,7 @@ export function GuestHome({
       {featuredService ? (
         <Link
           href={`/g/${hotelSlug}/${roomCode}/service/${featuredService.id}`}
+          prefetch={true}
           className="mx-5 mt-6 relative overflow-hidden rounded-2xl bg-emerald-brand text-primary-foreground p-4 active:scale-[0.99] transition-transform group"
         >
           <div className="absolute -top-10 -right-8 h-32 w-32 rounded-full bg-amber-brand/30 blur-2xl pointer-events-none" />
@@ -143,7 +192,7 @@ export function GuestHome({
         </Link>
       ) : null}
 
-      {/* Categories */}
+      {/* Categories — root departments (grid) */}
       <section className="px-5 mt-7">
         <div className="flex items-center justify-between">
           <p className="eyebrow">Concierge</p>
@@ -153,12 +202,13 @@ export function GuestHome({
         </div>
         <div className="mt-3 grid grid-cols-2 gap-2.5">
           {categories.map((category, index) => {
-            const Icon = iconMap[category.icon ?? "Info"] ?? Info;
+            const Icon = guestCategoryIcon(category.icon);
             const accent = categoryAccents[index % categoryAccents.length];
             return (
               <Link
                 key={category.id}
                 href={`/g/${hotelSlug}/${roomCode}/category/${category.id}`}
+                prefetch={index < 2}
                 className="group rounded-xl p-3.5 border border-[color:var(--border)] bg-card active:scale-[0.98] transition-transform"
               >
                 <div className="flex items-center justify-between">
@@ -197,6 +247,7 @@ export function GuestHome({
               <Link
                 key={item.id}
                 href={`/g/${hotelSlug}/${roomCode}/service/${item.id}`}
+                prefetch={false}
                 className="flex items-center justify-between gap-3 px-3.5 py-3 rounded-xl border border-[color:var(--border)] bg-card hover:border-emerald-brand/25 transition-colors group"
               >
                 <div className="min-w-0 flex-1">
@@ -242,6 +293,86 @@ export function GuestHome({
           {hotelName} · powered by HotelX
         </p>
       </footer>
+
+      <Dialog open={isLogoutOpen} onOpenChange={setIsLogoutOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Log out from this room?</DialogTitle>
+            <DialogDescription>
+              Double verification is required before logout.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-3">
+            <label className="flex items-start gap-2 text-sm text-ink">
+              <input
+                type="checkbox"
+                checked={confirmChecked}
+                onChange={(e) => setConfirmChecked(e.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded border-[color:var(--border)] accent-[color:var(--primary)]"
+              />
+              <span>I understand I will need to sign in again.</span>
+            </label>
+
+            <div className="rounded-xl border border-[color:var(--border)] bg-surface/70 p-3 space-y-1.5">
+              <p className="text-xs font-medium text-ink flex items-center gap-1.5">
+                <KeyRound className="h-3.5 w-3.5 text-emerald-brand" />
+                Need help with your room code?
+              </p>
+              <p className="text-xs text-foreground/70">
+                The code appears on the card in your room.
+              </p>
+              <p className="text-xs text-foreground/70">
+                Not sure what it is? Call reception and ask.
+              </p>
+            </div>
+
+            <div className="space-y-1.5">
+              <label
+                htmlFor="logout-room-code"
+                className="font-mono text-[10px] uppercase tracking-[0.18em] text-foreground/55"
+              >
+                Confirm room code
+              </label>
+              <input
+                id="logout-room-code"
+                value={confirmRoomCode}
+                onChange={(e) => setConfirmRoomCode(e.target.value)}
+                placeholder="Enter room code"
+                className="w-full h-10 px-3 rounded-md bg-surface border border-[color:var(--border)] text-ink text-sm"
+              />
+              <p className="text-[11px] text-foreground/55">
+                Room code appears on the card in your room. Not sure what it is?
+                Call reception.
+              </p>
+            </div>
+
+            {logoutError ? (
+              <p className="text-xs text-clay" role="alert">
+                {logoutError}
+              </p>
+            ) : null}
+          </div>
+
+          <DialogFooter>
+            <button
+              type="button"
+              onClick={() => setIsLogoutOpen(false)}
+              className="h-9 px-4 rounded-md text-sm text-ink hover:bg-surface"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={logoutGuest}
+              disabled={!canLogout || isLoggingOut}
+              className="h-9 px-4 rounded-md bg-clay text-white text-sm font-medium hover:opacity-90 disabled:opacity-50"
+            >
+              {isLoggingOut ? "Logging out…" : "Log out"}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </main>
   );
 }
