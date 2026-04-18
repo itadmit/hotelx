@@ -51,7 +51,7 @@ export function CTA() {
                 Try now
               </Link>
               <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-white/50 text-center mt-2">
-                14 days · no card · cancel anytime
+                30 days free · no credit card · no commitment
               </p>
             </div>
           </div>

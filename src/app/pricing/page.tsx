@@ -158,7 +158,7 @@ export default function PricingPage() {
               </a>
             </div>
             <p className="mt-6 eyebrow">
-              14-day trial &middot; no card &middot; cancel anytime
+              30 days free &middot; no credit card &middot; no commitment
             </p>
           </div>
         </section>

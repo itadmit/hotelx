@@ -155,7 +155,7 @@ export function PricingTeaser() {
         <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 flex-wrap text-center">
           <span className="eyebrow flex items-center gap-2">
             <ShieldCheck className="h-3.5 w-3.5 text-emerald-brand" />
-            No card &middot; cancel anytime
+            30 days free &middot; no card &middot; no commitment
           </span>
           <span className="hidden sm:inline text-foreground/30">&middot;</span>
           <span className="eyebrow flex items-center gap-2">

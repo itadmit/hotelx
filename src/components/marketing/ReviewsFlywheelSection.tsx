@@ -6,6 +6,7 @@ import {
   TrendingUp,
   ArrowRight,
   Sparkles,
+  Quote,
 } from "lucide-react";
 
 const WHY_IT_MATTERS = [
@@ -132,6 +133,41 @@ export function ReviewsFlywheelSection() {
             </article>
           ))}
         </div>
+
+        {/* Customer testimonial — proof point right after the flow */}
+        <figure className="mt-10 card-elev p-7 sm:p-9 relative overflow-hidden max-w-4xl mx-auto">
+          <span
+            aria-hidden
+            className="pointer-events-none absolute -top-20 -right-16 h-56 w-56 rounded-full bg-emerald-soft/50 blur-3xl"
+          />
+          <Quote
+            className="absolute -top-3 left-7 h-7 w-7 text-emerald-brand bg-card rounded-full p-1.5 border border-[color:var(--border)]"
+            strokeWidth={2}
+          />
+          <blockquote className="relative">
+            <p className="font-display text-xl sm:text-2xl md:text-[1.65rem] leading-snug text-ink">
+              &ldquo;Our Booking score went from{" "}
+              <span className="numeral text-emerald-brand">8.4</span> to{" "}
+              <span className="numeral text-emerald-brand">8.9</span> in three
+              months. The review loop alone{" "}
+              <span className="display-italic">paid for the platform.</span>
+              &rdquo;
+            </p>
+            <figcaption className="mt-6 flex items-center gap-3">
+              <span className="h-10 w-10 rounded-full bg-emerald-brand text-primary-foreground flex items-center justify-center font-mono text-xs">
+                EM
+              </span>
+              <div>
+                <p className="text-sm text-ink leading-none font-medium">
+                  Elena Marchetti
+                </p>
+                <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-foreground/55 mt-1.5">
+                  Marketing manager &middot; Plaza Hotel, Milan
+                </p>
+              </div>
+            </figcaption>
+          </blockquote>
+        </figure>
       </div>
     </section>
   );

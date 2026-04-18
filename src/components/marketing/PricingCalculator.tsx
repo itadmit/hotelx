@@ -155,7 +155,7 @@ export function PricingCalculator() {
             Start with {rooms} {rooms === 1 ? "room" : "rooms"}
           </Link>
           <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-foreground/45 text-center">
-            14-day trial &middot; no card &middot; cancel anytime
+            30 days free &middot; no credit card &middot; no commitment
           </p>
         </div>
       </div>

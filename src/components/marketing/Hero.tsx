@@ -112,8 +112,7 @@ export function Hero() {
               className="reveal mt-4 font-mono text-[10px] uppercase tracking-[0.18em] text-foreground/45 text-center lg:text-left"
               style={{ animationDelay: "520ms" }}
             >
-              Founders cohort averages, Q3 2026 &middot; 14-day trial &middot;
-              cancel anytime
+              30 days free &middot; no credit card &middot; no commitment
             </p>
           </div>
 
