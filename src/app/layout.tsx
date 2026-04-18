@@ -23,7 +23,10 @@ const fontMono = JetBrains_Mono({
   display: "swap",
 });
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://hotelx.app";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: "HotelX — The Concierge Operating System",
   description:
     "A QR-first guest experience platform. Guests scan, staff respond, managers see everything — beautifully.",
