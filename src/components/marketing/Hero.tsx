@@ -84,11 +84,11 @@ export function Hero() {
                   <TrendingUp className="h-4 w-4" strokeWidth={2} />
                 </span>
                 <div className="min-w-0 text-left">
-                  <p className="numeral text-lg text-ink leading-none">
-                    +&euro;18 / room / night
+                  <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-emerald-brand">
+                    Earn extra
                   </p>
-                  <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-foreground/55 mt-1">
-                    Avg added in-room revenue
+                  <p className="numeral text-lg text-ink leading-none mt-1">
+                    +&euro;18 <span className="text-foreground/55 text-xs font-sans">/ room / night</span>
                   </p>
                 </div>
               </div>
@@ -98,11 +98,11 @@ export function Hero() {
                   <Star className="h-4 w-4" strokeWidth={2} />
                 </span>
                 <div className="min-w-0 text-left">
-                  <p className="numeral text-lg text-ink leading-none">
-                    +0.4 stars on Booking
+                  <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-amber-brand">
+                    Score lift
                   </p>
-                  <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-foreground/55 mt-1">
-                    After 90 days, smart review loop
+                  <p className="numeral text-lg text-ink leading-none mt-1">
+                    +0.4 <span className="text-foreground/55 text-xs font-sans">stars on Booking</span>
                   </p>
                 </div>
               </div>
