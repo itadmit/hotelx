@@ -11,6 +11,8 @@ import {
   MessageCircle,
   ScanLine,
   Sparkles,
+  Star,
+  TrendingUp,
   User,
   Wifi,
   Wine,
@@ -27,30 +29,29 @@ export function Hero() {
           <div className="lg:col-span-7 text-center lg:text-left">
             <div className="reveal flex justify-center lg:justify-start" style={{ animationDelay: "0ms" }}>
               <span className="pill">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-brand" />
-                Now serving · v2.0
+                <Sparkles className="h-3 w-3 text-emerald-brand" />
+                Founders cohort · 6 months retainer free
               </span>
             </div>
 
             <h1
-              className="reveal mt-6 sm:mt-7 font-display text-[2.5rem] sm:text-5xl md:text-6xl lg:text-[5.25rem] leading-[0.98] tracking-tight text-ink"
+              className="reveal mt-6 sm:mt-7 font-display text-[2.5rem] sm:text-5xl md:text-6xl lg:text-[4.75rem] leading-[1.0] tracking-tight text-ink"
               style={{ animationDelay: "100ms" }}
             >
-              The concierge,
+              Turn every room into a
               <br />
               <span className="display-italic text-emerald-brand">
-                reimagined
-              </span>{" "}
-              as software.
+                revenue channel.
+              </span>
             </h1>
 
             <p
               className="reveal mt-6 sm:mt-7 text-base sm:text-lg text-foreground/70 max-w-xl mx-auto lg:mx-0 leading-relaxed"
               style={{ animationDelay: "220ms" }}
             >
-              A QR-first guest experience platform for modern hospitality.
-              Guests scan in their suite, your team responds in real time,
-              managers see every signal — without a single app to install.
+              The QR concierge that lifts in-room spend, raises your Booking
+              score, and cuts calls to reception &mdash; in 14 languages, live
+              in 48 hours.
             </p>
 
             <div
@@ -68,26 +69,52 @@ export function Hero() {
                 href="/demo"
                 className="inline-flex items-center justify-center gap-2 h-12 px-6 rounded-full border border-[color:var(--border)] bg-card text-ink font-medium hover:bg-surface transition-colors"
               >
-                Try now
+                See live demo
                 <ArrowUpRight className="h-4 w-4" />
               </Link>
             </div>
 
+            {/* Two micro-KPI chips — the marketing manager's eye candy */}
             <div
-              className="reveal mt-10 sm:mt-12 flex flex-wrap justify-center lg:justify-start items-center gap-x-4 sm:gap-x-6 gap-y-2 eyebrow"
+              className="reveal mt-8 sm:mt-10 grid sm:grid-cols-2 gap-3 max-w-xl mx-auto lg:mx-0"
               style={{ animationDelay: "440ms" }}
             >
-              <span className="flex items-center gap-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-brand" />
-                No app required
-              </span>
-              <span className="text-foreground/30">·</span>
-              <span>14 languages</span>
-              <span className="text-foreground/30">·</span>
-              <span>14-day trial</span>
-              <span className="hidden sm:inline text-foreground/30">·</span>
-              <span className="hidden sm:inline">Cancel anytime</span>
+              <div className="card-surface p-3 flex items-center gap-3">
+                <span className="inline-flex h-9 w-9 rounded-lg bg-emerald-soft text-emerald-brand items-center justify-center shrink-0">
+                  <TrendingUp className="h-4 w-4" strokeWidth={2} />
+                </span>
+                <div className="min-w-0 text-left">
+                  <p className="numeral text-lg text-ink leading-none">
+                    +&euro;18 / room / night
+                  </p>
+                  <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-foreground/55 mt-1">
+                    Avg added in-room revenue
+                  </p>
+                </div>
+              </div>
+
+              <div className="card-surface p-3 flex items-center gap-3">
+                <span className="inline-flex h-9 w-9 rounded-lg bg-amber-soft text-amber-brand items-center justify-center shrink-0">
+                  <Star className="h-4 w-4" strokeWidth={2} />
+                </span>
+                <div className="min-w-0 text-left">
+                  <p className="numeral text-lg text-ink leading-none">
+                    +0.4 stars on Booking
+                  </p>
+                  <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-foreground/55 mt-1">
+                    After 90 days, smart review loop
+                  </p>
+                </div>
+              </div>
             </div>
+
+            <p
+              className="reveal mt-4 font-mono text-[10px] uppercase tracking-[0.18em] text-foreground/45 text-center lg:text-left"
+              style={{ animationDelay: "520ms" }}
+            >
+              Founders cohort averages, Q3 2026 &middot; 14-day trial &middot;
+              cancel anytime
+            </p>
           </div>
 
           {/* Right — orderly composition */}

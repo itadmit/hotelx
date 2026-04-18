@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import {
   Check,
@@ -10,25 +11,29 @@ import {
   ArrowUpRight,
   HelpCircle,
   Gift,
-  ShieldCheck,
   Calendar,
   Languages,
+  TrendingDown,
 } from "lucide-react";
 import { Navbar } from "@/components/marketing/Navbar";
 import { Footer } from "@/components/marketing/Footer";
+import { PricingCalculator } from "@/components/marketing/PricingCalculator";
+import {
+  FOUNDERS,
+  LIST,
+  foundersMonthly,
+  listMonthly,
+  firstYearSavings,
+  listFirstYearTotal,
+  foundersFirstYearTotal,
+  formatUsd,
+} from "@/lib/pricing";
 
-const PRODUCT_INCLUDES = [
-  "Unlimited rooms & QR codes",
-  "Full guest web app · branded",
-  "Staff dashboard, requests board & analytics",
-  "Multi-language engine (14 languages)",
-  "Hotel info, amenities, helpful info",
-  "Real-time notifications · Server-Sent Events",
-  "Bring any payment processor · 0% transaction fees",
-  "Service recovery desk · feedback loop",
-  "Editable email templates · Resend layer",
-  "Export your data, always",
-];
+export const metadata: Metadata = {
+  title: "Pricing — HotelX | $29 + $6/room, everything included",
+  description:
+    "Simple, founders-friendly pricing for hotels: $29/month base + $6 per room. Free onboarding, training, support and 6 months of concierge retainer.",
+};
 
 const ONBOARDING_STEPS = [
   {
@@ -40,8 +45,8 @@ const ONBOARDING_STEPS = [
   {
     icon: Wrench,
     title: "Initial setup",
-    body: "Branding, languages, payment processor and your starting menu — done with you.",
-    badge: "1–3 days",
+    body: "Branding, languages, payment processor and your starting menu \u2014 done with you.",
+    badge: "1\u20133 days",
   },
   {
     icon: Headphones,
@@ -66,30 +71,40 @@ const RETAINER_INCLUDES = [
   "Quarterly reputation review",
 ];
 
+const SAMPLE_HOTELS = [
+  { rooms: 20, label: "Boutique inn" },
+  { rooms: 60, label: "Mid-size independent" },
+  { rooms: 150, label: "Large hotel" },
+];
+
 const FAQ = [
   {
-    q: "Is the product really free forever?",
-    a: "Yes. The Concierge OS itself, every QR code, every guest, every team seat — free. We make money only if you choose the optional monthly retainer.",
+    q: "How exactly does the price work?",
+    a: `A flat $${FOUNDERS.base}/month base plus $${FOUNDERS.perRoom} per room. So a 20-room boutique pays $${foundersMonthly(20)}/mo; a 60-room hotel pays $${foundersMonthly(60)}/mo. No tiers, no surprises.`,
   },
   {
-    q: "Are there transaction fees?",
-    a: "Zero from us. You bring your own payment processor; their fees are theirs. We never take a cut of your in-room sales.",
+    q: "What's the 'normal' price you keep crossing out?",
+    a: `Our list price after the founders cohort closes is $${LIST.base}/month base + $${LIST.perRoom} per room, plus a one-time $${LIST.onboarding} onboarding and $${LIST.training} training. The 6-month concierge retainer becomes $${LIST.retainerMonthly}/month. The founders cohort waives all of that.`,
+  },
+  {
+    q: "Are there transaction fees on top?",
+    a: "Zero from us. You bring your own payment processor; their fees are theirs. We never take a cut of in-room sales.",
   },
   {
     q: "What does 'free onboarding' include?",
-    a: "A kickoff call, initial setup with you, live staff training, and on-call support on launch day. No card, no contract.",
+    a: "A kickoff call, initial setup with you, live staff training, and on-call support on launch day. No card, no contract, no hidden fee.",
   },
   {
-    q: "Can I cancel the retainer anytime?",
-    a: "Yes — cancel any time, no clawback, no exit fees. Your data, menus and QR codes stay with you.",
+    q: "What happens after the 6 free retainer months?",
+    a: `Two options. Keep the dedicated concierge engineer for $${LIST.retainerMonthly}/month \u2014 cancel anytime. Or stop the retainer and keep using the platform; the $${FOUNDERS.base} + $${FOUNDERS.perRoom}/room never changes.`,
+  },
+  {
+    q: "Will the founders price change later?",
+    a: `For your hotel, no. Once you're in, your $${FOUNDERS.base} + $${FOUNDERS.perRoom}/room is locked in. The list price applies only to hotels that join after the founders cohort closes.`,
   },
   {
     q: "Do you take on-site visits?",
     a: "In selected destinations (Tel Aviv, Milan, Lisbon, Athens, Limassol, Paphos) on-site is included once during onboarding. Outside those, we work remotely.",
-  },
-  {
-    q: "Will my data leave with me?",
-    a: "Always. One-click export of guests, menus, requests, QR codes — in standard formats. Yours, not ours.",
   },
 ];
 
@@ -104,187 +119,201 @@ export default function PricingPage() {
           <div className="absolute -top-32 left-1/4 h-72 w-72 rounded-full bg-emerald-soft/60 blur-3xl pointer-events-none" />
           <div className="absolute -bottom-24 right-1/4 h-72 w-72 rounded-full bg-amber-soft/60 blur-3xl pointer-events-none" />
 
-          <div className="relative max-w-5xl mx-auto px-4 sm:px-6 pt-20 pb-12 sm:pt-28 sm:pb-16 text-center">
+          <div className="relative max-w-5xl mx-auto px-4 sm:px-6 pt-20 pb-10 sm:pt-28 sm:pb-12 text-center">
             <span className="pill">
               <Gift className="h-3 w-3 text-emerald-brand" />
-              Free for the hotel · founders cohort
+              Founders cohort &middot; everything included
             </span>
             <h1 className="mt-6 font-display text-4xl sm:text-5xl md:text-6xl tracking-tight leading-[1.04] text-ink">
-              The product is yours.
+              ${FOUNDERS.base} a month, plus
               <br />
               <span className="display-italic text-emerald-brand">
-                The retainer is optional.
+                ${FOUNDERS.perRoom} per room.
               </span>
             </h1>
+            <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.18em] text-foreground/55">
+              <span className="line-through">
+                Normally ${LIST.base} + ${LIST.perRoom}/room
+              </span>
+            </p>
             <p className="mt-6 text-base sm:text-lg text-foreground/70 max-w-2xl mx-auto leading-relaxed">
-              Run the entire Concierge OS by yourself — no monthly fee, ever.
-              Initial setup and staff training are on us. If you want a
-              dedicated person handling the day-to-day, add the optional
-              retainer.
+              One simple formula for every hotel. Onboarding, training and the
+              first 6 months of dedicated concierge retainer &mdash; all on the
+              house for the founders cohort.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
               <Link
                 href="/signup"
                 className="group inline-flex items-center justify-center gap-2 h-12 pl-6 pr-5 rounded-full bg-emerald-brand text-primary-foreground font-medium hover:bg-ink transition-colors"
               >
-                Start your hotel · free
+                Start free trial
                 <ArrowUpRight className="h-4 w-4 transition-transform group-hover:rotate-45" />
               </Link>
               <a
-                href="#retainer"
+                href="#calculator"
                 className="inline-flex items-center justify-center gap-2 h-12 px-6 rounded-full border border-[color:var(--border)] bg-card text-ink font-medium hover:bg-surface transition-colors"
               >
-                See the retainer
+                See the calculator
                 <ArrowRight className="h-4 w-4" />
               </a>
             </div>
             <p className="mt-6 eyebrow">
-              No card · cancel anytime · your data leaves with you
+              14-day trial &middot; no card &middot; cancel anytime
             </p>
           </div>
         </section>
 
-        {/* TWO PLANS */}
-        <section className="relative py-16 sm:py-20">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6">
-            <div className="grid lg:grid-cols-2 gap-5 lg:gap-6 items-stretch">
-              {/* Plan A — Free product */}
-              <article className="card-elev p-7 sm:p-9 flex flex-col h-full relative overflow-hidden">
-                <span
-                  aria-hidden
-                  className="pointer-events-none absolute -top-20 -right-20 h-60 w-60 rounded-full bg-emerald-soft/60 blur-3xl"
-                />
-                <div className="relative">
-                  <div className="flex items-center gap-2">
-                    <span className="pill">
-                      <ShieldCheck className="h-3 w-3 text-emerald-brand" />
-                      Concierge OS
-                    </span>
-                    <span className="pill pill-amber">forever free</span>
-                  </div>
-                  <h2 className="mt-5 font-display text-3xl sm:text-4xl tracking-tight leading-[1.05] text-ink">
-                    Run it yourself,
-                    <br />
-                    <span className="display-italic text-emerald-brand">
-                      keep every euro.
-                    </span>
-                  </h2>
-                  <div className="mt-6 flex items-baseline gap-2">
-                    <span className="numeral text-6xl text-ink">€0</span>
-                    <span className="text-sm text-foreground/60">
-                      / month, every month
-                    </span>
-                  </div>
-                  <p className="mt-3 text-foreground/65 max-w-md">
-                    The full product. Your hotel, your menus, your branding,
-                    your team. We don&apos;t take a cut of in-room sales.
-                  </p>
+        {/* CALCULATOR */}
+        <section
+          id="calculator"
+          aria-labelledby="calc-heading"
+          className="relative py-12 sm:py-16"
+        >
+          <h2 id="calc-heading" className="sr-only">
+            Pricing calculator
+          </h2>
+          <div className="relative max-w-6xl mx-auto px-4 sm:px-6">
+            <PricingCalculator />
+          </div>
+        </section>
 
-                  <ul className="mt-6 grid sm:grid-cols-2 gap-x-5 gap-y-2.5">
-                    {PRODUCT_INCLUDES.map((line) => (
-                      <li
-                        key={line}
-                        className="flex items-start gap-2.5 text-sm text-ink"
-                      >
-                        <Check className="h-4 w-4 text-emerald-brand shrink-0 mt-0.5" />
-                        <span className="leading-snug">{line}</span>
-                      </li>
-                    ))}
-                  </ul>
+        {/* WHAT'S INCLUDED — with strike-through anchors */}
+        <section
+          aria-labelledby="included-heading"
+          className="relative py-16 sm:py-20 bg-surface border-y border-[color:var(--border)]"
+        >
+          <div className="absolute inset-0 bg-grid opacity-20 pointer-events-none" />
 
-                  <Link
-                    href="/signup"
-                    className="group mt-7 inline-flex items-center justify-center gap-2 h-12 px-6 rounded-full bg-emerald-brand text-primary-foreground font-medium hover:bg-ink transition-colors w-full sm:w-auto"
-                  >
-                    Start free
-                    <ArrowUpRight className="h-4 w-4 transition-transform group-hover:rotate-45" />
-                  </Link>
-                </div>
-              </article>
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6">
+            <div className="grid lg:grid-cols-12 gap-6 lg:gap-10 mb-10">
+              <div className="lg:col-span-6">
+                <span className="pill">
+                  <Check className="h-3 w-3 text-emerald-brand" />
+                  Everything included
+                </span>
+                <h2
+                  id="included-heading"
+                  className="mt-4 sm:mt-5 font-display text-3xl sm:text-4xl md:text-5xl tracking-tight leading-[1.05] text-ink"
+                >
+                  No add-ons.
+                  <br />
+                  <span className="display-italic text-emerald-brand">
+                    No surprise invoices.
+                  </span>
+                </h2>
+              </div>
+              <div className="lg:col-span-6 lg:flex lg:items-end">
+                <p className="text-foreground/70">
+                  Other vendors charge separately for setup, training, languages,
+                  seats, even commissions. We don&rsquo;t. Here&rsquo;s the full
+                  list, with what you&rsquo;d normally pay elsewhere &mdash;
+                  struck through.
+                </p>
+              </div>
+            </div>
 
-              {/* Plan B — Optional retainer */}
-              <article
-                id="retainer"
-                className="card-elev p-7 sm:p-9 flex flex-col h-full relative overflow-hidden bg-ink text-[#f1ebde] border-white/10"
-              >
-                <span
-                  aria-hidden
-                  className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-amber-brand/30 blur-3xl"
-                />
-                <span
-                  aria-hidden
-                  className="pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-emerald-brand/30 blur-3xl"
-                />
-                <div className="relative">
-                  <div className="flex items-center gap-2">
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 border border-white/15 text-amber-soft font-mono text-[10px] uppercase tracking-[0.18em]">
-                      <Headphones className="h-3 w-3" />
-                      Concierge retainer
-                    </span>
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-amber-brand text-white font-mono text-[10px] uppercase tracking-[0.18em]">
-                      optional
-                    </span>
-                  </div>
-                  <h2 className="mt-5 font-display text-3xl sm:text-4xl tracking-tight leading-[1.05] text-[#f7f3ec]">
-                    Or hand it to us
-                    <br />
-                    <span className="display-italic text-emerald-soft">
-                      and exhale.
-                    </span>
-                  </h2>
-                  <div className="mt-6 flex items-baseline gap-2">
-                    <span className="numeral text-6xl text-white">$39</span>
-                    <span className="text-sm text-white/60">
-                      / month · cancel anytime
-                    </span>
-                  </div>
-                  <p className="mt-3 text-[#f1ebde]/75 max-w-md">
-                    A real person on your account. Menus, translations, seasonal
-                    offers, branding tweaks — handled monthly without you
-                    lifting a finger.
-                  </p>
-
-                  <ul className="mt-6 space-y-2.5">
-                    {RETAINER_INCLUDES.map((line) => (
-                      <li
-                        key={line}
-                        className="flex items-start gap-2.5 text-sm text-[#f1ebde]/90"
-                      >
-                        <Check className="h-4 w-4 text-amber-soft shrink-0 mt-0.5" />
-                        <span className="leading-snug">{line}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <Link
-                    href="/demo"
-                    className="group mt-7 inline-flex items-center justify-center gap-2 h-12 px-6 rounded-full bg-amber-brand text-white font-medium hover:bg-clay transition-colors w-full sm:w-auto"
-                  >
-                    Talk to a rep
-                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-                  </Link>
-                  <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-white/45">
-                    add or cancel anytime · no clawback
-                  </p>
-                </div>
-              </article>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+              <IncludedRow
+                label="Onboarding"
+                listPrice={`$${LIST.onboarding} one-time`}
+                note="We set the menus, branding, languages, payments &mdash; with you."
+              />
+              <IncludedRow
+                label="Live staff training"
+                listPrice={`$${LIST.training} one-time`}
+                note="Reception, housekeeping, managers &mdash; trained in one session."
+              />
+              <IncludedRow
+                label="Concierge retainer (6 months)"
+                listPrice={`$${LIST.retainerMonthly * LIST.retainerMonthsFree} value`}
+                note="A dedicated person on your account. Then $39/mo or cancel."
+              />
+              <IncludedRow
+                label="Transaction fees"
+                listPrice="10\u201315% elsewhere"
+                note="Bring your own processor. We never touch the rev share."
+              />
+              <IncludedRow
+                label="14 guest languages"
+                listPrice="$190/mo add-on"
+                note="Auto-translated menus, messages and reviews."
+              />
+              <IncludedRow
+                label="Unlimited staff seats"
+                listPrice="$8/seat elsewhere"
+                note="Add the whole team. We don&rsquo;t penalize growth."
+              />
+              <IncludedRow
+                label="Smart review loop"
+                listPrice="$120/mo elsewhere"
+                note="Public links to happy guests. Private apology to unhappy ones."
+              />
+              <IncludedRow
+                label="Email infrastructure"
+                listPrice="$45/mo per domain"
+                note="Resend integration, deliverability, templates &mdash; ready."
+              />
+              <IncludedRow
+                label="All future features"
+                listPrice="upgrade fees"
+                note="As we ship, you get it. No 'pro' tier wall later."
+              />
             </div>
           </div>
         </section>
 
+        {/* SAMPLE HOTELS — anchored */}
+        <section
+          aria-labelledby="examples-heading"
+          className="relative py-16 sm:py-20"
+        >
+          <div className="max-w-5xl mx-auto px-4 sm:px-6">
+            <div className="text-center max-w-2xl mx-auto mb-10">
+              <span className="pill pill-amber">// real-world math</span>
+              <h2
+                id="examples-heading"
+                className="mt-4 font-display text-3xl sm:text-4xl tracking-tight leading-[1.05] text-ink"
+              >
+                Three hotels.
+                <br />
+                <span className="display-italic text-emerald-brand">
+                  Same product, different rooms.
+                </span>
+              </h2>
+            </div>
+
+            <div className="space-y-3">
+              {SAMPLE_HOTELS.map((h) => (
+                <SampleRow key={h.rooms} rooms={h.rooms} label={h.label} />
+              ))}
+            </div>
+
+            <p className="mt-6 font-mono text-[10px] uppercase tracking-[0.18em] text-foreground/50 text-center">
+              All examples include onboarding, training, 6mo retainer, and 0%
+              transaction fees
+            </p>
+          </div>
+        </section>
+
         {/* FREE ONBOARDING & TRAINING */}
-        <section className="relative py-20 sm:py-24 bg-surface border-y border-[color:var(--border)] overflow-hidden">
-          <div className="absolute inset-0 bg-grid opacity-25 pointer-events-none" />
-          <div className="absolute -top-32 right-1/3 h-72 w-72 rounded-full bg-emerald-soft/50 blur-3xl pointer-events-none" />
+        <section
+          aria-labelledby="onboarding-heading"
+          className="relative py-20 sm:py-24 overflow-hidden bg-surface border-y border-[color:var(--border)]"
+        >
+          <div className="absolute inset-0 bg-grid opacity-20 pointer-events-none" />
+          <div className="absolute -top-32 right-1/3 h-72 w-72 rounded-full bg-emerald-soft/45 blur-3xl pointer-events-none" />
 
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6">
             <div className="grid lg:grid-cols-12 gap-6 lg:gap-10 mb-10">
               <div className="lg:col-span-7">
                 <span className="pill">
                   <Sparkles className="h-3 w-3 text-emerald-brand" />
-                  Always included · always free
+                  How we get you live
                 </span>
-                <h2 className="mt-4 sm:mt-5 font-display text-3xl sm:text-4xl md:text-5xl tracking-tight leading-[1.05] text-ink">
+                <h2
+                  id="onboarding-heading"
+                  className="mt-4 sm:mt-5 font-display text-3xl sm:text-4xl md:text-5xl tracking-tight leading-[1.05] text-ink"
+                >
                   Free onboarding.
                   <br />
                   <span className="display-italic text-emerald-brand">
@@ -295,9 +324,9 @@ export default function PricingPage() {
               </div>
               <div className="lg:col-span-5 lg:flex lg:items-end">
                 <p className="text-foreground/70">
-                  Whether you take the retainer or not, we walk you through the
-                  first set-up and train your staff — at no cost. Because
-                  software only matters if your team actually uses it.
+                  We don&rsquo;t hand you a SaaS login and wave goodbye. We sit
+                  with your team, set everything up, and stand by on launch
+                  day. At zero extra cost.
                 </p>
               </div>
             </div>
@@ -340,80 +369,85 @@ export default function PricingPage() {
               />
               <SupportPill
                 icon={Languages}
-                title="Worldwide, 14 languages"
+                title="14 languages out of the box"
                 body="Translations included for every menu and message."
               />
             </div>
           </div>
         </section>
 
-        {/* COMPARISON ROW */}
-        <section className="relative py-16 sm:py-20">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6">
-            <div className="text-center max-w-2xl mx-auto mb-10">
-              <span className="pill pill-amber">// at a glance</span>
-              <h2 className="mt-4 font-display text-3xl sm:text-4xl tracking-tight leading-[1.05] text-ink">
-                Free or with a retainer.
-                <br />
-                <span className="display-italic text-emerald-brand">
-                  You pick.
-                </span>
-              </h2>
-            </div>
-
-            <div className="card-surface overflow-hidden">
-              <ComparisonRow
-                feature="Full Concierge OS"
-                free
-                retainer
-                head
+        {/* OPTIONAL RETAINER (after 6 months) */}
+        <section
+          aria-labelledby="retainer-heading"
+          className="relative py-16 sm:py-20"
+        >
+          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+            <div className="card-elev p-7 sm:p-9 relative overflow-hidden bg-ink text-[#f1ebde] border-white/10">
+              <span
+                aria-hidden
+                className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-amber-brand/30 blur-3xl"
               />
-              <ComparisonRow feature="Onboarding & training" free retainer />
-              <ComparisonRow feature="0% transaction fees" free retainer />
-              <ComparisonRow
-                feature="14-language guest engine"
-                free
-                retainer
+              <span
+                aria-hidden
+                className="pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-emerald-brand/30 blur-3xl"
               />
-              <ComparisonRow
-                feature="Email, WhatsApp & screen-share support"
-                free
-                retainer
-              />
-              <ComparisonRow
-                feature="Dedicated concierge engineer"
-                free={false}
-                retainer
-              />
-              <ComparisonRow
-                feature="Monthly menu & translation refresh"
-                free={false}
-                retainer
-              />
-              <ComparisonRow
-                feature="Seasonal offers & upsell ideas"
-                free={false}
-                retainer
-              />
-              <ComparisonRow
-                feature="Branding tweaks handled by us"
-                free={false}
-                retainer
-                last
-              />
+              <div className="relative grid lg:grid-cols-[1.1fr_1fr] gap-8 items-start">
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 border border-white/15 text-amber-soft font-mono text-[10px] uppercase tracking-[0.18em]">
+                      <Headphones className="h-3 w-3" />
+                      After your free 6 months
+                    </span>
+                  </div>
+                  <h2
+                    id="retainer-heading"
+                    className="mt-5 font-display text-3xl sm:text-4xl tracking-tight leading-[1.05] text-[#f7f3ec]"
+                  >
+                    Keep the concierge,
+                    <br />
+                    <span className="display-italic text-emerald-soft">
+                      or fly solo.
+                    </span>
+                  </h2>
+                  <p className="mt-4 text-white/70 max-w-md">
+                    After the 6 founders months, you choose: keep your
+                    dedicated concierge engineer for ${LIST.retainerMonthly}
+                    /month (cancel any time), or just keep using the platform.
+                    Your $${FOUNDERS.base} + $${FOUNDERS.perRoom}/room never
+                    changes.
+                  </p>
+                </div>
+                <ul className="grid sm:grid-cols-1 gap-2.5">
+                  {RETAINER_INCLUDES.map((line) => (
+                    <li
+                      key={line}
+                      className="flex items-start gap-2.5 text-sm text-[#f1ebde]/90"
+                    >
+                      <Check className="h-4 w-4 text-amber-soft shrink-0 mt-0.5" />
+                      <span className="leading-snug">{line}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
           </div>
         </section>
 
         {/* FAQ */}
-        <section className="relative py-16 sm:py-20 bg-surface border-y border-[color:var(--border)]">
+        <section
+          aria-labelledby="faq-heading"
+          className="relative py-16 sm:py-20 bg-surface border-y border-[color:var(--border)]"
+        >
           <div className="max-w-5xl mx-auto px-4 sm:px-6">
             <div className="text-center max-w-2xl mx-auto mb-10">
               <span className="pill">
                 <HelpCircle className="h-3 w-3 text-emerald-brand" />
                 Honest answers
               </span>
-              <h2 className="mt-4 font-display text-3xl sm:text-4xl tracking-tight leading-[1.05] text-ink">
+              <h2
+                id="faq-heading"
+                className="mt-4 font-display text-3xl sm:text-4xl tracking-tight leading-[1.05] text-ink"
+              >
                 The questions hoteliers
                 <br />
                 <span className="display-italic text-emerald-brand">
@@ -424,10 +458,7 @@ export default function PricingPage() {
 
             <div className="grid md:grid-cols-2 gap-4 sm:gap-5">
               {FAQ.map((f) => (
-                <article
-                  key={f.q}
-                  className="card-surface p-5 sm:p-6"
-                >
+                <article key={f.q} className="card-surface p-5 sm:p-6">
                   <h3 className="font-display text-lg text-ink leading-snug">
                     {f.q}
                   </h3>
@@ -458,15 +489,15 @@ export default function PricingPage() {
               </span>
             </h2>
             <p className="mt-5 text-foreground/70">
-              Sign up in two minutes. Setup, training and your launch day are on
-              us — whether you take the retainer or not.
+              Sign up in two minutes. Setup, training and your first 6 months
+              of concierge retainer are on us.
             </p>
             <div className="mt-7 flex flex-col sm:flex-row items-center justify-center gap-3">
               <Link
                 href="/signup"
                 className="group inline-flex items-center justify-center gap-2 h-12 pl-6 pr-5 rounded-full bg-emerald-brand text-primary-foreground font-medium hover:bg-ink transition-colors"
               >
-                Start your hotel
+                Start free trial
                 <ArrowUpRight className="h-4 w-4 transition-transform group-hover:rotate-45" />
               </Link>
               <Link
@@ -482,6 +513,36 @@ export default function PricingPage() {
       </main>
       <Footer />
     </div>
+  );
+}
+
+function IncludedRow({
+  label,
+  listPrice,
+  note,
+}: {
+  label: string;
+  listPrice: string;
+  note: string;
+}) {
+  return (
+    <article className="card-surface p-4 sm:p-5">
+      <div className="flex items-start justify-between gap-3">
+        <h3 className="font-display text-base text-ink leading-snug">
+          {label}
+        </h3>
+        <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-soft text-emerald-brand font-mono text-[10px] uppercase tracking-[0.14em] shrink-0">
+          Free
+        </span>
+      </div>
+      <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.16em] text-foreground/50">
+        <span className="line-through">{listPrice}</span>
+      </p>
+      <p
+        className="mt-2 text-[12.5px] text-foreground/65 leading-relaxed"
+        dangerouslySetInnerHTML={{ __html: note }}
+      />
+    </article>
   );
 }
 
@@ -510,55 +571,46 @@ function SupportPill({
   );
 }
 
-function ComparisonRow({
-  feature,
-  free,
-  retainer,
-  head = false,
-  last = false,
-}: {
-  feature: string;
-  free: boolean;
-  retainer: boolean;
-  head?: boolean;
-  last?: boolean;
-}) {
+function SampleRow({ rooms, label }: { rooms: number; label: string }) {
+  const founders = foundersMonthly(rooms);
+  const list = listMonthly(rooms);
+  const listYear = listFirstYearTotal(rooms);
+  const foundersYear = foundersFirstYearTotal(rooms);
+  const save = firstYearSavings(rooms);
+
   return (
-    <>
-      {head ? (
-        <div className="grid grid-cols-[1fr_auto_auto] gap-4 sm:gap-8 items-center px-5 sm:px-6 py-3 bg-surface/60 border-b border-[color:var(--border)]">
-          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-foreground/55">
-            What you get
-          </p>
-          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-emerald-brand text-center min-w-[60px]">
-            Free
-          </p>
-          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-amber-brand text-center min-w-[80px]">
-            + Retainer
+    <div className="card-surface p-5 sm:p-6">
+      <div className="grid sm:grid-cols-[1fr_auto_auto] gap-4 sm:gap-6 items-center">
+        <div>
+          <p className="text-base font-medium text-ink">{label}</p>
+          <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-foreground/55 mt-1">
+            {rooms} rooms
           </p>
         </div>
-      ) : null}
-      <div
-        className={`grid grid-cols-[1fr_auto_auto] gap-4 sm:gap-8 items-center px-5 sm:px-6 py-3.5 ${
-          last ? "" : "border-b border-[color:var(--border)]"
-        }`}
-      >
-        <p className="text-sm text-ink">{feature}</p>
-        <div className="text-center min-w-[60px]">
-          {free ? (
-            <Check className="h-4 w-4 text-emerald-brand mx-auto" />
-          ) : (
-            <span className="text-foreground/30">—</span>
-          )}
+
+        <div className="text-left sm:text-right">
+          <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-foreground/50">
+            <span className="line-through">Normally {formatUsd(list)}/mo</span>
+          </p>
+          <p className="numeral text-2xl text-ink leading-none mt-1">
+            {formatUsd(founders)}
+            <span className="text-sm text-foreground/55 ml-1">/mo</span>
+          </p>
         </div>
-        <div className="text-center min-w-[80px]">
-          {retainer ? (
-            <Check className="h-4 w-4 text-amber-brand mx-auto" />
-          ) : (
-            <span className="text-foreground/30">—</span>
-          )}
+
+        <div className="rounded-lg bg-emerald-soft/50 border border-emerald-brand/20 px-3 py-2 text-left sm:text-right">
+          <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-emerald-brand flex items-center gap-1 sm:justify-end">
+            <TrendingDown className="h-3 w-3" />
+            Year-1 savings
+          </p>
+          <p className="numeral text-lg text-emerald-brand leading-none mt-1">
+            {formatUsd(save)}
+          </p>
+          <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-foreground/45 mt-1">
+            {formatUsd(foundersYear)} vs {formatUsd(listYear)}
+          </p>
         </div>
       </div>
-    </>
+    </div>
   );
 }

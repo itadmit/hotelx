@@ -86,7 +86,11 @@ const columns: Array<{
 
 export function LivePreview() {
   return (
-    <section className="relative py-20 sm:py-28 bg-ink text-[#f1ebde] overflow-hidden">
+    <section
+      id="live-preview"
+      aria-labelledby="live-preview-heading"
+      className="relative py-20 sm:py-28 bg-ink text-[#f1ebde] overflow-hidden"
+    >
       {/* color washes */}
       <div className="absolute -top-20 left-1/3 h-72 w-72 rounded-full bg-emerald-brand/30 blur-3xl" />
       <div className="absolute -bottom-20 right-1/4 h-72 w-72 rounded-full bg-amber-brand/20 blur-3xl" />
@@ -96,18 +100,22 @@ export function LivePreview() {
           <div className="lg:col-span-7">
             <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full font-mono text-[10px] uppercase tracking-[0.18em] bg-white/5 border border-white/10 text-emerald-soft">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-soft" />
-              Live ops view
+              The screen your team will live on
             </span>
-            <h2 className="mt-4 sm:mt-5 font-display text-3xl sm:text-4xl md:text-5xl leading-[1.05] tracking-tight text-white">
-              Your front desk,
+            <h2
+              id="live-preview-heading"
+              className="mt-4 sm:mt-5 font-display text-3xl sm:text-4xl md:text-5xl leading-[1.05] tracking-tight text-white"
+            >
+              One calm screen instead of
               <br />
-              <span className="display-italic text-amber-soft">in one calm screen.</span>
+              <span className="display-italic text-amber-soft">five WhatsApp groups.</span>
             </h2>
           </div>
           <div className="lg:col-span-5 lg:flex lg:items-end">
             <p className="text-white/60 max-w-md">
-              A live look at the staff dashboard. Realtime, prioritized, and
-              gracefully quiet — even on the busiest Saturday night.
+              Every guest request lands here, sorted by SLA, with a live status
+              the guest can see. No sticky notes, no missed orders, no &ldquo;who
+              took that?&rdquo; on a Saturday night.
             </p>
           </div>
         </div>

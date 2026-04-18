@@ -5,48 +5,59 @@ const steps = [
     no: "01",
     icon: ScanLine,
     accent: "bg-amber-soft text-amber-brand",
-    title: "Guests scan",
-    sub: "In-suite QR · Web-only",
+    title: "Guest scans the QR",
+    sub: "No app, no friction",
     description:
-      "A discreet QR card on the nightstand opens a branded, instantly-translated micro-app. No download. No login. No friction.",
+      "A small card on the nightstand opens your branded micro-app, already in their language. Zero downloads, zero logins.",
   },
   {
     no: "02",
     icon: Bell,
     accent: "bg-emerald-soft text-emerald-brand",
-    title: "Staff respond",
-    sub: "Realtime board",
+    title: "Reception responds",
+    sub: "Live request board",
     description:
-      "Requests stream into a Kanban that prioritises by SLA. Assign with one click, leave private notes, and notify guests automatically.",
+      "Orders and questions land on a Kanban sorted by SLA. Assign with one tap, the guest sees a status update automatically.",
   },
   {
     no: "03",
     icon: LineChart,
     accent: "bg-[#f3d8cf] text-clay",
-    title: "Managers see everything",
-    sub: "Operational intelligence",
+    title: "Marketing sees the numbers",
+    sub: "ROI in plain English",
     description:
-      "Live dashboards reveal response times, peak hours, top services, and team performance — exportable to CSV & PDF.",
+      "Revenue per room, top sellers, response times, Booking score \u2014 a weekly digest your GM can read in 90 seconds.",
   },
 ];
 
 export function HowItWorks() {
   return (
-    <section id="how" className="relative py-20 sm:py-28">
+    <section
+      id="how"
+      aria-labelledby="how-heading"
+      className="relative py-20 sm:py-28"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="grid lg:grid-cols-12 gap-6 lg:gap-10 mb-10 sm:mb-14">
           <div className="lg:col-span-7">
-            <span className="pill">// process</span>
-            <h2 className="mt-4 sm:mt-5 font-display text-3xl sm:text-4xl md:text-5xl tracking-tight max-w-2xl leading-[1.05] text-ink">
-              From <span className="display-italic text-emerald-brand">scan</span> to{" "}
-              <span className="display-italic text-amber-brand">served</span> —
-              in three deliberate moves.
+            <span className="pill">
+              <ScanLine className="h-3 w-3 text-emerald-brand" />
+              How it works
+            </span>
+            <h2
+              id="how-heading"
+              className="mt-4 sm:mt-5 font-display text-3xl sm:text-4xl md:text-5xl tracking-tight max-w-2xl leading-[1.05] text-ink"
+            >
+              From <span className="display-italic text-emerald-brand">scan</span>{" "}
+              to{" "}
+              <span className="display-italic text-amber-brand">served</span>{" "}
+              &mdash; in 90 seconds.
             </h2>
           </div>
           <div className="lg:col-span-5 lg:flex lg:items-end">
             <p className="text-foreground/70 max-w-md">
-              A choreography designed for five-star service, engineered for
-              millisecond response times.
+              No PMS rip-and-replace, no IT project, no app on the App Store.
+              Print a QR, train your team in an afternoon, you&rsquo;re live.
             </p>
           </div>
         </div>
