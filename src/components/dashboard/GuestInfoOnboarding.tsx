@@ -70,7 +70,17 @@ const STEPS: Array<{
  * keep nagging on every navigation. It will reappear after a hard reload
  * (or new tab) until all four pieces are filled.
  */
-export function GuestInfoOnboarding() {
+export function GuestInfoOnboarding({
+  refreshKey = 0,
+}: {
+  /**
+   * Bump this number from the parent (e.g. after the demo import succeeds)
+   * to force the banner to re-fetch its completion status. Without this, the
+   * banner would stay visible until a hard refresh because it only checks
+   * once on mount.
+   */
+  refreshKey?: number;
+} = {}) {
   const [status, setStatus] = useState<Status | null>(null);
   const [dismissed, setDismissed] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -118,7 +128,7 @@ export function GuestInfoOnboarding() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [refreshKey]);
 
   function dismiss() {
     setDismissed(true);

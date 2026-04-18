@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,10 +24,17 @@ import {
   ArrowUpRight,
   Clock,
   TrendingUp,
+  AlertTriangle,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DashboardPageLoading } from "@/components/dashboard/DashboardPageLoading";
 import { GuestInfoOnboarding } from "@/components/dashboard/GuestInfoOnboarding";
+import { FirstTimeWelcomeModal } from "@/components/dashboard/FirstTimeWelcomeModal";
+import {
+  DemoImportDialog,
+  type ImportResult,
+} from "@/components/dashboard/DemoImportDialog";
 
 type RequestStatus = "NEW" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
 
@@ -71,6 +78,34 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<null | "reset">(null);
+  const [actionRunning, setActionRunning] = useState<null | "reset">(null);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [onboardingRefreshKey, setOnboardingRefreshKey] = useState(0);
+  const [toast, setToast] = useState<{
+    tone: "success" | "error";
+    title: string;
+    detail?: string;
+  } | null>(null);
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  function showToast(payload: {
+    tone: "success" | "error";
+    title: string;
+    detail?: string;
+  }) {
+    if (toastTimerRef.current) {
+      clearTimeout(toastTimerRef.current);
+    }
+    setToast(payload);
+    toastTimerRef.current = setTimeout(() => setToast(null), 5000);
+  }
+
+  useEffect(() => {
+    return () => {
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    };
+  }, []);
 
   async function loadData(options?: { initial?: boolean }) {
     const isInitial = options?.initial ?? false;
@@ -103,14 +138,84 @@ export default function DashboardPage() {
     }
   }
 
-  async function importDemoData() {
-    await fetch("/api/demo/seed", { method: "POST" });
-    await loadData();
+  function handleImportSuccess(result: ImportResult | null) {
+    const detailParts = [
+      typeof result?.amenities === "number"
+        ? `${result.amenities} amenities`
+        : null,
+      typeof result?.newServices === "number"
+        ? `${result.newServices} new services`
+        : null,
+      typeof result?.newRooms === "number"
+        ? `${result.newRooms} new rooms`
+        : null,
+    ].filter(Boolean);
+    showToast({
+      tone: "success",
+      title: "Plaza Hotel demo imported",
+      detail:
+        detailParts.length > 0
+          ? `${detailParts.join(" · ")}.`
+          : "Your dashboard now shows real-looking data.",
+    });
+    setOnboardingRefreshKey((k) => k + 1);
+    loadData();
   }
 
-  async function resetHotelData() {
-    await fetch("/api/demo/reset", { method: "POST" });
-    await loadData();
+  async function runResetHotelData() {
+    setActionRunning("reset");
+    try {
+      const res = await fetch("/api/demo/reset", { method: "POST" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        showToast({
+          tone: "error",
+          title: "Could not reset hotel data",
+          detail:
+            data?.detail ??
+            data?.error ??
+            "Please try again in a moment.",
+        });
+        return;
+      }
+      const r = data?.result ?? {};
+      const removed =
+        (r.removedRequests ?? 0) +
+        (r.removedServices ?? 0) +
+        (r.removedCategories ?? 0) +
+        (r.removedRooms ?? 0) +
+        (r.removedAmenities ?? 0);
+      showToast({
+        tone: "success",
+        title: "Hotel data reset",
+        detail:
+          removed > 0
+            ? `${removed} records removed across rooms, services and categories.`
+            : "Nothing to remove — your hotel was already empty.",
+      });
+      if (typeof window !== "undefined") {
+        window.localStorage.removeItem("hotelx:welcome-dismissed");
+        // After a reset the onboarding nudge becomes relevant again.
+        try {
+          window.sessionStorage.removeItem(
+            "hotelx:guest-info-onboarding-dismissed"
+          );
+        } catch {
+          // ignore
+        }
+      }
+      setOnboardingRefreshKey((k) => k + 1);
+      await loadData();
+    } catch {
+      showToast({
+        tone: "error",
+        title: "Network error",
+        detail: "Couldn't reach the server. Please try again.",
+      });
+    } finally {
+      setActionRunning(null);
+      setConfirmAction(null);
+    }
   }
 
   async function createRequest() {
@@ -160,7 +265,8 @@ export default function DashboardPage() {
         <div className="flex flex-wrap gap-2">
           <Button
             variant="outline"
-            onClick={importDemoData}
+            onClick={() => setImportDialogOpen(true)}
+            disabled={actionRunning !== null || importDialogOpen}
             className="gap-2 h-9 text-xs"
           >
             <Database className="h-3.5 w-3.5" />
@@ -168,11 +274,16 @@ export default function DashboardPage() {
           </Button>
           <Button
             variant="outline"
-            onClick={resetHotelData}
+            onClick={() => setConfirmAction("reset")}
+            disabled={actionRunning !== null}
             className="gap-2 h-9 text-xs"
           >
-            <RotateCcw className="h-3.5 w-3.5" />
-            Reset
+            {actionRunning === "reset" ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <RotateCcw className="h-3.5 w-3.5" />
+            )}
+            {actionRunning === "reset" ? "Resetting…" : "Reset"}
           </Button>
           <Button
             onClick={() => setIsCreateOpen(true)}
@@ -185,7 +296,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Onboarding nudge — only renders if any of the 4 guest-info pieces are missing. */}
-      <GuestInfoOnboarding />
+      <GuestInfoOnboarding refreshKey={onboardingRefreshKey} />
 
       {/* KPI Grid */}
       <div className="grid gap-3 sm:gap-4 grid-cols-2 xl:grid-cols-4">
@@ -442,6 +553,111 @@ export default function DashboardPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog
+        open={confirmAction === "reset"}
+        onOpenChange={(open) => {
+          if (!open && actionRunning === null) setConfirmAction(null);
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[#f3d8cf] text-clay">
+                <AlertTriangle className="h-4 w-4" />
+              </span>
+              Reset all hotel data?
+            </DialogTitle>
+            <DialogDescription className="pt-2 text-foreground/70">
+              This will permanently delete <strong>all rooms, services,
+              categories, amenities, hotel info and requests</strong> for your
+              hotel. Guests scanning your QR codes will see an empty menu until
+              you add new content. This cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="mt-4">
+            <Button
+              variant="outline"
+              onClick={() => setConfirmAction(null)}
+              disabled={actionRunning !== null}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={runResetHotelData}
+              disabled={actionRunning !== null}
+              className="gap-2 bg-clay text-white hover:bg-clay/90"
+            >
+              {actionRunning === "reset" && (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              )}
+              {actionRunning === "reset" ? "Resetting…" : "Yes, reset everything"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <DemoImportDialog
+        open={importDialogOpen}
+        onOpenChange={setImportDialogOpen}
+        onSuccess={handleImportSuccess}
+      />
+
+      <FirstTimeWelcomeModal
+        hotelIsEmpty={
+          !isInitialLoading &&
+          rooms.length === 0 &&
+          services.length === 0
+        }
+        onRequestImport={() => setImportDialogOpen(true)}
+      />
+
+      {toast && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed bottom-6 right-6 z-[80] w-[min(360px,calc(100vw-2rem))] animate-[fadeInUp_0.18s_ease-out]"
+        >
+          <div
+            className={cn(
+              "flex items-start gap-3 rounded-xl border bg-card p-4 shadow-lg",
+              toast.tone === "success"
+                ? "border-primary/25"
+                : "border-clay/30"
+            )}
+          >
+            <span
+              className={cn(
+                "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg",
+                toast.tone === "success"
+                  ? "bg-primary/10 text-primary"
+                  : "bg-[#f3d8cf] text-clay"
+              )}
+            >
+              {toast.tone === "success" ? (
+                <CheckCircle2 className="h-4 w-4" />
+              ) : (
+                <AlertTriangle className="h-4 w-4" />
+              )}
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium text-ink">{toast.title}</p>
+              {toast.detail && (
+                <p className="mt-0.5 text-xs text-foreground/70">
+                  {toast.detail}
+                </p>
+              )}
+            </div>
+            <button
+              onClick={() => setToast(null)}
+              className="text-xs text-foreground/50 hover:text-ink transition-colors"
+              aria-label="Dismiss"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
         </>
       )}
     </div>

@@ -3,6 +3,120 @@ const U = (photoPath: string) =>
   `https://images.unsplash.com/${photoPath}?auto=format&fit=crop&w=900&q=82`;
 
 /**
+ * Display identity rewritten by the seed action so the dashboard demo and
+ * the marketing demo iPhone always show the same fictional 5-star property
+ * in Milan: Plaza Hotel.
+ */
+export const demoHotel = {
+  name: "Plaza Hotel",
+  primaryColor: "#0e5240",
+  defaultCurrency: "EUR",
+};
+
+/**
+ * Wi-Fi, About, Helpful info — written into the HotelInfo row that backs
+ * the guest-info pages and the dashboard onboarding nudge.
+ */
+export const demoHotelInfo = {
+  wifiName: "PlazaGuest",
+  wifiPassword: "DuomoMilano1386",
+  wifiNotes:
+    "Open the network and accept the captive page on first connect. The same credentials work in your room, the orchard lobby and on the rooftop terrace.",
+  about: `Plaza Hotel sits on Via dell'Arcivescovado, just 90 seconds on foot from the Piazza del Duomo and the marble facade of Milan's cathedral. The building, a restored 19th-century palazzo, opens onto a quiet courtyard you can hear the bell tower from but never the traffic.
+
+Forty-two rooms and suites blend Lombard craftsmanship with a calm modern hand — terracotta floors, ivory linen, brass fixtures cast in Brescia. Every key includes a personal concierge on the in-room screen, and your room is yours from the moment you arrive: priority check-in opens at 11:00 whenever the room is ready.
+
+Our restaurant, Il Cortile, is led by chef Matteo Ricci (one Michelin star, formerly of Cracco) and serves a seasonal Lombard tasting menu nightly. The rooftop bar — Sopra il Duomo — opens at 17:00 with a direct line of sight to the cathedral's spires.`,
+  helpfulInfo: `Check-in 15:00 (priority from 11:00 when ready). Check-out 11:00.
+Breakfast 7:00 – 10:30 in Il Cortile, the orchard hall on the ground floor.
+Rooftop bar Sopra il Duomo opens daily 17:00 – 01:00.
+Valet parking at the Via Larga garage — call reception 30 minutes before arrival or departure.
+Smoking only on the rooftop terrace; rooms and suites are strictly non-smoking.
+The Duomo is a 90-second walk; Galleria Vittorio Emanuele 4 minutes; La Scala 7 minutes.
+Closest metro: Duomo (M1 / M3), exit Via Mengoni — 2 minutes on foot.
+Concierge desk is staffed 24/7. Tap "Concierge" on your in-room screen for immediate help.
+Pets up to 10kg are welcome — please notify us in advance.
+Children of any age are welcome. Cribs and high chairs are complimentary.`,
+};
+
+/**
+ * On-site amenities a guest can use during their stay. Order matters — these
+ * are rendered top-to-bottom in the guest amenities page.
+ */
+export const demoAmenities: Array<{
+  name: string;
+  description: string;
+  icon: string;
+  hours: string;
+  location: string;
+}> = [
+  {
+    name: "Sopra il Duomo · Rooftop bar",
+    description:
+      "Sky-bar with a direct view of the cathedral's spires. Aperitivo from 17:00.",
+    icon: "bar",
+    hours: "17:00 – 01:00",
+    location: "Floor 7",
+  },
+  {
+    name: "Il Cortile · Restaurant",
+    description:
+      "Chef Matteo Ricci's seasonal Lombard tasting menu. Reservation recommended.",
+    icon: "restaurant",
+    hours: "19:00 – 23:00",
+    location: "Ground floor",
+  },
+  {
+    name: "Orchard breakfast hall",
+    description:
+      "Italian breakfast with house pastries, cured meats and a Caffè Vergnano espresso bar.",
+    icon: "breakfast",
+    hours: "07:00 – 10:30",
+    location: "Ground floor",
+  },
+  {
+    name: "Marble indoor pool",
+    description:
+      "Heated 18m pool carved from Carrara marble, steam room and rain showers adjacent.",
+    icon: "pool",
+    hours: "06:30 – 22:00",
+    location: "Floor -1",
+  },
+  {
+    name: "La Brera spa",
+    description:
+      "Six treatment cabins, hammam and a vitality pool. Massages bookable via the concierge.",
+    icon: "spa",
+    hours: "10:00 – 21:00",
+    location: "Floor -1",
+  },
+  {
+    name: "24/7 fitness studio",
+    description:
+      "Technogym cardio, free weights, Peloton bikes and a private yoga corner.",
+    icon: "gym",
+    hours: "Always open",
+    location: "Floor -1",
+  },
+  {
+    name: "Valet parking",
+    description:
+      "Off-site garage on Via Larga. Call reception 30 minutes ahead to bring your car.",
+    icon: "parking",
+    hours: "On request",
+    location: "Via Larga",
+  },
+  {
+    name: "Concierge desk",
+    description:
+      "Tickets to La Scala, Duomo terraces & Last Supper viewings — booked while you settle in.",
+    icon: "concierge",
+    hours: "Always open",
+    location: "Lobby",
+  },
+];
+
+/**
  * Root categories first, then children (must reference existing `parentSlug`).
  * Room service sub-menus live under `room-service` only.
  */
@@ -77,6 +191,7 @@ export const demoServices: Array<{
   price: number | null;
   estimatedTime: string;
   requirePayment: boolean;
+  isFeatured?: boolean;
   image?: string | null;
 }> = [
   // Breakfast
@@ -87,6 +202,7 @@ export const demoServices: Array<{
     price: 24,
     estimatedTime: "25–35 min",
     requirePayment: false,
+    isFeatured: true,
     image: U("photo-1533089860891-a7c6f0a88666"),
   },
   {
@@ -179,6 +295,7 @@ export const demoServices: Array<{
     price: 28,
     estimatedTime: "25–35 min",
     requirePayment: false,
+    isFeatured: true,
     image: U("photo-1476124369491-e7add44a9f24"),
   },
   {
@@ -226,6 +343,7 @@ export const demoServices: Array<{
     price: 48,
     estimatedTime: "15–20 min",
     requirePayment: true,
+    isFeatured: true,
     image: U("photo-1513558161293-cdaf765ed2fd"),
   },
   {
