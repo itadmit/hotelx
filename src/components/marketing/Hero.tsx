@@ -26,7 +26,7 @@ export function Hero() {
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-12 pb-20 lg:pt-24 lg:pb-32">
         <div className="grid lg:grid-cols-12 gap-12 lg:gap-12 items-center">
           {/* Left — copy */}
-          <div className="lg:col-span-7 text-center lg:text-left">
+          <div className="lg:col-span-7 text-center lg:text-left lg:pr-8 xl:pr-16">
             <div className="reveal flex justify-center lg:justify-start" style={{ animationDelay: "0ms" }}>
               <span className="pill">
                 <Sparkles className="h-3 w-3 text-emerald-brand" />
@@ -35,7 +35,7 @@ export function Hero() {
             </div>
 
             <h1
-              className="reveal mt-6 sm:mt-7 font-display text-[2.5rem] sm:text-5xl md:text-6xl lg:text-[4.75rem] leading-[1.0] tracking-tight text-ink"
+              className="reveal mt-6 sm:mt-7 font-display text-[2.5rem] sm:text-5xl md:text-6xl lg:text-[4.5rem] xl:text-[4.75rem] leading-[1.0] tracking-tight text-ink max-w-[18ch] mx-auto lg:mx-0"
               style={{ animationDelay: "100ms" }}
             >
               Turn every room into a
