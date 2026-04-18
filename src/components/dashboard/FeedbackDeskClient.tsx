@@ -19,6 +19,7 @@ import {
 import { DashboardPageHeader } from "./DashboardPageHeader";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { FeedbackDeskSkeleton } from "./FeedbackDeskSkeleton";
 
 type FeedbackItem = {
   id: string;
@@ -69,10 +70,13 @@ export function FeedbackDeskClient() {
   const [items, setItems] = useState<FeedbackItem[]>([]);
   const [summary, setSummary] = useState<SummaryRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [tab, setTab] = useState<FilterTab>("NEGATIVE_OPEN");
   const [savingId, setSavingId] = useState<string | null>(null);
 
-  async function load() {
+  async function load(options?: { initial?: boolean }) {
+    const isInitial = options?.initial ?? false;
+    if (isInitial) setIsInitialLoading(true);
     setLoading(true);
     try {
       const res = await fetch("/api/feedback?limit=200", { cache: "no-store" });
@@ -81,11 +85,12 @@ export function FeedbackDeskClient() {
       setSummary(data.summary ?? []);
     } finally {
       setLoading(false);
+      if (isInitial) setIsInitialLoading(false);
     }
   }
 
   useEffect(() => {
-    load();
+    load({ initial: true });
   }, []);
 
   const filtered = useMemo(() => {
@@ -154,6 +159,10 @@ export function FeedbackDeskClient() {
 
   const latest = filtered.slice(0, 8);
 
+  if (isInitialLoading) {
+    return <FeedbackDeskSkeleton />;
+  }
+
   return (
     <div className="space-y-8">
       <DashboardPageHeader
@@ -163,7 +172,7 @@ export function FeedbackDeskClient() {
       >
         <Button
           variant="outline"
-          onClick={load}
+          onClick={() => load()}
           disabled={loading}
           className="gap-2 h-9 text-xs"
         >

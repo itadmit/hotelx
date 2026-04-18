@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { DashboardPageHeader } from "./DashboardPageHeader";
 import { cn } from "@/lib/utils";
+import { EmailTemplatesSkeleton } from "./EmailTemplatesSkeleton";
 
 type TemplateKind =
   | "FEEDBACK_THANKS"
@@ -70,12 +71,15 @@ const KIND_META: Record<
 export function EmailTemplatesClient() {
   const [templates, setTemplates] = useState<Template[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [activeKind, setActiveKind] = useState<TemplateKind>("FEEDBACK_THANKS");
   const [draft, setDraft] = useState<Template | null>(null);
   const [saving, setSaving] = useState(false);
   const [savedAt, setSavedAt] = useState<number | null>(null);
 
-  async function load() {
+  async function load(options?: { initial?: boolean }) {
+    const isInitial = options?.initial ?? false;
+    if (isInitial) setIsInitialLoading(true);
     setLoading(true);
     try {
       const res = await fetch("/api/email-templates", { cache: "no-store" });
@@ -83,11 +87,12 @@ export function EmailTemplatesClient() {
       setTemplates(data.templates ?? []);
     } finally {
       setLoading(false);
+      if (isInitial) setIsInitialLoading(false);
     }
   }
 
   useEffect(() => {
-    load();
+    load({ initial: true });
   }, []);
 
   useEffect(() => {
@@ -150,6 +155,10 @@ export function EmailTemplatesClient() {
     }
   }
 
+  if (isInitialLoading) {
+    return <EmailTemplatesSkeleton />;
+  }
+
   return (
     <div className="space-y-7 pb-12">
       <DashboardPageHeader
@@ -159,7 +168,7 @@ export function EmailTemplatesClient() {
       >
         <button
           type="button"
-          onClick={load}
+          onClick={() => load()}
           className="inline-flex items-center gap-2 h-9 px-3 rounded-md border border-[color:var(--border)] bg-card text-xs text-ink hover:bg-surface transition-colors"
         >
           <RefreshCcw className={cn("h-3.5 w-3.5", loading && "animate-spin")} />
