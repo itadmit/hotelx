@@ -3,7 +3,9 @@ import { Hero } from "@/components/marketing/Hero";
 import { LanguagesMarquee } from "@/components/marketing/LanguagesMarquee";
 import { HowItWorks } from "@/components/marketing/HowItWorks";
 import { LivePreview } from "@/components/marketing/LivePreview";
+import { GuestExperienceSection } from "@/components/marketing/GuestExperienceSection";
 import { Features } from "@/components/marketing/Features";
+import { RealtimeSection } from "@/components/marketing/RealtimeSection";
 import { PaymentsSection } from "@/components/marketing/PaymentsSection";
 import { InsightsSection } from "@/components/marketing/InsightsSection";
 import { FeedbackLoopSection } from "@/components/marketing/FeedbackLoopSection";
@@ -24,7 +26,9 @@ export default function Home() {
         <LanguagesMarquee />
         <HowItWorks />
         <LivePreview />
+        <GuestExperienceSection />
         <Features />
+        <RealtimeSection />
         <PaymentsSection />
         <InsightsSection />
         <FeedbackLoopSection />
