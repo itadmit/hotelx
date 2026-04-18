@@ -11,6 +11,10 @@ import {
   CircleCheck,
   CircleDot,
   ArrowLeft,
+  Star,
+  Send,
+  Heart,
+  ExternalLink,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
@@ -272,6 +276,13 @@ export function RequestStatusClient({
         </section>
       ) : null}
 
+      {request.status === "COMPLETED" ? (
+        <FeedbackPanel
+          requestId={requestId}
+          serviceName={request.service.name}
+        />
+      ) : null}
+
       <div className="mt-auto pt-10 px-5">
         <Link
           href={`/g/${hotelSlug}/${roomCode}`}
@@ -285,5 +296,274 @@ export function RequestStatusClient({
         </p>
       </div>
     </main>
+  );
+}
+
+type FeedbackPhase = "rate" | "details" | "submitting" | "thanks-positive" | "thanks-negative";
+
+function FeedbackPanel({
+  requestId,
+  serviceName,
+}: {
+  requestId: string;
+  serviceName: string;
+}) {
+  const STORAGE_KEY = `hotelx:feedback:${requestId}`;
+  const [phase, setPhase] = useState<FeedbackPhase>("rate");
+  const [rating, setRating] = useState<number>(0);
+  const [hoverRating, setHoverRating] = useState<number>(0);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [comment, setComment] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [reviewLinks, setReviewLinks] = useState<{
+    google: string | null;
+    booking: string | null;
+  } | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const stored = window.localStorage.getItem(STORAGE_KEY);
+    if (!stored) return;
+    try {
+      const parsed = JSON.parse(stored) as {
+        phase: FeedbackPhase;
+        rating?: number;
+        reviewLinks?: { google: string | null; booking: string | null } | null;
+      };
+      if (parsed.phase === "thanks-positive" || parsed.phase === "thanks-negative") {
+        setPhase(parsed.phase);
+        setRating(parsed.rating ?? 0);
+        setReviewLinks(parsed.reviewLinks ?? null);
+      }
+    } catch {
+      /* ignore */
+    }
+  }, [STORAGE_KEY]);
+
+  function persist(next: {
+    phase: FeedbackPhase;
+    rating?: number;
+    reviewLinks?: { google: string | null; booking: string | null } | null;
+  }) {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  }
+
+  async function submit() {
+    if (rating < 1) {
+      setError("Pick a rating first");
+      return;
+    }
+    setError(null);
+    setPhase("submitting");
+    try {
+      const res = await fetch("/api/public/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          requestId,
+          rating,
+          comment: comment.trim() || null,
+          guestName: name.trim() || null,
+          guestEmail: email.trim() || null,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.error ?? "Could not save feedback");
+      }
+      const sentiment = data?.feedback?.sentiment as
+        | "POSITIVE"
+        | "NEGATIVE"
+        | undefined;
+      const nextPhase: FeedbackPhase =
+        sentiment === "POSITIVE" ? "thanks-positive" : "thanks-negative";
+      const links = data?.reviewLinks ?? null;
+      setReviewLinks(links);
+      setPhase(nextPhase);
+      persist({ phase: nextPhase, rating, reviewLinks: links });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Something went wrong");
+      setPhase("details");
+    }
+  }
+
+  if (phase === "thanks-positive") {
+    const hasLinks = reviewLinks?.google || reviewLinks?.booking;
+    return (
+      <section className="mx-5 mt-6 rounded-2xl border border-[color:var(--border)] bg-card overflow-hidden">
+        <div className="px-5 py-5 bg-emerald-soft/60">
+          <div className="flex items-center gap-2">
+            <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-emerald-brand text-primary-foreground">
+              <Heart className="h-4 w-4" />
+            </span>
+            <p className="eyebrow text-emerald-brand">Thank you</p>
+          </div>
+          <h2 className="font-display text-xl text-ink mt-3 leading-snug">
+            We&apos;re so glad you enjoyed it
+            <span className="display-italic text-emerald-brand">.</span>
+          </h2>
+          <p className="text-sm text-foreground/70 mt-1.5">
+            A short public review helps fellow travellers — and our team — more
+            than you&apos;d think.
+          </p>
+        </div>
+        {hasLinks ? (
+          <div className="px-5 py-4 grid gap-2.5">
+            {reviewLinks?.google ? (
+              <a
+                href={reviewLinks.google}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="group inline-flex items-center justify-between gap-2 h-12 px-4 rounded-full bg-emerald-brand text-primary-foreground font-medium hover:bg-ink transition-colors"
+              >
+                <span className="inline-flex items-center gap-2">
+                  <Star className="h-4 w-4" /> Review on Google
+                </span>
+                <ExternalLink className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+              </a>
+            ) : null}
+            {reviewLinks?.booking ? (
+              <a
+                href={reviewLinks.booking}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="group inline-flex items-center justify-between gap-2 h-12 px-4 rounded-full border border-[color:var(--border)] bg-card text-ink font-medium hover:bg-surface transition-colors"
+              >
+                <span className="inline-flex items-center gap-2">
+                  <Star className="h-4 w-4 text-emerald-brand" /> Review on Booking.com
+                </span>
+                <ExternalLink className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+              </a>
+            ) : null}
+          </div>
+        ) : (
+          <div className="px-5 py-4">
+            <p className="text-sm text-foreground/65">
+              Your kind words have been forwarded to the team.
+            </p>
+          </div>
+        )}
+      </section>
+    );
+  }
+
+  if (phase === "thanks-negative") {
+    return (
+      <section className="mx-5 mt-6 rounded-2xl border border-[color:var(--border)] bg-card overflow-hidden">
+        <div className="px-5 py-5 bg-amber-soft/50">
+          <div className="flex items-center gap-2">
+            <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-amber-brand text-primary-foreground">
+              <Heart className="h-4 w-4" />
+            </span>
+            <p className="eyebrow text-amber-brand">We&apos;re on it</p>
+          </div>
+          <h2 className="font-display text-xl text-ink mt-3 leading-snug">
+            Thank you for telling us
+            <span className="display-italic text-amber-brand">.</span>
+          </h2>
+          <p className="text-sm text-foreground/70 mt-1.5">
+            Our concierge has been notified and someone will personally reach out
+            to make this right.
+          </p>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="mx-5 mt-6 rounded-2xl border border-[color:var(--border)] bg-card overflow-hidden">
+      <div className="px-5 pt-5 pb-3 border-b border-[color:var(--border)]">
+        <p className="eyebrow flex items-center gap-1.5">
+          <Sparkles className="h-3 w-3 text-emerald-brand" />
+          How was it?
+        </p>
+        <h2 className="font-display text-xl text-ink mt-2 leading-snug">
+          Rate <span className="text-emerald-brand">{serviceName}</span>
+        </h2>
+      </div>
+
+      <div className="px-5 py-5 space-y-4">
+        <div
+          className="flex items-center justify-center gap-1.5"
+          onMouseLeave={() => setHoverRating(0)}
+        >
+          {[1, 2, 3, 4, 5].map((n) => {
+            const filled = (hoverRating || rating) >= n;
+            return (
+              <button
+                key={n}
+                type="button"
+                onMouseEnter={() => setHoverRating(n)}
+                onClick={() => {
+                  setRating(n);
+                  if (phase === "rate") setPhase("details");
+                }}
+                aria-label={`Rate ${n} out of 5`}
+                className="h-11 w-11 rounded-full flex items-center justify-center transition-transform hover:scale-110"
+              >
+                <Star
+                  className={`h-7 w-7 transition-colors ${
+                    filled
+                      ? "fill-amber-brand text-amber-brand"
+                      : "text-foreground/25"
+                  }`}
+                  strokeWidth={1.5}
+                />
+              </button>
+            );
+          })}
+        </div>
+
+        {phase !== "rate" ? (
+          <div className="space-y-3 pt-1">
+            <div className="grid gap-2 sm:grid-cols-2">
+              <input
+                type="text"
+                placeholder="Your name (optional)"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="h-10 px-3 rounded-md border border-[color:var(--border)] bg-surface text-sm text-ink placeholder:text-foreground/40 focus:outline-none focus:border-emerald-brand/40"
+              />
+              <input
+                type="email"
+                placeholder="Email for a reply (optional)"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="h-10 px-3 rounded-md border border-[color:var(--border)] bg-surface text-sm text-ink placeholder:text-foreground/40 focus:outline-none focus:border-emerald-brand/40"
+              />
+            </div>
+            <textarea
+              placeholder={
+                rating > 0 && rating < 4
+                  ? "Tell us what we can do better"
+                  : "Anything you'd like to add?"
+              }
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              rows={3}
+              className="w-full px-3 py-2.5 rounded-md border border-[color:var(--border)] bg-surface text-sm text-ink placeholder:text-foreground/40 resize-none focus:outline-none focus:border-emerald-brand/40"
+            />
+            {error ? (
+              <p className="text-xs text-clay">{error}</p>
+            ) : null}
+            <button
+              type="button"
+              onClick={submit}
+              disabled={phase === "submitting" || rating < 1}
+              className="group w-full inline-flex items-center justify-center gap-2 h-11 rounded-full bg-emerald-brand text-primary-foreground font-medium hover:bg-ink transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {phase === "submitting" ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Send className="h-4 w-4" />
+              )}
+              {phase === "submitting" ? "Sending…" : "Send feedback"}
+            </button>
+          </div>
+        ) : null}
+      </div>
+    </section>
   );
 }

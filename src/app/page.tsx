@@ -6,6 +6,7 @@ import { LivePreview } from "@/components/marketing/LivePreview";
 import { Features } from "@/components/marketing/Features";
 import { PaymentsSection } from "@/components/marketing/PaymentsSection";
 import { InsightsSection } from "@/components/marketing/InsightsSection";
+import { FeedbackLoopSection } from "@/components/marketing/FeedbackLoopSection";
 import { Audiences } from "@/components/marketing/Audiences";
 import { Stats } from "@/components/marketing/Stats";
 import { OfferSection } from "@/components/marketing/OfferSection";
@@ -26,6 +27,7 @@ export default function Home() {
         <Features />
         <PaymentsSection />
         <InsightsSection />
+        <FeedbackLoopSection />
         <Audiences />
         <Stats />
         <OfferSection />

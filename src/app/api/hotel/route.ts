@@ -15,6 +15,11 @@ const updateHotelSchema = z.object({
   primaryColor: z.string().min(4).max(16).optional(),
   paymentsEnabled: z.boolean().optional(),
   defaultCurrency: z.string().min(3).max(8).optional(),
+  feedbackEnabled: z.boolean().optional(),
+  feedbackThreshold: z.number().int().min(2).max(5).optional(),
+  googleReviewUrl: z.string().url().nullable().optional(),
+  bookingReviewUrl: z.string().url().nullable().optional(),
+  supportEmail: z.string().email().nullable().optional(),
 })
 
 export async function GET() {
@@ -31,6 +36,11 @@ export async function GET() {
         primaryColor: true,
         paymentsEnabled: true,
         defaultCurrency: true,
+        feedbackEnabled: true,
+        feedbackThreshold: true,
+        googleReviewUrl: true,
+        bookingReviewUrl: true,
+        supportEmail: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -72,6 +82,11 @@ export async function PUT(request: Request) {
         primaryColor: true,
         paymentsEnabled: true,
         defaultCurrency: true,
+        feedbackEnabled: true,
+        feedbackThreshold: true,
+        googleReviewUrl: true,
+        bookingReviewUrl: true,
+        supportEmail: true,
       },
     })
 

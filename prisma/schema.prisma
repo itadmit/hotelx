@@ -31,6 +31,11 @@ model Hotel {
   primaryColor    String?           @default("#2563eb")
   paymentsEnabled Boolean           @default(false)
   defaultCurrency String            @default("USD")
+  feedbackEnabled    Boolean        @default(true)
+  feedbackThreshold  Int            @default(4)
+  googleReviewUrl    String?
+  bookingReviewUrl   String?
+  supportEmail       String?
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
   categories      Category[]
@@ -43,6 +48,9 @@ model Hotel {
   notifications   Notification[]
   info            HotelInfo?
   amenities       HotelAmenity[]
+  feedbacks       Feedback[]
+  emailTemplates  HotelEmailTemplate[]
+  emailLogs       EmailLog[]
 }
 
 model HotelInfo {
@@ -146,6 +154,7 @@ model Request {
   service       Service        @relation(fields: [serviceId], references: [id])
   payment       Payment?       @relation(fields: [paymentId], references: [id])
   notifications Notification[]
+  feedback      Feedback?
 }
 
 model PaymentProvider {
@@ -262,4 +271,86 @@ enum NotificationType {
   REQUEST_COMPLETED
   PAYMENT_PAID
   PAYMENT_FAILED
+  FEEDBACK_RECEIVED
+  FEEDBACK_ESCALATION
+}
+
+model Feedback {
+  id           String           @id @default(cuid())
+  hotelId      String
+  requestId    String           @unique
+  rating       Int
+  comment      String?
+  guestName    String?
+  guestEmail   String?
+  sentiment    FeedbackSentiment
+  status       FeedbackStatus   @default(NEW)
+  resolvedAt   DateTime?
+  resolvedById String?
+  resolutionNote String?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  hotel        Hotel            @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+  request      Request          @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  @@index([hotelId, sentiment, status, createdAt])
+}
+
+enum FeedbackSentiment {
+  POSITIVE
+  NEGATIVE
+}
+
+enum FeedbackStatus {
+  NEW
+  IN_REVIEW
+  RESOLVED
+}
+
+model HotelEmailTemplate {
+  id        String           @id @default(cuid())
+  hotelId   String
+  kind      EmailTemplateKind
+  subject   String
+  heading   String
+  body      String
+  ctaLabel  String?
+  ctaUrl    String?
+  isActive  Boolean          @default(true)
+  updatedAt DateTime         @updatedAt
+  createdAt DateTime         @default(now())
+  hotel     Hotel            @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+
+  @@unique([hotelId, kind])
+}
+
+enum EmailTemplateKind {
+  FEEDBACK_THANKS
+  FEEDBACK_APOLOGY
+  PASSWORD_RESET
+  TEAM_INVITE
+}
+
+model EmailLog {
+  id          String       @id @default(cuid())
+  hotelId     String?
+  to          String
+  subject     String
+  template    EmailTemplateKind?
+  provider    String       @default("resend")
+  externalId  String?
+  status      EmailStatus  @default(SENT)
+  error       String?
+  meta        Json         @default("{}")
+  createdAt   DateTime     @default(now())
+  hotel       Hotel?       @relation(fields: [hotelId], references: [id], onDelete: SetNull)
+
+  @@index([hotelId, createdAt])
+  @@index([to, createdAt])
+}
+
+enum EmailStatus {
+  SENT
+  FAILED
+  SIMULATED
 }

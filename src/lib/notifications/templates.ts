@@ -96,6 +96,18 @@ export function renderStaff(
         body: "The guest's payment didn't go through.",
         href,
       };
+    case "FEEDBACK_RECEIVED":
+      return {
+        title: `Positive feedback — ${service}${room}`,
+        body: "A happy guest shared a 5-star moment.",
+        href: "/dashboard/feedback",
+      };
+    case "FEEDBACK_ESCALATION":
+      return {
+        title: `Service recovery — ${service}${room}`,
+        body: "A guest left low feedback. Reach out and make it right.",
+        href: "/dashboard/feedback",
+      };
   }
 }
 
@@ -142,6 +154,12 @@ export function renderGuest(
       return {
         title: "Payment didn't go through",
         body: "Please try again or use another card.",
+        href,
+      };
+    case "FEEDBACK_RECEIVED":
+    case "FEEDBACK_ESCALATION":
+      return {
+        title: "Thank you for your feedback",
         href,
       };
   }

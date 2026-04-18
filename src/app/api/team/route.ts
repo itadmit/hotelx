@@ -4,6 +4,7 @@ import { ApiAuthError, requireSessionUser } from "@/lib/server-auth"
 import { Role } from "@prisma/client"
 import bcrypt from "bcryptjs"
 import { z } from "zod"
+import { sendTemplatedEmail } from "@/lib/email/mailer"
 
 const createTeamMemberSchema = z.object({
   name: z.string().min(2),
@@ -74,6 +75,30 @@ export async function POST(request: Request) {
         password: hashedPassword,
       },
       select: { id: true, name: true, email: true, role: true, createdAt: true },
+    })
+
+    const hotel = await prisma.hotel.findUnique({
+      where: { id: user.hotelId! },
+      select: { name: true, supportEmail: true },
+    })
+
+    const origin =
+      request.headers.get("origin") ??
+      process.env.NEXTAUTH_URL ??
+      "http://localhost:3000"
+
+    void sendTemplatedEmail({
+      to: member.email,
+      hotelId: user.hotelId!,
+      template: "TEAM_INVITE",
+      replyTo: hotel?.supportEmail ?? undefined,
+      fromName: hotel?.name ?? undefined,
+      variables: {
+        guestName: member.name ?? "there",
+        hotelName: hotel?.name ?? "your hotel",
+        tempPassword,
+        loginUrl: `${origin}/login`,
+      },
     })
 
     return NextResponse.json(

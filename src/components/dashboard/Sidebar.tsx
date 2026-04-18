@@ -21,6 +21,8 @@ import {
   Sparkles,
   BookOpen,
   Info,
+  MessageSquareHeart,
+  Mail,
 } from "lucide-react";
 
 const sidebarSections: {
@@ -32,6 +34,7 @@ const sidebarSections: {
     items: [
       { title: "Overview", href: "/dashboard", icon: LayoutDashboard },
       { title: "Requests", href: "/dashboard/requests", icon: ClipboardList, badge: "live" },
+      { title: "Feedback", href: "/dashboard/feedback", icon: MessageSquareHeart },
     ],
   },
   {
@@ -57,6 +60,7 @@ const sidebarSections: {
     items: [
       { title: "Analytics", href: "/dashboard/reports", icon: BarChart3 },
       { title: "Team", href: "/dashboard/team", icon: Users },
+      { title: "Email templates", href: "/dashboard/email-templates", icon: Mail },
       { title: "Settings", href: "/dashboard/hotel-settings", icon: Settings },
     ],
   },
