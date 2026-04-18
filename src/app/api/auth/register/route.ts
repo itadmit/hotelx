@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
+import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
 
 // Validation schema
 const registerSchema = z.object({
@@ -13,6 +14,20 @@ const registerSchema = z.object({
 
 export async function POST(request: Request) {
   try {
+    const forwardedFor = request.headers.get("x-forwarded-for");
+    const ip = forwardedFor?.split(",")[0]?.trim() ?? "unknown";
+    const rate = checkRateLimit(`register:${ip}`, RATE_LIMITS.register);
+
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { error: "Too many registration attempts. Please try again later." },
+        {
+          status: 429,
+          headers: { "Retry-After": String(rate.retryAfterSeconds) },
+        }
+      );
+    }
+
     const body = await request.json();
 
     // Validate input
@@ -42,10 +57,11 @@ export async function POST(request: Request) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create Hotel slug
-    const slug = hotelName
+    const baseSlug = hotelName
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "") + "-" + Math.floor(Math.random() * 1000);
+      .replace(/^-+|-+$/g, "");
+    const slug = `${baseSlug}-${Math.random().toString(36).slice(2, 8)}`;
 
     // Create Hotel and User in a transaction
     const result = await prisma.$transaction(async (tx) => {

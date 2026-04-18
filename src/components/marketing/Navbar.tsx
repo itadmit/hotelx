@@ -1,40 +1,134 @@
+"use client";
+
 import Link from "next/link";
-import { Button } from "@/components/ui/button"; // We need to create a basic Button component first
+import { useState, useEffect } from "react";
+import { ArrowUpRight, Menu, X } from "lucide-react";
+
+const navLinks = [
+  { href: "/features", label: "Features" },
+  { href: "/pricing", label: "Pricing" },
+  { href: "/about", label: "About" },
+  { href: "/demo", label: "Try now" },
+];
 
 export function Navbar() {
-  return (
-    <header className="w-full py-4 px-6 border-b bg-white/80 backdrop-blur-md sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          {/* Logo placeholder */}
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-bold">
-            H
-          </div>
-          <span className="text-xl font-bold font-heading">HotelX</span>
-        </div>
+  const [open, setOpen] = useState(false);
 
-        <nav className="hidden md:flex items-center gap-8">
-          <Link href="/features" className="text-sm font-medium text-gray-600 hover:text-primary">
-            Features
-          </Link>
-          <Link href="/pricing" className="text-sm font-medium text-gray-600 hover:text-primary">
-            Pricing
-          </Link>
-          <Link href="/about" className="text-sm font-medium text-gray-600 hover:text-primary">
-            About
-          </Link>
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
+  return (
+    <header className="sticky top-0 z-50 w-full">
+      <div className="absolute inset-0 bg-background/80 backdrop-blur-xl border-b border-[color:var(--border)]" />
+      <div className="relative max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 h-16">
+        <Link href="/" className="flex items-center gap-2.5">
+          <span className="relative w-8 h-8 rounded-md bg-emerald-brand flex items-center justify-center text-primary-foreground">
+            <span className="font-display text-base leading-none">H</span>
+            <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full bg-amber-brand border-2 border-background" />
+          </span>
+          <span className="font-display text-xl tracking-tight text-ink">
+            Hotel<span className="text-emerald-brand">X</span>
+          </span>
+          <span className="hidden sm:inline-block ml-1 eyebrow">
+            / Concierge OS
+          </span>
+        </Link>
+
+        <nav className="hidden md:flex items-center gap-9">
+          {navLinks.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="text-sm text-foreground/70 hover:text-emerald-brand transition-colors"
+            >
+              {item.label}
+            </Link>
+          ))}
         </nav>
 
-        <div className="flex items-center gap-4">
-          <Link href="/login" className="text-sm font-medium text-gray-600 hover:text-primary">
-            Login
+        <div className="flex items-center gap-2 sm:gap-3">
+          <Link
+            href="/login"
+            className="text-sm text-foreground/70 hover:text-emerald-brand transition-colors hidden md:block"
+          >
+            Sign in
           </Link>
-          <Link href="/signup" className="px-4 py-2 bg-primary text-white rounded-md text-sm font-medium hover:bg-primary/90 transition-colors">
-            Start Free Trial
+          <Link
+            href="/signup"
+            className="hidden sm:inline-flex group items-center gap-1.5 h-9 pl-4 pr-3 rounded-full bg-emerald-brand text-primary-foreground text-sm font-medium hover:bg-ink transition-colors"
+          >
+            Start free trial
+            <ArrowUpRight className="h-4 w-4 transition-transform group-hover:rotate-45" />
           </Link>
+
+          <button
+            type="button"
+            aria-label={open ? "Close menu" : "Open menu"}
+            aria-expanded={open}
+            onClick={() => setOpen((v) => !v)}
+            className="md:hidden inline-flex items-center justify-center h-10 w-10 rounded-full border border-[color:var(--border)] text-ink hover:bg-surface transition-colors"
+          >
+            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile menu */}
+      <div
+        className={`md:hidden fixed inset-x-0 top-16 bottom-0 bg-background/98 backdrop-blur-xl border-t border-[color:var(--border)] transition-all duration-300 ${
+          open ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-2 pointer-events-none"
+        }`}
+      >
+        <div className="px-6 pt-8 pb-12 flex flex-col gap-1 h-full overflow-y-auto">
+          {navLinks.map((item, i) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              onClick={() => setOpen(false)}
+              className="group flex items-center justify-between py-4 border-b border-[color:var(--border)]"
+              style={{
+                animation: open ? `reveal-up 0.4s ease-out ${i * 60}ms both` : "none",
+              }}
+            >
+              <span className="font-display text-3xl text-ink group-hover:text-emerald-brand transition-colors">
+                {item.label}
+              </span>
+              <ArrowUpRight className="h-5 w-5 text-foreground/40 group-hover:text-emerald-brand group-hover:rotate-45 transition-all" />
+            </Link>
+          ))}
+
+          <div className="mt-8 flex flex-col gap-3">
+            <Link
+              href="/signup"
+              onClick={() => setOpen(false)}
+              className="group inline-flex items-center justify-center gap-2 h-12 px-6 rounded-full bg-emerald-brand text-primary-foreground font-medium hover:bg-ink transition-colors"
+            >
+              Start free trial
+              <ArrowUpRight className="h-4 w-4 transition-transform group-hover:rotate-45" />
+            </Link>
+            <Link
+              href="/login"
+              onClick={() => setOpen(false)}
+              className="inline-flex items-center justify-center h-12 px-6 rounded-full border border-[color:var(--border)] text-ink hover:bg-surface transition-colors"
+            >
+              Sign in
+            </Link>
+          </div>
+
+          <div className="mt-auto pt-8 flex items-center justify-between">
+            <span className="eyebrow">Concierge OS</span>
+            <span className="eyebrow text-emerald-brand">v2.0</span>
+          </div>
         </div>
       </div>
     </header>
   );
 }
-

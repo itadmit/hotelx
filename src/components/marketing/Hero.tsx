@@ -1,58 +1,341 @@
 import Link from "next/link";
-import { ArrowRight, QrCode } from "lucide-react";
+import {
+  ArrowUpRight,
+  BellRing,
+  Bell,
+  Car,
+  ChevronRight,
+  CheckCircle2,
+  Flower2,
+  Home,
+  MessageCircle,
+  ScanLine,
+  Sparkles,
+  User,
+  Wifi,
+  Wine,
+} from "lucide-react";
 
 export function Hero() {
   return (
-    <section className="relative py-20 lg:py-32 overflow-hidden">
-      <div className="max-w-7xl mx-auto px-6 flex flex-col items-center text-center z-10 relative">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-sm font-medium mb-6">
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-          </span>
-          New: Multi-language support
-        </div>
-        
-        <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold font-heading text-gray-900 tracking-tight mb-6 max-w-4xl">
-          Upgrade Your Hotel Service with <span className="text-primary">QR-Based Requests</span>
-        </h1>
-        
-        <p className="text-lg md:text-xl text-gray-600 mb-10 max-w-2xl leading-relaxed">
-          Guests scan. Staff responds. Managers see everything. 
-          Streamline your hotel operations and boost guest satisfaction without expensive hardware.
-        </p>
-        
-        <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-          <Link 
-            href="/signup"
-            className="inline-flex items-center justify-center h-12 px-8 rounded-lg bg-primary text-white font-medium text-lg hover:bg-primary/90 transition-colors"
-          >
-            Start Free Trial
-            <ArrowRight className="ml-2 h-5 w-5" />
-          </Link>
-          <Link 
-            href="/demo"
-            className="inline-flex items-center justify-center h-12 px-8 rounded-lg border border-gray-200 bg-white text-gray-900 font-medium text-lg hover:bg-gray-50 transition-colors"
-          >
-            Book a Live Demo
-          </Link>
-        </div>
+    <section className="relative overflow-hidden bg-wash">
+      <div className="absolute inset-0 bg-grid opacity-50 pointer-events-none" />
 
-        {/* Mockup Placeholder */}
-        <div className="mt-20 relative w-full max-w-5xl mx-auto">
-          <div className="aspect-video rounded-2xl bg-gray-100 border border-gray-200 shadow-2xl flex items-center justify-center overflow-hidden relative">
-            <div className="absolute inset-0 bg-gradient-to-tr from-blue-50 to-white opacity-50"></div>
-            <div className="text-center p-8">
-              <QrCode className="h-24 w-24 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-400 text-lg">Dashboard & Guest App Mockup</p>
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-12 pb-20 lg:pt-24 lg:pb-32">
+        <div className="grid lg:grid-cols-12 gap-12 lg:gap-12 items-center">
+          {/* Left — copy */}
+          <div className="lg:col-span-7 text-center lg:text-left">
+            <div className="reveal flex justify-center lg:justify-start" style={{ animationDelay: "0ms" }}>
+              <span className="pill">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-brand" />
+                Now serving · v2.0
+              </span>
+            </div>
+
+            <h1
+              className="reveal mt-6 sm:mt-7 font-display text-[2.5rem] sm:text-5xl md:text-6xl lg:text-[5.25rem] leading-[0.98] tracking-tight text-ink"
+              style={{ animationDelay: "100ms" }}
+            >
+              The concierge,
+              <br />
+              <span className="display-italic text-emerald-brand">
+                reimagined
+              </span>{" "}
+              as software.
+            </h1>
+
+            <p
+              className="reveal mt-6 sm:mt-7 text-base sm:text-lg text-foreground/70 max-w-xl mx-auto lg:mx-0 leading-relaxed"
+              style={{ animationDelay: "220ms" }}
+            >
+              A QR-first guest experience platform for modern hospitality.
+              Guests scan in their suite, your team responds in real time,
+              managers see every signal — without a single app to install.
+            </p>
+
+            <div
+              className="reveal mt-8 sm:mt-9 flex flex-col sm:flex-row gap-3 sm:justify-start justify-center lg:justify-start"
+              style={{ animationDelay: "320ms" }}
+            >
+              <Link
+                href="/signup"
+                className="group inline-flex items-center justify-center gap-2 h-12 pl-6 pr-5 rounded-full bg-emerald-brand text-primary-foreground font-medium hover:bg-ink transition-colors"
+              >
+                Start your free trial
+                <ArrowUpRight className="h-4 w-4 transition-transform group-hover:rotate-45" />
+              </Link>
+              <Link
+                href="/demo"
+                className="inline-flex items-center justify-center gap-2 h-12 px-6 rounded-full border border-[color:var(--border)] bg-card text-ink font-medium hover:bg-surface transition-colors"
+              >
+                Try now
+                <ArrowUpRight className="h-4 w-4" />
+              </Link>
+            </div>
+
+            <div
+              className="reveal mt-10 sm:mt-12 flex flex-wrap justify-center lg:justify-start items-center gap-x-4 sm:gap-x-6 gap-y-2 eyebrow"
+              style={{ animationDelay: "440ms" }}
+            >
+              <span className="flex items-center gap-2">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-brand" />
+                No app required
+              </span>
+              <span className="text-foreground/30">·</span>
+              <span>14 languages</span>
+              <span className="text-foreground/30">·</span>
+              <span>14-day trial</span>
+              <span className="hidden sm:inline text-foreground/30">·</span>
+              <span className="hidden sm:inline">Cancel anytime</span>
             </div>
           </div>
-          {/* Decorative elements */}
-          <div className="absolute -top-12 -right-12 h-64 w-64 bg-blue-100 rounded-full blur-3xl opacity-30 -z-10"></div>
-          <div className="absolute -bottom-12 -left-12 h-64 w-64 bg-purple-100 rounded-full blur-3xl opacity-30 -z-10"></div>
+
+          {/* Right — orderly composition */}
+          <div className="lg:col-span-5 mt-8 lg:mt-0">
+            <HeroComposition />
+          </div>
         </div>
       </div>
     </section>
   );
 }
 
+function HeroComposition() {
+  return (
+    <div className="relative w-full">
+      <div className="relative reveal" style={{ animationDelay: "300ms" }}>
+        <div className="relative mx-auto w-[280px] py-6">
+          {/* color halos behind phone */}
+          <div className="absolute top-2 -left-6 h-28 w-28 rounded-2xl bg-amber-soft -z-10" />
+          <div className="absolute -bottom-2 -right-6 h-36 w-36 rounded-full bg-emerald-soft -z-10" />
+
+          {/* iPhone 17 — Titanium frame */}
+          <div className="relative z-0">
+            {/* Side buttons — left side */}
+            <span className="absolute left-[-3px] top-[78px] h-8 w-[3px] rounded-l-sm bg-gradient-to-b from-[#3a4742] to-[#1a2420] z-10" />{/* action */}
+            <span className="absolute left-[-3px] top-[122px] h-12 w-[3px] rounded-l-sm bg-gradient-to-b from-[#3a4742] to-[#1a2420] z-10" />{/* vol up */}
+            <span className="absolute left-[-3px] top-[180px] h-12 w-[3px] rounded-l-sm bg-gradient-to-b from-[#3a4742] to-[#1a2420] z-10" />{/* vol down */}
+            {/* Side buttons — right side */}
+            <span className="absolute right-[-3px] top-[105px] h-16 w-[3px] rounded-r-sm bg-gradient-to-b from-[#3a4742] to-[#1a2420] z-10" />{/* power */}
+            <span className="absolute right-[-3px] top-[195px] h-9 w-[3px] rounded-r-sm bg-gradient-to-b from-[#3a4742] to-[#1a2420] z-10" />{/* camera */}
+
+            {/* Titanium outer frame */}
+            <div className="relative rounded-[48px] p-[3px] bg-gradient-to-br from-[#5a6661] via-[#3a4742] to-[#1a2420] shadow-[0_50px_100px_-30px_rgba(21,32,28,0.55),0_0_0_1px_rgba(255,255,255,0.04)_inset]">
+              {/* Bezel */}
+              <div className="rounded-[45px] p-[5px] bg-ink">
+                {/* Screen */}
+                <div className="rounded-[40px] overflow-hidden bg-card relative">
+                  {/* Dynamic Island */}
+                  <div className="absolute top-2 left-1/2 -translate-x-1/2 h-[26px] w-[96px] rounded-full bg-ink z-30 flex items-center justify-end pr-2">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#1a2a26] ring-1 ring-[#0a1310]" />
+                  </div>
+
+                  {/* Status bar */}
+                  <div className="absolute top-0 left-0 right-0 h-10 z-20 flex items-center justify-between px-6">
+                    <span className="font-mono text-[11px] text-ink font-medium">9:41</span>
+                    <div className="flex items-center gap-1 text-ink">
+                      <span className="flex items-end gap-[1.5px] h-2.5">
+                        <span className="w-[2px] h-1 rounded-sm bg-ink" />
+                        <span className="w-[2px] h-1.5 rounded-sm bg-ink" />
+                        <span className="w-[2px] h-2 rounded-sm bg-ink" />
+                        <span className="w-[2px] h-2.5 rounded-sm bg-ink" />
+                      </span>
+                      <Wifi className="h-3 w-3" strokeWidth={2.5} />
+                      <span className="ml-0.5 relative inline-flex items-center">
+                        <span className="h-2.5 w-5 rounded-[3px] border border-ink relative">
+                          <span className="absolute inset-[1px] rounded-[1px] bg-ink w-[80%]" />
+                        </span>
+                        <span className="ml-px h-1.5 w-[2px] rounded-r-sm bg-ink" />
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* App content — guest landing page */}
+                  <div className="pt-10 pb-2 flex flex-col bg-background">
+                    {/* Top bar — brand + bell */}
+                    <div className="px-4 pt-2 pb-3 flex items-center justify-between">
+                      <div className="flex items-center gap-1.5">
+                        <span className="relative h-5 w-5 rounded-md bg-emerald-brand flex items-center justify-center">
+                          <span className="font-display text-[10px] leading-none text-primary-foreground">H</span>
+                          <span className="absolute -bottom-0.5 -right-0.5 h-1.5 w-1.5 rounded-full bg-amber-brand border border-background" />
+                        </span>
+                        <span className="font-display text-[13px] tracking-tight text-ink leading-none">
+                          Hotel<span className="text-emerald-brand">X</span>
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="relative h-6 w-6 rounded-full border border-[color:var(--border)] flex items-center justify-center">
+                          <Bell className="h-3 w-3 text-ink" strokeWidth={2} />
+                          <span className="absolute -top-0.5 -right-0.5 h-1.5 w-1.5 rounded-full bg-clay" />
+                        </span>
+                        <span className="h-6 w-6 rounded-full bg-emerald-brand flex items-center justify-center text-[8px] font-mono text-primary-foreground">
+                          MS
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Hero greeting */}
+                    <div className="px-4">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-soft text-emerald-brand font-mono text-[8px] uppercase tracking-[0.14em]">
+                        <span className="h-1 w-1 rounded-full bg-emerald-brand" />
+                        Suite · 412
+                      </span>
+                      <h4 className="font-display text-[20px] mt-2 leading-[1.05] text-ink">
+                        Good evening,
+                        <br />
+                        <span className="text-emerald-brand display-italic">Mr. Sullivan.</span>
+                      </h4>
+                      <p className="mt-1 text-[10px] text-foreground/60 leading-snug">
+                        How may we make tonight unforgettable?
+                      </p>
+                    </div>
+
+                    {/* Featured offer card */}
+                    <div className="mx-4 mt-3 relative overflow-hidden rounded-xl bg-emerald-brand text-primary-foreground p-3">
+                      <div className="absolute -top-6 -right-6 h-20 w-20 rounded-full bg-amber-brand/30 blur-xl" />
+                      <div className="relative flex items-center gap-2.5">
+                        <div className="h-10 w-10 rounded-lg bg-amber-brand flex items-center justify-center shrink-0">
+                          <Wine className="h-4 w-4 text-primary-foreground" strokeWidth={2} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-mono text-[8px] uppercase tracking-[0.14em] text-amber-soft">
+                            Tonight's offer
+                          </p>
+                          <p className="font-display text-[13px] leading-tight mt-0.5">
+                            Champagne &amp; <span className="display-italic">strawberries</span>
+                          </p>
+                        </div>
+                        <span className="numeral text-[16px] leading-none">€48</span>
+                      </div>
+                    </div>
+
+                    {/* Categories section */}
+                    <div className="px-4 mt-3">
+                      <div className="flex items-center justify-between">
+                        <p className="font-mono text-[8px] uppercase tracking-[0.18em] text-foreground/50">
+                          Concierge
+                        </p>
+                        <span className="font-mono text-[8px] text-foreground/40">View all</span>
+                      </div>
+
+                      <div className="mt-2 grid grid-cols-2 gap-1.5">
+                        {[
+                          { label: "Room Service", note: "24/7", icon: Wine, color: "bg-amber-soft text-amber-brand" },
+                          { label: "Spa", note: "By appt.", icon: Flower2, color: "bg-emerald-soft text-emerald-brand" },
+                          { label: "Cleaning", note: "Now", icon: Sparkles, color: "bg-[#f3d8cf] text-clay" },
+                          { label: "Transport", note: "5 min", icon: Car, color: "bg-[#e3eadf] text-emerald-brand" },
+                        ].map((c) => (
+                          <div
+                            key={c.label}
+                            className="rounded-lg p-2 border border-[color:var(--border)] bg-card"
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className={`inline-flex items-center justify-center h-6 w-6 rounded-md ${c.color}`}>
+                                <c.icon className="h-3 w-3" strokeWidth={2} />
+                              </div>
+                              <ChevronRight className="h-3 w-3 text-foreground/30" />
+                            </div>
+                            <p className="mt-1.5 text-[10px] text-ink leading-tight font-medium">
+                              {c.label}
+                            </p>
+                            <p className="text-[8px] text-foreground/50 mt-0.5 font-mono uppercase tracking-[0.1em]">
+                              {c.note}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Status row */}
+                    <div className="mx-4 mt-2.5 flex items-center justify-between rounded-lg bg-surface px-2.5 py-1.5">
+                      <div className="flex items-center gap-1.5">
+                        <span className="relative flex h-1.5 w-1.5">
+                          <span className="absolute inset-0 rounded-full bg-emerald-brand pulse-ring" />
+                          <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-brand" />
+                        </span>
+                        <p className="text-[9px] text-ink leading-none">
+                          Towels on the way
+                        </p>
+                      </div>
+                      <span className="font-mono text-[8px] text-foreground/50">3 min</span>
+                    </div>
+
+                    {/* Bottom tab bar */}
+                    <div className="mt-3 mx-2 px-2 py-2 border-t border-[color:var(--border)] flex items-center justify-around">
+                      {[
+                        { icon: Home, active: true, label: "Home" },
+                        { icon: Sparkles, active: false, label: "Services" },
+                        { icon: MessageCircle, active: false, label: "Chat" },
+                        { icon: User, active: false, label: "Stay" },
+                      ].map((t) => (
+                        <div key={t.label} className="flex flex-col items-center gap-0.5">
+                          <t.icon
+                            className={`h-3.5 w-3.5 ${t.active ? "text-emerald-brand" : "text-foreground/40"}`}
+                            strokeWidth={2}
+                          />
+                          <span className={`text-[7px] font-medium ${t.active ? "text-emerald-brand" : "text-foreground/40"}`}>
+                            {t.label}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Home indicator */}
+                    <div className="mx-auto mt-1 h-[4px] w-[90px] rounded-full bg-ink/40" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* === Floating chips — must be ABOVE the phone === */}
+
+          {/* Live request chip — visible on all sizes (positioned so it stays in view) */}
+          <div className="absolute -top-3 right-0 sm:right-2 lg:-right-16 card-elev px-3 py-2.5 flex items-center gap-2.5 w-[170px] sm:w-[200px] z-30">
+            <span className="relative flex h-2 w-2 shrink-0">
+              <span className="absolute inset-0 rounded-full bg-emerald-brand pulse-ring" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-brand" />
+            </span>
+            <div className="min-w-0">
+              <p className="eyebrow text-emerald-brand">New · 2s ago</p>
+              <p className="text-xs text-ink leading-tight mt-0.5 truncate">
+                Extra towels · 412
+              </p>
+            </div>
+          </div>
+
+          {/* Bell chip — desktop only */}
+          <div className="hidden lg:flex absolute top-28 -left-[152px] card-elev p-2.5 items-center gap-2 w-[170px] z-30">
+            <div className="h-9 w-9 rounded-md bg-amber-brand flex items-center justify-center shrink-0">
+              <BellRing className="h-4 w-4 text-primary-foreground" />
+            </div>
+            <div className="min-w-0">
+              <p className="eyebrow">Notify</p>
+              <p className="text-xs text-ink truncate">Maria assigned</p>
+            </div>
+          </div>
+
+          {/* QR chip — desktop only */}
+          <div className="hidden lg:flex absolute top-[260px] -right-24 card-elev p-2.5 items-center gap-2 w-[180px] z-30">
+            <div className="h-9 w-9 rounded-md bg-ink flex items-center justify-center shrink-0">
+              <ScanLine className="h-4 w-4 text-amber-soft" />
+            </div>
+            <div className="min-w-0">
+              <p className="eyebrow">Scan · Order</p>
+              <p className="text-xs text-ink truncate">Zero friction</p>
+            </div>
+          </div>
+
+          {/* KPI chip — visible on all sizes */}
+          <div className="absolute -bottom-3 left-0 sm:left-2 lg:-left-20 card-elev p-3 flex items-center gap-3 z-30">
+            <CheckCircle2 className="h-4 w-4 text-emerald-brand shrink-0" />
+            <div>
+              <p className="eyebrow">Avg response</p>
+              <p className="numeral text-xl text-ink leading-none mt-0.5">3 min</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -1,8 +1,16 @@
 import Link from "next/link";
-import { ChevronLeft, Clock } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input"; // Changed to Textarea if available, otherwise Input
-import { Label } from "@/components/ui/label";
+import { ChevronLeft, Clock, Sparkles, Wallet } from "lucide-react";
+import prisma from "@/lib/prisma";
+import { notFound } from "next/navigation";
+import ServiceRequestForm from "@/components/guest/ServiceRequestForm";
+
+function formatPrice(price: unknown): string {
+  if (price === null || price === undefined) return "Included";
+  const n = Number(price);
+  if (Number.isNaN(n)) return String(price);
+  if (n === 0) return "Included";
+  return `$${n}`;
+}
 
 export default async function ServicePage({
   params,
@@ -10,64 +18,128 @@ export default async function ServicePage({
   params: Promise<{ hotelSlug: string; roomCode: string; serviceId: string }>;
 }) {
   const { hotelSlug, roomCode, serviceId } = await params;
+  const hotel = await prisma.hotel.findUnique({
+    where: { slug: hotelSlug },
+    include: {
+      rooms: {
+        where: { code: roomCode },
+        select: { id: true, number: true },
+      },
+    },
+  });
 
-  // Mock service details
-  const service = { 
-    id: serviceId, 
-    name: "Club Sandwich", 
-    description: "Triple-decker sandwich with roasted chicken breast, crispy bacon, lettuce, tomato, and mayonnaise on toasted white bread. Served with french fries.", 
-    price: "$18.00", 
-    time: "20-30 min",
-    image: "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=800&q=80" 
-  };
+  if (!hotel || hotel.rooms.length === 0) {
+    notFound();
+  }
+
+  const service = await prisma.service.findFirst({
+    where: { id: serviceId, hotelId: hotel.id, isActive: true },
+    include: { category: { select: { name: true } } },
+  });
+
+  if (!service) {
+    notFound();
+  }
+
+  const priceLabel = formatPrice(service.price);
+  const room = hotel.rooms[0];
 
   return (
-    <div className="flex flex-col h-full min-h-screen bg-white">
-      {/* Image Header */}
-      <div className="relative h-64 bg-gray-200">
-        <Link 
-          href={`/g/${hotelSlug}/${roomCode}`}
-          className="absolute top-4 left-4 z-10 p-2 bg-white/80 backdrop-blur-md rounded-full hover:bg-white transition-colors shadow-sm"
-        >
-          <ChevronLeft className="h-6 w-6 text-gray-900" />
-        </Link>
+    <main className="mx-auto w-full max-w-[480px] min-h-screen bg-background text-ink flex flex-col">
+      {/* Image hero */}
+      <div className="relative h-72 sm:h-80 overflow-hidden bg-surface">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img 
-          src={service.image} 
-          alt={service.name} 
+        <img
+          src={
+            service.image ??
+            "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=900&q=80"
+          }
+          alt={service.name}
           className="absolute inset-0 w-full h-full object-cover"
         />
+        <div className="absolute inset-0 bg-gradient-to-t from-ink/70 via-ink/10 to-transparent" />
+
+        {/* Back */}
+        <Link
+          href={`/g/${hotelSlug}/${roomCode}`}
+          className="absolute top-4 left-4 h-10 w-10 rounded-full bg-background/85 backdrop-blur-md flex items-center justify-center hover:bg-background transition-colors shadow-sm"
+          aria-label="Back"
+        >
+          <ChevronLeft className="h-5 w-5 text-ink" />
+        </Link>
+
+        {/* Room chip */}
+        <span className="absolute top-4 right-4 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-background/85 backdrop-blur-md font-mono text-[10px] uppercase tracking-[0.16em] text-ink">
+          <span className="h-1 w-1 rounded-full bg-emerald-brand" />
+          Suite · {room.number}
+        </span>
+
+        {/* Title overlay */}
+        <div className="absolute bottom-0 left-0 right-0 p-5 text-white">
+          {service.category?.name ? (
+            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-amber-soft">
+              {service.category.name}
+            </p>
+          ) : null}
+          <h1 className="font-display text-3xl sm:text-4xl mt-1 leading-tight tracking-tight">
+            {service.name}
+          </h1>
+        </div>
       </div>
 
-      <div className="flex-1 p-6 pb-24 flex flex-col">
-        <div className="flex justify-between items-start mb-2">
-          <h1 className="text-2xl font-bold font-heading text-gray-900">{service.name}</h1>
-          <span className="text-xl font-bold text-primary">{service.price}</span>
-        </div>
-        
-        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-          <Clock className="h-4 w-4" />
-          <span>Estimated time: {service.time}</span>
-        </div>
-
-        <p className="text-gray-600 leading-relaxed mb-8">
-          {service.description}
-        </p>
-
-        <div className="mt-auto space-y-6">
-          <div className="space-y-2">
-            <Label>Special Instructions</Label>
-            <Input placeholder="E.g. No mayo, extra crispy fries..." className="h-20" />
+      {/* Body */}
+      <div className="flex-1 flex flex-col px-5 pt-6 pb-10">
+        {/* Stats row */}
+        <div className="grid grid-cols-2 gap-2.5">
+          <div className="rounded-xl border border-[color:var(--border)] bg-card p-3 flex items-center gap-2.5">
+            <span className="inline-flex h-9 w-9 rounded-lg bg-emerald-soft text-emerald-brand items-center justify-center">
+              <Wallet className="h-4 w-4" strokeWidth={2} />
+            </span>
+            <div className="leading-tight">
+              <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-foreground/55">
+                Price
+              </p>
+              <p className="numeral text-base text-ink">{priceLabel}</p>
+            </div>
           </div>
+          <div className="rounded-xl border border-[color:var(--border)] bg-card p-3 flex items-center gap-2.5">
+            <span className="inline-flex h-9 w-9 rounded-lg bg-amber-soft text-amber-brand items-center justify-center">
+              <Clock className="h-4 w-4" strokeWidth={2} />
+            </span>
+            <div className="leading-tight">
+              <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-foreground/55">
+                ETA
+              </p>
+              <p className="text-sm font-medium text-ink">
+                {service.estimatedTime ?? "On request"}
+              </p>
+            </div>
+          </div>
+        </div>
 
-          <Link href={`/g/${hotelSlug}/${roomCode}/request/req-123`} className="block">
-            <Button className="w-full h-12 text-lg rounded-xl shadow-lg shadow-primary/20">
-              Confirm Request • {service.price}
-            </Button>
-          </Link>
+        {/* Description */}
+        {service.description ? (
+          <div className="mt-6">
+            <p className="eyebrow flex items-center gap-1.5">
+              <Sparkles className="h-3 w-3 text-emerald-brand" />
+              About this service
+            </p>
+            <p className="mt-2 text-[15px] text-foreground/75 leading-relaxed">
+              {service.description}
+            </p>
+          </div>
+        ) : null}
+
+        {/* Form */}
+        <div className="mt-8 flex-1 flex flex-col">
+          <ServiceRequestForm
+            hotelSlug={hotelSlug}
+            roomCode={roomCode}
+            serviceId={service.id}
+            servicePriceLabel={priceLabel}
+          />
         </div>
       </div>
-    </div>
+    </main>
   );
 }
-

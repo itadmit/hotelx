@@ -1,88 +1,106 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+"use client";
+
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Download, Calendar, TrendingUp, TrendingDown, Users, Clock, CheckCircle2 } from "lucide-react";
+import { Download, TrendingUp } from "lucide-react";
+import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
+
+type AnalyticsResponse = {
+  stats: {
+    totalRequests: number;
+    openRequests: number;
+    completedRequests: number;
+    avgResponseMinutes: number | null;
+    topService: string | null;
+  };
+  requestsByDay: Array<{ date: string; count: number }>;
+};
 
 export default function ReportsPage() {
+  const [data, setData] = useState<AnalyticsResponse | null>(null);
+
+  useEffect(() => {
+    async function load() {
+      const response = await fetch("/api/analytics/overview", { cache: "no-store" });
+      const json = await response.json();
+      setData(json);
+    }
+    load();
+  }, []);
+
+  const chartMax = Math.max(...(data?.requestsByDay.map((point) => point.count) ?? [1]), 1);
+
   return (
     <div className="space-y-8">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Reports & Analytics</h1>
-          <p className="text-gray-500 mt-1">Deep dive into your hotel's operational performance</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <Button variant="outline" className="bg-white border-none shadow-sm text-gray-600 hover:bg-gray-50 gap-2 rounded-xl">
-            <Calendar className="h-4 w-4" />
-            Last 30 Days
-          </Button>
-          <Button className="gap-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md shadow-indigo-200">
-            <Download className="h-4 w-4" />
-            Export Report
-          </Button>
-        </div>
-      </div>
+      <DashboardPageHeader
+        eyebrow="Insights · analytics"
+        title="Reports"
+        description="Operational metrics from your live database — refreshed on load."
+      >
+        <Button variant="outline" className="gap-2 h-9 text-xs rounded-md">
+          <Download className="h-3.5 w-3.5" />
+          Export
+        </Button>
+      </DashboardPageHeader>
 
-      {/* Stats Cards */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {[
-          { title: "Total Requests", value: "1,234", trend: "+12%", trendUp: true, icon: Users, color: "text-blue-600", bg: "bg-blue-50" },
-          { title: "Avg Response", value: "8m 30s", trend: "-15%", trendUp: true, icon: Clock, color: "text-orange-600", bg: "bg-orange-50" },
-          { title: "Completion Rate", value: "94%", trend: "+2%", trendUp: true, icon: CheckCircle2, color: "text-green-600", bg: "bg-green-50" },
-          { title: "Top Service", value: "Room Service", sub: "45% of total", icon: TrendingUp, color: "text-purple-600", bg: "bg-purple-50" },
-        ].map((stat, i) => (
-          <div key={i} className="bg-white rounded-3xl p-6 shadow-sm hover:shadow-md transition-shadow">
-             <div className="flex justify-between items-start mb-4">
-                <div className={`p-3 rounded-2xl ${stat.bg} ${stat.color}`}>
-                   <stat.icon className="h-6 w-6" />
-                </div>
-                {stat.trend && (
-                   <div className={`flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-full ${stat.trendUp ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
-                      {stat.trendUp ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-                      {stat.trend.replace('-', '')}
-                   </div>
-                )}
-             </div>
-             <div>
-                <h3 className="text-3xl font-bold text-gray-900 tracking-tight">{stat.value}</h3>
-                <p className="text-sm text-gray-500 font-medium mt-1">{stat.title}</p>
-                {stat.sub && <p className="text-xs text-gray-400 mt-1">{stat.sub}</p>}
-             </div>
+          { title: "Total requests", value: String(data?.stats.totalRequests ?? 0) },
+          { title: "Open", value: String(data?.stats.openRequests ?? 0) },
+          { title: "Completed", value: String(data?.stats.completedRequests ?? 0) },
+          {
+            title: "Avg response",
+            value:
+              data?.stats.avgResponseMinutes !== null && data?.stats.avgResponseMinutes !== undefined
+                ? `${data.stats.avgResponseMinutes} min`
+                : "—",
+          },
+        ].map((stat) => (
+          <div key={stat.title} className="card-surface p-5">
+            <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-foreground/50">
+              {stat.title}
+            </p>
+            <p className="numeral text-3xl text-ink mt-2">{stat.value}</p>
           </div>
         ))}
       </div>
 
-      {/* Charts Grid */}
-      <div className="grid gap-8 md:grid-cols-2">
-        <div className="bg-white rounded-3xl p-8 shadow-sm">
-          <div className="flex items-center justify-between mb-8">
-             <div>
-                <h3 className="font-bold text-lg text-gray-900">Requests Over Time</h3>
-                <p className="text-sm text-gray-500">Daily request volume</p>
-             </div>
+      <div className="card-surface p-6 lg:p-8">
+        <div className="flex flex-wrap items-end justify-between gap-4 mb-8">
+          <div>
+            <h3 className="font-display text-lg text-ink">Requests over time</h3>
+            <p className="text-sm text-foreground/55 mt-0.5">Last 30 days (sample)</p>
           </div>
-          <div className="h-[300px] flex items-center justify-center bg-gray-50 rounded-2xl border-2 border-dashed border-gray-100">
-            <p className="text-gray-400 font-medium flex items-center gap-2">
-               <TrendingUp className="h-5 w-5" />
-               Chart: Requests per day (Last 7 days)
-            </p>
-          </div>
+          <span className="text-sm text-foreground/55 font-mono">
+            Top: {data?.stats.topService ?? "—"}
+          </span>
         </div>
-        
-        <div className="bg-white rounded-3xl p-8 shadow-sm">
-           <div className="flex items-center justify-between mb-8">
-             <div>
-                <h3 className="font-bold text-lg text-gray-900">Service Distribution</h3>
-                <p className="text-sm text-gray-500">Breakdown by category</p>
-             </div>
-          </div>
-          <div className="h-[300px] flex items-center justify-center bg-gray-50 rounded-2xl border-2 border-dashed border-gray-100">
-            <p className="text-gray-400 font-medium flex items-center gap-2">
-               <Users className="h-5 w-5" />
-               Chart: Top services breakdown
-            </p>
-          </div>
+
+        <div className="h-56 flex items-end gap-1.5 sm:gap-2">
+          {(data?.requestsByDay ?? []).slice(-14).map((point) => (
+            <div key={point.date} className="flex-1 flex flex-col items-center gap-2 min-w-0">
+              <div className="w-full bg-surface rounded-sm h-40 relative overflow-hidden border border-[color:var(--border)]">
+                <div
+                  className="absolute bottom-0 w-full bg-primary rounded-sm"
+                  style={{
+                    height: `${Math.max(8, (point.count / chartMax) * 100)}%`,
+                  }}
+                />
+              </div>
+              <span className="text-[10px] font-mono text-foreground/45 truncate w-full text-center">
+                {point.date.slice(5)}
+              </span>
+            </div>
+          ))}
         </div>
+      </div>
+
+      <div className="card-surface p-4 flex items-start gap-3 border-l-2 border-primary">
+        <TrendingUp className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+        <p className="text-sm text-foreground/70">
+          Data loads from your production database on each visit. For scheduled exports, wire a job
+          later.
+        </p>
       </div>
     </div>
   );

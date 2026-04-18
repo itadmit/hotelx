@@ -1,312 +1,542 @@
 "use client";
 
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogFooter 
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
-import { 
-  ArrowUpRight, 
-  Building2, 
-  Users, 
-  CreditCard, 
-  Activity,
-  CalendarRange,
-  Download,
-  AlertCircle,
+import {
+  Plus,
+  Database,
+  RotateCcw,
+  ClipboardList,
+  CheckCircle2,
+  BedDouble,
+  Sparkles,
+  ArrowUpRight,
   Clock,
-  Utensils
+  TrendingUp,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+type RequestStatus = "NEW" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
+
+const STATUS_LABEL: Record<RequestStatus, string> = {
+  NEW: "New",
+  IN_PROGRESS: "In progress",
+  COMPLETED: "Completed",
+  CANCELLED: "Cancelled",
+};
+
+const STATUS_STYLES: Record<RequestStatus, string> = {
+  NEW: "bg-primary/10 text-primary border-primary/20",
+  IN_PROGRESS: "bg-amber-soft text-amber-brand border-[color:var(--amber)]/22",
+  COMPLETED: "bg-[color:var(--surface-2)] text-foreground/70 border-[color:var(--border)]",
+  CANCELLED: "bg-[#f3d8cf] text-clay border-[color:var(--clay)]/22",
+};
 
 export default function DashboardPage() {
-  const [isAddServiceOpen, setIsAddServiceOpen] = useState(false);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [rooms, setRooms] = useState<Array<{ id: string; number: string }>>([]);
+  const [services, setServices] = useState<Array<{ id: string; name: string }>>([]);
+  const [requests, setRequests] = useState<
+    Array<{
+      id: string;
+      status: RequestStatus;
+      createdAt: string;
+      room: { number: string };
+      service: { name: string };
+    }>
+  >([]);
+  const [stats, setStats] = useState<{
+    totalRequests: number;
+    openRequests: number;
+    completedRequests: number;
+    roomsCount: number;
+    servicesCount: number;
+    avgResponseMinutes: number | null;
+    topService: string | null;
+  } | null>(null);
+  const [form, setForm] = useState({ roomId: "", serviceId: "", notes: "" });
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+
+  async function loadData() {
+    setLoading(true);
+    const [analyticsRes, reqRes, roomsRes, servicesRes] = await Promise.all([
+      fetch("/api/analytics/overview", { cache: "no-store" }),
+      fetch("/api/requests", { cache: "no-store" }),
+      fetch("/api/rooms", { cache: "no-store" }),
+      fetch("/api/services", { cache: "no-store" }),
+    ]);
+
+    const analyticsData = await analyticsRes.json();
+    const reqData = await reqRes.json();
+    const roomData = await roomsRes.json();
+    const serviceData = await servicesRes.json();
+
+    setStats(analyticsData.stats ?? null);
+    setRequests(reqData.requests ?? []);
+    setRooms(roomData.rooms ?? []);
+    setServices(serviceData.services ?? []);
+    setLoading(false);
+  }
+
+  async function importDemoData() {
+    await fetch("/api/demo/seed", { method: "POST" });
+    await loadData();
+  }
+
+  async function resetHotelData() {
+    await fetch("/api/demo/reset", { method: "POST" });
+    await loadData();
+  }
+
+  async function createRequest() {
+    if (!form.roomId || !form.serviceId) return;
+    setSubmitting(true);
+    await fetch("/api/requests", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
+    });
+    setSubmitting(false);
+    setIsCreateOpen(false);
+    setForm({ roomId: "", serviceId: "", notes: "" });
+    await loadData();
+  }
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const latestRequests = requests.slice(0, 8);
+  const today = new Date().toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
 
   return (
     <div className="space-y-8">
-      {/* Header Section */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {/* Page header */}
+      <div className="flex flex-wrap items-end justify-between gap-4 pt-2">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Good Morning, Sarah! 👋</h1>
-          <p className="text-gray-500 mt-1">Here's a quick overview of your hotel's performance today.</p>
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-foreground/50">
+            {today} · live
+          </p>
+          <h1 className="font-display text-3xl sm:text-4xl text-ink mt-2 tracking-tight">
+            Good day at the front desk.
+          </h1>
+          <p className="text-sm text-foreground/60 mt-1.5">
+            Real-time view of your operation — every request, room and service.
+          </p>
         </div>
-        <div className="flex items-center gap-3">
-          <Button variant="outline" className="bg-white border-none shadow-sm text-gray-600 hover:bg-gray-50 gap-2 rounded-xl">
-            <CalendarRange className="h-4 w-4" />
-            Today: Oct 24
-          </Button>
-          <Button 
-            onClick={() => setIsAddServiceOpen(true)}
-            className="gap-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md shadow-indigo-200"
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant="outline"
+            onClick={importDemoData}
+            className="gap-2 h-9 text-xs"
           >
-            <Utensils className="h-4 w-4" />
-            New Request
+            <Database className="h-3.5 w-3.5" />
+            Import demo
+          </Button>
+          <Button
+            variant="outline"
+            onClick={resetHotelData}
+            className="gap-2 h-9 text-xs"
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+            Reset
+          </Button>
+          <Button
+            onClick={() => setIsCreateOpen(true)}
+            className="gap-2 h-9 text-xs bg-primary hover:bg-primary/90"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            New request
           </Button>
         </div>
       </div>
 
-      {/* Add Request Dialog */}
-      <Dialog open={isAddServiceOpen} onOpenChange={setIsAddServiceOpen}>
+      {/* KPI Grid */}
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 xl:grid-cols-4">
+        <KpiCard
+          label="Open requests"
+          value={stats?.openRequests ?? 0}
+          icon={ClipboardList}
+          accent="emerald"
+          delta={stats ? `${stats.totalRequests} total` : undefined}
+          loading={loading}
+        />
+        <KpiCard
+          label="Completed today"
+          value={stats?.completedRequests ?? 0}
+          icon={CheckCircle2}
+          accent="sage"
+          delta={
+            stats?.avgResponseMinutes
+              ? `~${stats.avgResponseMinutes}m avg`
+              : undefined
+          }
+          loading={loading}
+        />
+        <KpiCard
+          label="Active rooms"
+          value={stats?.roomsCount ?? 0}
+          icon={BedDouble}
+          accent="amber"
+          delta={
+            stats ? `${stats.servicesCount} services` : undefined
+          }
+          loading={loading}
+        />
+        <KpiCard
+          label="Top service"
+          value={stats?.topService ?? "—"}
+          icon={Sparkles}
+          accent="clay"
+          delta={stats?.topService ? "most requested" : undefined}
+          loading={loading}
+          isText
+        />
+      </div>
+
+      {/* Main grid */}
+      <div className="grid gap-4 lg:grid-cols-3">
+        {/* Recent requests */}
+        <section className="lg:col-span-2 card-surface overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-[color:var(--border)]">
+            <div>
+              <h2 className="text-base font-medium text-ink">Recent activity</h2>
+              <p className="text-xs text-foreground/55 mt-0.5">
+                Live updates from production data
+              </p>
+            </div>
+            <a
+              href="/dashboard/requests"
+              className="group inline-flex items-center gap-1 text-xs font-medium text-primary hover:gap-1.5 transition-all"
+            >
+              View all
+              <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+            </a>
+          </div>
+
+          {loading ? (
+            <div className="px-5 py-8 text-sm text-foreground/55">
+              Loading recent requests…
+            </div>
+          ) : latestRequests.length === 0 ? (
+            <div className="px-5 py-12 text-center">
+              <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary mb-3">
+                <ClipboardList className="h-5 w-5" />
+              </div>
+              <p className="text-sm text-foreground/70">No requests yet</p>
+              <p className="text-xs text-foreground/50 mt-1">
+                Import demo data to see how the board comes alive.
+              </p>
+            </div>
+          ) : (
+            <ul className="divide-y divide-[color:var(--border)]">
+              {latestRequests.map((request) => {
+                const time = new Date(request.createdAt);
+                return (
+                  <li
+                    key={request.id}
+                    className="flex items-center gap-4 px-5 py-3.5 hover:bg-background/60 transition-colors"
+                  >
+                    <div className="hidden sm:flex h-9 w-9 shrink-0 rounded-md bg-surface border border-[color:var(--border)] items-center justify-center font-mono text-[11px] text-foreground/70">
+                      {request.room.number}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-ink truncate">
+                        <span className="sm:hidden text-foreground/55 font-mono text-[11px] mr-1.5">
+                          {request.room.number}
+                        </span>
+                        {request.service.name}
+                      </p>
+                      <p className="flex items-center gap-1.5 text-[11px] text-foreground/50 mt-0.5 font-mono">
+                        <Clock className="h-3 w-3" />
+                        {time.toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                        <span className="text-foreground/30">·</span>
+                        {time.toLocaleDateString([], {
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </p>
+                    </div>
+                    <span
+                      className={cn(
+                        "shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border font-mono text-[10px] uppercase tracking-[0.12em]",
+                        STATUS_STYLES[request.status]
+                      )}
+                    >
+                      {request.status === "NEW" && (
+                        <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                      )}
+                      {STATUS_LABEL[request.status]}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </section>
+
+        {/* Right column */}
+        <aside className="space-y-4">
+          <div className="card-surface border-white/15 bg-primary p-5 text-primary-foreground shadow-sm">
+            <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em] text-primary-foreground/75">
+              <TrendingUp className="h-3 w-3" />
+              Performance
+            </div>
+            <div className="mt-3">
+              <p className="numeral text-5xl text-primary-foreground">
+                {stats?.avgResponseMinutes ?? "—"}
+                <span className="text-xl text-primary-foreground/65 ml-1">
+                  min
+                </span>
+              </p>
+              <p className="text-xs text-primary-foreground/75 mt-1">
+                Average response time
+              </p>
+            </div>
+            <div className="mt-5 pt-4 border-t border-white/15 grid grid-cols-2 gap-4">
+              <div>
+                <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-primary-foreground/65">
+                  Total
+                </p>
+                <p className="numeral text-2xl text-primary-foreground mt-1">
+                  {stats?.totalRequests ?? 0}
+                </p>
+              </div>
+              <div>
+                <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-primary-foreground/65">
+                  Services
+                </p>
+                <p className="numeral text-2xl text-primary-foreground mt-1">
+                  {stats?.servicesCount ?? 0}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick actions */}
+          <div className="card-surface p-5">
+            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-foreground/50">
+              Quick actions
+            </p>
+            <div className="mt-3 space-y-2">
+              <QuickAction
+                href="/dashboard/rooms"
+                icon={BedDouble}
+                title="Manage rooms"
+                desc="Add, edit, or remove guest rooms"
+              />
+              <QuickAction
+                href="/dashboard/services"
+                icon={Sparkles}
+                title="Configure services"
+                desc="Menus, amenities & pricing"
+              />
+              <QuickAction
+                href="/dashboard/qr"
+                icon={ClipboardList}
+                title="Print QR codes"
+                desc="Per-room access for guests"
+              />
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      {/* Create dialog (kept) */}
+      <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Create New Request</DialogTitle>
-            <DialogDescription>Add a new service request for a guest.</DialogDescription>
+            <DialogTitle>Create Request</DialogTitle>
+            <DialogDescription>Open a request for a room.</DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="room">Room Number</Label>
-              <Input id="room" placeholder="e.g. 305" />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="service">Service Type</Label>
-              <Select>
-                <option>Room Service</option>
-                <option>Housekeeping</option>
-                <option>Maintenance</option>
-                <option>Transport</option>
+          <div className="grid gap-3 py-2">
+            <div className="grid gap-1">
+              <Label>Room</Label>
+              <Select
+                value={form.roomId}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, roomId: event.target.value }))
+                }
+              >
+                <option value="">Select room</option>
+                {rooms.map((room) => (
+                  <option key={room.id} value={room.id}>
+                    Room {room.number}
+                  </option>
+                ))}
               </Select>
             </div>
-            <div className="grid gap-2">
-               <Label htmlFor="notes">Notes</Label>
-               <Input id="notes" placeholder="Additional details..." />
+            <div className="grid gap-1">
+              <Label>Service</Label>
+              <Select
+                value={form.serviceId}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, serviceId: event.target.value }))
+                }
+              >
+                <option value="">Select service</option>
+                {services.map((service) => (
+                  <option key={service.id} value={service.id}>
+                    {service.name}
+                  </option>
+                ))}
+              </Select>
+            </div>
+            <div className="grid gap-1">
+              <Label>Notes</Label>
+              <Input
+                value={form.notes}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, notes: event.target.value }))
+                }
+                placeholder="Optional notes"
+              />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAddServiceOpen(false)}>Cancel</Button>
-            <Button onClick={() => setIsAddServiceOpen(false)}>Create Request</Button>
+            <Button variant="outline" onClick={() => setIsCreateOpen(false)}>
+              Cancel
+            </Button>
+            <Button disabled={submitting} onClick={createRequest}>
+              {submitting ? "Creating…" : "Create"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      {/* Stats Row */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {[
-          { title: "Revenue", value: "$45,231", change: "+20.1%", icon: CreditCard, color: "text-indigo-600", bg: "bg-indigo-50" },
-          { title: "Occupancy", value: "85%", change: "+4.0%", icon: Building2, color: "text-pink-600", bg: "bg-pink-50" },
-          { title: "Guests", value: "573", change: "+12%", icon: Users, color: "text-blue-600", bg: "bg-blue-50" },
-          { title: "Requests", value: "12", change: "Active", icon: Activity, color: "text-orange-600", bg: "bg-orange-50" },
-        ].map((stat, i) => (
-          <div key={i} className="bg-white rounded-2xl p-6 shadow-sm flex items-start justify-between hover:shadow-md transition-shadow duration-200 cursor-pointer">
-            <div>
-              <p className="text-sm font-medium text-gray-500">{stat.title}</p>
-              <h3 className="text-2xl font-bold text-gray-900 mt-2">{stat.value}</h3>
-              <div className="flex items-center mt-1 gap-1 text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full w-fit">
-                {stat.change.includes('+') && <ArrowUpRight className="h-3 w-3" />}
-                {stat.change}
-              </div>
-            </div>
-            <div className={`p-3 rounded-xl ${stat.bg}`}>
-              <stat.icon className={`h-5 w-5 ${stat.color}`} />
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Main Content Grid */}
-      <div className="grid gap-8 md:grid-cols-12">
-        
-        {/* Main Column (8 cols) */}
-        <div className="md:col-span-8 space-y-8">
-          
-          {/* Revenue Chart Widget */}
-          <div className="bg-white rounded-3xl p-8 shadow-sm">
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <h3 className="text-lg font-bold text-gray-900">Revenue Overview</h3>
-                <p className="text-sm text-gray-500">Monthly revenue performance</p>
-              </div>
-              <div className="flex gap-2 p-1 bg-gray-100 rounded-xl">
-                {['Daily', 'Weekly', 'Monthly'].map((t, i) => (
-                  <button key={t} className={`px-4 py-1.5 text-sm font-medium rounded-lg transition-all ${i === 1 ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}>
-                    {t}
-                  </button>
-                ))}
-              </div>
-            </div>
-            
-            {/* Chart Bars */}
-            <div className="h-[280px] flex items-end justify-between gap-3 px-2">
-              {[40, 65, 45, 80, 55, 70, 90, 60, 75, 50, 85, 95].map((h, i) => (
-                <div key={i} className="w-full flex flex-col items-center gap-2 group cursor-pointer">
-                  <div className="w-full bg-gray-100 rounded-xl relative h-[240px] overflow-hidden">
-                    <div 
-                      className="absolute bottom-0 w-full bg-indigo-500 rounded-xl transition-all duration-500 group-hover:bg-indigo-600" 
-                      style={{ height: `${h}%` }}
-                    ></div>
-                  </div>
-                  <span className="text-xs text-gray-400 group-hover:text-indigo-600 font-medium transition-colors">
-                    {['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][i]}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Recent Requests Table Widget */}
-          <div className="bg-white rounded-3xl p-8 shadow-sm overflow-hidden">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h3 className="text-lg font-bold text-gray-900">Guest Requests</h3>
-                <p className="text-sm text-gray-500">Latest service tickets needing attention</p>
-              </div>
-              <Button variant="ghost" className="text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 font-medium">
-                See All Requests
-              </Button>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50/50">
-                  <tr className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                    <th className="px-6 py-4 rounded-l-xl">Guest / Room</th>
-                    <th className="px-6 py-4">Service</th>
-                    <th className="px-6 py-4">Priority</th>
-                    <th className="px-6 py-4">Status</th>
-                    <th className="px-6 py-4 rounded-r-xl">Time</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-50">
-                  {[
-                    { room: "301", guest: "Sarah Connor", service: "Extra Towels", status: "New", priority: "Normal", color: "blue" },
-                    { room: "205", guest: "John Smith", service: "Club Sandwich", status: "In Progress", priority: "High", color: "orange" },
-                    { room: "102", guest: "Emily Blunt", service: "Taxi Booking", status: "Completed", priority: "Normal", color: "green" },
-                    { room: "404", guest: "Mike Ross", service: "AC Repair", status: "New", priority: "High", color: "red" },
-                  ].map((req, i) => (
-                    <tr key={i} className="hover:bg-gray-50/80 transition-colors group cursor-pointer">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm font-bold">
-                            {req.room}
-                          </div>
-                          <div>
-                            <div className="font-medium text-gray-900">{req.guest}</div>
-                            <div className="text-xs text-gray-500">Deluxe Suite</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-600 font-medium">{req.service}</td>
-                      <td className="px-6 py-4">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          req.priority === "High" ? "bg-red-50 text-red-700" : "bg-blue-50 text-blue-700"
-                        }`}>
-                          {req.priority}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          req.status === "New" ? "bg-indigo-100 text-indigo-800" : 
-                          req.status === "In Progress" ? "bg-yellow-100 text-yellow-800" : 
-                          "bg-green-100 text-green-800"
-                        }`}>
-                          {req.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-400 group-hover:text-gray-600">2m ago</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-        </div>
-
-        {/* Right Column (4 cols) */}
-        <div className="md:col-span-4 space-y-8">
-          
-          {/* Room Status Widget */}
-          <div className="bg-white rounded-3xl p-8 shadow-sm h-fit">
-            <h3 className="text-lg font-bold text-gray-900 mb-6">Housekeeping Status</h3>
-            <div className="relative flex items-center justify-center py-6">
-               {/* Simple Donut Chart Representation */}
-               <div className="relative h-48 w-48 rounded-full border-[16px] border-green-100 flex items-center justify-center">
-                  <div className="absolute inset-0 rounded-full border-[16px] border-green-500 border-l-transparent border-b-transparent rotate-45"></div>
-                  <div className="text-center">
-                     <div className="text-3xl font-bold text-gray-900">72%</div>
-                     <div className="text-xs text-gray-500 uppercase font-bold tracking-wide mt-1">Clean</div>
-                  </div>
-               </div>
-            </div>
-            
-            <div className="space-y-4 mt-6">
-               {[
-                 { label: "Clean Ready", count: 142, color: "bg-green-500" },
-                 { label: "Occupied / Dirty", count: 45, color: "bg-yellow-500" },
-                 { label: "Out of Service", count: 8, color: "bg-red-500" }
-               ].map((item, i) => (
-                 <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-gray-50">
-                    <div className="flex items-center gap-3">
-                       <div className={`h-3 w-3 rounded-full ${item.color}`}></div>
-                       <span className="text-sm font-medium text-gray-600">{item.label}</span>
-                    </div>
-                    <span className="font-bold text-gray-900">{item.count}</span>
-                 </div>
-               ))}
-            </div>
-          </div>
-
-          {/* Urgent Tasks */}
-          <div className="bg-white rounded-3xl p-8 shadow-sm">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">Urgent Tasks</h3>
-            <div className="space-y-4">
-                {[
-                  { title: "VIP Arrival - Room 405", time: "10:00 AM", type: "Front Desk" },
-                  { title: "AC Maintenance - Floor 3", time: "11:30 AM", type: "Maintenance" },
-                  { title: "Staff Meeting", time: "2:00 PM", type: "Management" },
-                ].map((task, i) => (
-                  <div key={i} className="flex items-start gap-3 p-3 rounded-xl border border-gray-100 bg-gray-50 hover:bg-white hover:shadow-md transition-all cursor-pointer">
-                      <div className="mt-0.5">
-                        <AlertCircle className="h-4 w-4 text-orange-500" />
-                      </div>
-                      <div className="space-y-1">
-                        <p className="text-sm font-medium leading-none text-gray-900">{task.title}</p>
-                        <div className="flex items-center gap-2 text-xs text-gray-500">
-                            <Clock className="h-3 w-3" />
-                            {task.time}
-                            <span>•</span>
-                            {task.type}
-                        </div>
-                      </div>
-                  </div>
-                ))}
-            </div>
-          </div>
-
-          {/* Team Widget */}
-          <div className="bg-indigo-900 rounded-3xl p-8 shadow-lg text-white relative overflow-hidden">
-            <div className="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 bg-indigo-800 rounded-full opacity-50 blur-2xl"></div>
-            <div className="relative z-10">
-              <h3 className="text-lg font-bold mb-1">Team on Duty</h3>
-              <p className="text-indigo-200 text-sm mb-6">3 departments active</p>
-              
-              <div className="flex -space-x-4 mb-8">
-                 {[1,2,3,4,5].map(i => (
-                    <div key={i} className="h-12 w-12 rounded-full border-4 border-indigo-900 bg-white flex items-center justify-center text-indigo-900 font-bold text-xs shadow-sm">
-                       ST
-                    </div>
-                 ))}
-                 <div className="h-12 w-12 rounded-full border-4 border-indigo-900 bg-indigo-800 flex items-center justify-center text-white font-bold text-xs">
-                    +8
-                 </div>
-              </div>
-
-              <Button className="w-full bg-white text-indigo-900 hover:bg-indigo-50 font-bold rounded-xl">
-                 Manage Schedule
-              </Button>
-            </div>
-          </div>
-
-        </div>
-      </div>
     </div>
+  );
+}
+
+/* ----- KPI Card ----- */
+
+const ACCENT_STYLES = {
+  emerald: {
+    iconBg: "bg-primary/10",
+    iconText: "text-primary",
+    bar: "bg-primary",
+  },
+  amber: {
+    iconBg: "bg-amber-soft",
+    iconText: "text-amber-brand",
+    bar: "bg-amber-brand",
+  },
+  clay: {
+    iconBg: "bg-[#f3d8cf]",
+    iconText: "text-clay",
+    bar: "bg-clay",
+  },
+  sage: {
+    iconBg: "bg-[color:var(--surface-2)]",
+    iconText: "text-sage",
+    bar: "bg-sage",
+  },
+} as const;
+
+function KpiCard({
+  label,
+  value,
+  icon: Icon,
+  accent,
+  delta,
+  loading,
+  isText = false,
+}: {
+  label: string;
+  value: number | string;
+  icon: typeof ClipboardList;
+  accent: keyof typeof ACCENT_STYLES;
+  delta?: string;
+  loading?: boolean;
+  isText?: boolean;
+}) {
+  const a = ACCENT_STYLES[accent];
+  return (
+    <div className="card-surface p-4 sm:p-5 relative overflow-hidden">
+      <span
+        className={cn(
+          "absolute left-0 top-4 bottom-4 w-[2px] rounded-r-full",
+          a.bar
+        )}
+      />
+      <div className="flex items-start justify-between">
+        <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-foreground/55">
+          {label}
+        </p>
+        <div
+          className={cn(
+            "h-8 w-8 rounded-md flex items-center justify-center",
+            a.iconBg,
+            a.iconText
+          )}
+        >
+          <Icon className="h-4 w-4" strokeWidth={2} />
+        </div>
+      </div>
+      <div className="mt-3">
+        {loading ? (
+          <div className="h-8 w-20 rounded bg-[color:var(--surface-2)] animate-pulse" />
+        ) : isText ? (
+          <p className="font-display text-xl sm:text-2xl text-ink leading-tight truncate">
+            {value}
+          </p>
+        ) : (
+          <p className="numeral text-3xl sm:text-4xl text-ink leading-none">
+            {value}
+          </p>
+        )}
+      </div>
+      {delta && !loading && (
+        <p className="text-[11px] text-foreground/50 mt-2 font-mono">{delta}</p>
+      )}
+    </div>
+  );
+}
+
+/* ----- Quick Action ----- */
+
+function QuickAction({
+  href,
+  icon: Icon,
+  title,
+  desc,
+}: {
+  href: string;
+  icon: typeof ClipboardList;
+  title: string;
+  desc: string;
+}) {
+  return (
+    <a
+      href={href}
+      className="group flex items-center gap-3 p-2.5 -mx-1 rounded-md hover:bg-background/70 transition-colors"
+    >
+      <div className="h-9 w-9 rounded-md bg-primary/10 text-primary flex items-center justify-center shrink-0">
+        <Icon className="h-4 w-4" strokeWidth={2} />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium text-ink truncate">{title}</p>
+        <p className="text-[11px] text-foreground/50 truncate">{desc}</p>
+      </div>
+      <ArrowUpRight className="h-3.5 w-3.5 text-foreground/30 group-hover:text-primary transition-colors" />
+    </a>
   );
 }

@@ -1,47 +1,282 @@
+"use client";
+
 import Link from "next/link";
-import { CheckCircle2, Clock, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import {
+  CheckCircle2,
+  Clock,
+  ChevronRight,
+  Loader2,
+  Sparkles,
+  ConciergeBell,
+  CircleCheck,
+  CircleDot,
+  ArrowLeft,
+} from "lucide-react";
+import { useEffect, useMemo, useState, use } from "react";
 
-export default async function RequestStatusPage({
-  params,
-}: {
-  params: Promise<{ hotelSlug: string; roomCode: string; requestId: string }>;
-}) {
-  const { hotelSlug, roomCode, requestId } = await params;
+type RequestData = {
+  id: string;
+  status: "NEW" | "IN_PROGRESS" | "COMPLETED" | string;
+  createdAt?: string;
+  notes?: string | null;
+  service: {
+    name: string;
+    estimatedTime: string | null;
+    price?: string | number | null;
+  };
+  room?: { number?: string };
+};
 
-  return (
-    <div className="flex flex-col h-full min-h-screen bg-gray-50 p-6 flex items-center justify-center text-center">
-      <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-6 animate-in zoom-in duration-300">
-        <CheckCircle2 className="h-10 w-10 text-green-600" />
-      </div>
+const STATUS_FLOW = ["NEW", "IN_PROGRESS", "COMPLETED"] as const;
 
-      <h1 className="text-2xl font-bold font-heading text-gray-900 mb-2">Request Received!</h1>
-      <p className="text-gray-500 mb-8 max-w-xs mx-auto">
-        Your request for <span className="font-semibold text-gray-900">Club Sandwich</span> has been sent to the staff.
-      </p>
-
-      <div className="bg-white rounded-2xl p-6 shadow-sm w-full max-w-sm border border-gray-100 mb-8">
-        <div className="flex items-center justify-between mb-4 pb-4 border-b border-gray-100">
-          <span className="text-sm text-gray-500">Status</span>
-          <span className="px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-bold uppercase tracking-wide">
-            In Progress
-          </span>
-        </div>
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-500">Estimated Time</span>
-          <div className="flex items-center gap-1.5 text-gray-900 font-medium">
-            <Clock className="h-4 w-4 text-gray-400" />
-            20 min
-          </div>
-        </div>
-      </div>
-
-      <Link href={`/g/${hotelSlug}/${roomCode}`}>
-        <Button variant="outline" className="gap-2">
-          Back to Home <ChevronRight className="h-4 w-4" />
-        </Button>
-      </Link>
-    </div>
-  );
+function statusLabel(s?: string): string {
+  if (!s) return "Pending";
+  if (s === "NEW") return "Received";
+  if (s === "IN_PROGRESS") return "Preparing";
+  if (s === "COMPLETED") return "Delivered";
+  return s.replace(/_/g, " ").toLowerCase();
 }
 
+function statusColor(s?: string): {
+  bg: string;
+  text: string;
+  ring: string;
+  dot: string;
+} {
+  if (s === "COMPLETED") {
+    return {
+      bg: "bg-emerald-soft",
+      text: "text-emerald-brand",
+      ring: "ring-emerald-brand/20",
+      dot: "bg-emerald-brand",
+    };
+  }
+  if (s === "IN_PROGRESS") {
+    return {
+      bg: "bg-amber-soft",
+      text: "text-amber-brand",
+      ring: "ring-amber-brand/20",
+      dot: "bg-amber-brand",
+    };
+  }
+  return {
+    bg: "bg-[#e3eadf]",
+    text: "text-emerald-brand",
+    ring: "ring-emerald-brand/20",
+    dot: "bg-emerald-brand",
+  };
+}
+
+export default function RequestStatusPage({
+  params,
+}: {
+  params:
+    | Promise<{ hotelSlug: string; roomCode: string; requestId: string }>
+    | { hotelSlug: string; roomCode: string; requestId: string };
+}) {
+  const resolved =
+    typeof (params as Promise<unknown>).then === "function"
+      ? use(params as Promise<{
+          hotelSlug: string;
+          roomCode: string;
+          requestId: string;
+        }>)
+      : (params as {
+          hotelSlug: string;
+          roomCode: string;
+          requestId: string;
+        });
+
+  const { hotelSlug, roomCode, requestId } = resolved;
+  const [request, setRequest] = useState<RequestData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadRequest() {
+      try {
+        const response = await fetch(`/api/public/requests/${requestId}`, {
+          cache: "no-store",
+        });
+        const data = await response.json();
+        if (!cancelled) {
+          setRequest(data.request ?? null);
+          setLoading(false);
+        }
+      } catch {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    loadRequest();
+    const interval = setInterval(loadRequest, 8000);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [requestId]);
+
+  const currentStepIndex = useMemo(() => {
+    const idx = STATUS_FLOW.indexOf(
+      (request?.status as (typeof STATUS_FLOW)[number]) ?? "NEW"
+    );
+    return idx === -1 ? 0 : idx;
+  }, [request?.status]);
+
+  const colors = statusColor(request?.status);
+
+  return (
+    <main className="mx-auto w-full max-w-[480px] min-h-screen bg-background text-ink flex flex-col pb-12">
+      {/* Top bar */}
+      <header className="sticky top-0 z-30 px-4 py-3 bg-background/85 backdrop-blur-md border-b border-[color:var(--border)]/60 flex items-center gap-2">
+        <Link
+          href={`/g/${hotelSlug}/${roomCode}`}
+          className="h-9 w-9 rounded-full border border-[color:var(--border)] flex items-center justify-center bg-background hover:bg-surface transition-colors"
+          aria-label="Back to home"
+        >
+          <ArrowLeft className="h-4 w-4 text-ink" />
+        </Link>
+        <div className="leading-tight">
+          <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-foreground/55">
+            Request · {requestId.slice(0, 6)}
+          </p>
+          <p className="text-sm font-medium text-ink">Live status</p>
+        </div>
+      </header>
+
+      {/* Confirmation hero */}
+      <section className="px-5 pt-8 text-center">
+        <div className="mx-auto inline-flex h-16 w-16 items-center justify-center rounded-full bg-emerald-soft text-emerald-brand">
+          <CheckCircle2 className="h-8 w-8" />
+        </div>
+        <h1 className="font-display text-3xl sm:text-4xl mt-5 leading-tight tracking-tight text-ink">
+          Request received
+          <span className="display-italic text-emerald-brand">.</span>
+        </h1>
+        <p className="mt-2.5 text-sm text-foreground/65 leading-snug max-w-xs mx-auto">
+          {loading ? (
+            "Connecting to the concierge…"
+          ) : request ? (
+            <>
+              We&apos;re preparing{" "}
+              <span className="font-medium text-ink">
+                {request.service.name}
+              </span>{" "}
+              for you.
+            </>
+          ) : (
+            "We couldn't load this request. It may have been updated."
+          )}
+        </p>
+      </section>
+
+      {/* Status card */}
+      <section className="mx-5 mt-7 rounded-2xl border border-[color:var(--border)] bg-card overflow-hidden">
+        {/* Header strip */}
+        <div className="px-4 py-3 border-b border-[color:var(--border)] flex items-center justify-between">
+          <p className="eyebrow flex items-center gap-1.5">
+            <Sparkles className="h-3 w-3 text-emerald-brand" />
+            Order status
+          </p>
+          <span
+            className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full font-mono text-[10px] uppercase tracking-[0.16em] ${colors.bg} ${colors.text} ring-1 ${colors.ring}`}
+          >
+            {loading ? (
+              <Loader2 className="h-2.5 w-2.5 animate-spin" />
+            ) : (
+              <span className={`h-1 w-1 rounded-full ${colors.dot}`} />
+            )}
+            {statusLabel(request?.status)}
+          </span>
+        </div>
+
+        {/* Timeline */}
+        <ol className="px-4 py-4 space-y-3.5">
+          {STATUS_FLOW.map((step, i) => {
+            const isDone = i < currentStepIndex;
+            const isActive = i === currentStepIndex;
+            const Icon = isDone ? CircleCheck : isActive ? CircleDot : Clock;
+            return (
+              <li key={step} className="flex items-start gap-3">
+                <span
+                  className={`mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${
+                    isDone
+                      ? "bg-emerald-brand text-primary-foreground"
+                      : isActive
+                      ? "bg-amber-soft text-amber-brand"
+                      : "bg-surface text-foreground/40 border border-[color:var(--border)]"
+                  }`}
+                >
+                  <Icon className="h-3.5 w-3.5" strokeWidth={2} />
+                </span>
+                <div className="leading-tight">
+                  <p
+                    className={`text-sm font-medium ${
+                      isDone || isActive ? "text-ink" : "text-foreground/45"
+                    }`}
+                  >
+                    {statusLabel(step)}
+                  </p>
+                  <p className="text-[11px] text-foreground/50 mt-0.5">
+                    {step === "NEW"
+                      ? "Concierge has been notified"
+                      : step === "IN_PROGRESS"
+                      ? "Staff is preparing your request"
+                      : "Service has been delivered"}
+                  </p>
+                </div>
+              </li>
+            );
+          })}
+        </ol>
+
+        {/* Footer details */}
+        <div className="px-4 py-3 border-t border-[color:var(--border)] grid grid-cols-2 gap-3 bg-surface/50">
+          <div>
+            <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-foreground/55">
+              ETA
+            </p>
+            <p className="text-sm font-medium text-ink mt-0.5 flex items-center gap-1.5">
+              <Clock className="h-3.5 w-3.5 text-foreground/50" />
+              {request?.service.estimatedTime ?? "On request"}
+            </p>
+          </div>
+          <div>
+            <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-foreground/55">
+              Concierge
+            </p>
+            <p className="text-sm font-medium text-ink mt-0.5 flex items-center gap-1.5">
+              <ConciergeBell className="h-3.5 w-3.5 text-foreground/50" />
+              On the line
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Notes (if any) */}
+      {request?.notes ? (
+        <section className="mx-5 mt-4 rounded-xl border border-dashed border-[color:var(--border)] bg-surface/40 px-4 py-3">
+          <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-foreground/55">
+            Your note
+          </p>
+          <p className="mt-1 text-sm text-ink leading-snug">
+            &ldquo;{request.notes}&rdquo;
+          </p>
+        </section>
+      ) : null}
+
+      {/* CTA */}
+      <div className="mt-auto pt-10 px-5">
+        <Link
+          href={`/g/${hotelSlug}/${roomCode}`}
+          className="group w-full inline-flex items-center justify-center gap-2 h-12 px-5 rounded-full border border-[color:var(--border)] bg-card text-ink font-medium hover:bg-surface transition-colors"
+        >
+          Back to concierge
+          <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+        </Link>
+        <p className="mt-3 text-center font-mono text-[10px] uppercase tracking-[0.18em] text-foreground/45">
+          Updates every 8 seconds
+        </p>
+      </div>
+    </main>
+  );
+}

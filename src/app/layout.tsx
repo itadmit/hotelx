@@ -1,21 +1,32 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Outfit } from "next/font/google";
+import { Fraunces, Manrope, JetBrains_Mono } from "next/font/google";
 import AuthProvider from "@/components/auth/AuthProvider";
+import { ThemeProvider, themeInitScript } from "@/lib/theme";
 import "./globals.css";
 
-const fontSans = Plus_Jakarta_Sans({
+const fontSans = Manrope({
   subsets: ["latin"],
   variable: "--font-sans",
+  display: "swap",
 });
 
-const fontHeading = Outfit({
+const fontDisplay = Fraunces({
   subsets: ["latin"],
-  variable: "--font-heading",
+  variable: "--font-display",
+  display: "swap",
+  axes: ["opsz", "SOFT"],
+});
+
+const fontMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "HotelX - Upgrade Your Hotel Service",
-  description: "Guest scan. Staff responds. Managers see everything.",
+  title: "HotelX — The Concierge Operating System",
+  description:
+    "A QR-first guest experience platform. Guests scan, staff respond, managers see everything — beautifully.",
 };
 
 export default function RootLayout({
@@ -24,11 +35,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{ __html: themeInitScript }}
+        />
+      </head>
       <body
-        className={`${fontSans.variable} ${fontHeading.variable} antialiased font-sans`}
+        className={`${fontSans.variable} ${fontDisplay.variable} ${fontMono.variable} antialiased font-sans bg-background text-foreground`}
       >
-        <AuthProvider>{children}</AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>{children}</AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

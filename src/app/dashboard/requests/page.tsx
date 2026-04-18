@@ -1,176 +1,283 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Search, Filter, MoreHorizontal, Clock, Plus, ArrowDownToLine } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
+import { Search, MoreHorizontal, Clock, Plus, ArrowDownToLine } from "lucide-react";
 
 export default function RequestsPage() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [requests, setRequests] = useState<
+    Array<{
+      id: string;
+      status: "NEW" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
+      notes: string | null;
+      createdAt: string;
+      room: { id: string; number: string };
+      service: { id: string; name: string };
+      assignee: { id: string; name: string | null } | null;
+    }>
+  >([]);
+  const [rooms, setRooms] = useState<Array<{ id: string; number: string }>>([]);
+  const [services, setServices] = useState<Array<{ id: string; name: string }>>([]);
+  const [form, setForm] = useState({ roomId: "", serviceId: "", notes: "" });
+  const [search, setSearch] = useState("");
 
-  const requests = [
-    { id: "REQ-001", room: "305", service: "Extra Towels", status: "New", time: "2m ago", assignee: "Unassigned", priority: "Normal" },
-    { id: "REQ-002", room: "204", service: "Room Service", status: "In Progress", time: "15m ago", assignee: "Sarah J.", priority: "High" },
-    { id: "REQ-003", room: "112", service: "Taxi", status: "Completed", time: "45m ago", assignee: "Mike T.", priority: "Normal" },
-    { id: "REQ-004", room: "401", service: "Maintenance (AC)", status: "New", time: "1h ago", assignee: "Unassigned", priority: "High" },
-    { id: "REQ-005", room: "202", service: "Late Checkout", status: "In Progress", time: "1h 20m ago", assignee: "Jessica M.", priority: "Low" },
+  const columns: Array<{
+    title: string;
+    status: "NEW" | "IN_PROGRESS" | "COMPLETED";
+    dotClass: string;
+  }> = [
+    { title: "New", status: "NEW", dotClass: "bg-primary" },
+    { title: "In progress", status: "IN_PROGRESS", dotClass: "bg-amber-brand" },
+    { title: "Completed", status: "COMPLETED", dotClass: "bg-sage" },
   ];
 
-  const columns = [
-    { title: "New", status: "New", color: "bg-indigo-500", count: 2 },
-    { title: "In Progress", status: "In Progress", color: "bg-orange-500", count: 2 },
-    { title: "Completed", status: "Completed", color: "bg-green-500", count: 1 },
-  ];
+  async function loadData() {
+    const [requestsRes, roomsRes, servicesRes] = await Promise.all([
+      fetch("/api/requests", { cache: "no-store" }),
+      fetch("/api/rooms", { cache: "no-store" }),
+      fetch("/api/services", { cache: "no-store" }),
+    ]);
+    const requestsData = await requestsRes.json();
+    const roomsData = await roomsRes.json();
+    const servicesData = await servicesRes.json();
+    setRequests(requestsData.requests ?? []);
+    setRooms(roomsData.rooms ?? []);
+    setServices(servicesData.services ?? []);
+  }
+
+  useEffect(() => {
+    loadData();
+    const interval = setInterval(loadData, 8000);
+    return () => clearInterval(interval);
+  }, []);
+
+  async function createRequest() {
+    if (!form.roomId || !form.serviceId) return;
+    await fetch("/api/requests", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
+    });
+    setForm({ roomId: "", serviceId: "", notes: "" });
+    setIsCreateOpen(false);
+    await loadData();
+  }
+
+  async function updateStatus(requestId: string, status: "NEW" | "IN_PROGRESS" | "COMPLETED") {
+    await fetch(`/api/requests/${requestId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    });
+    await loadData();
+  }
+
+  const filteredRequests = useMemo(() => {
+    const text = search.trim().toLowerCase();
+    if (!text) return requests;
+    return requests.filter(
+      (request) =>
+        request.room.number.toLowerCase().includes(text) ||
+        request.service.name.toLowerCase().includes(text)
+    );
+  }, [requests, search]);
 
   return (
     <div className="space-y-8">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Requests Board</h1>
-          <p className="text-gray-500 mt-1">Manage and track guest requests in real-time</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <Button variant="outline" className="bg-white border-none shadow-sm text-gray-600 hover:bg-gray-50 gap-2 rounded-xl">
-            <ArrowDownToLine className="h-4 w-4" />
-            Export
-          </Button>
-          <Button 
-            onClick={() => setIsCreateOpen(true)}
-            className="gap-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md shadow-indigo-200"
-          >
-            <Plus className="h-4 w-4" />
-            Create Request
-          </Button>
-        </div>
-      </div>
+      <DashboardPageHeader
+        eyebrow="Workspace · live"
+        title="Requests board"
+        description="Drag cards between columns to update status — synced with your database."
+      >
+        <Button variant="outline" className="gap-2 h-9 text-xs rounded-md">
+          <ArrowDownToLine className="h-3.5 w-3.5" />
+          Export
+        </Button>
+        <Button
+          onClick={() => setIsCreateOpen(true)}
+          className="gap-2 h-9 text-xs bg-primary hover:bg-primary/90 rounded-md"
+        >
+          <Plus className="h-3.5 w-3.5" />
+          Create request
+        </Button>
+      </DashboardPageHeader>
 
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Create Request</DialogTitle>
-            <DialogDescription>Manually add a new request to the board.</DialogDescription>
+            <DialogTitle>Create request</DialogTitle>
+            <DialogDescription>Add a new request to the board.</DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-               <Label htmlFor="room">Room Number</Label>
-               <Input id="room" placeholder="101" />
+              <Label htmlFor="room">Room</Label>
+              <Select
+                value={form.roomId}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, roomId: event.target.value }))
+                }
+              >
+                <option value="">Select room</option>
+                {rooms.map((room) => (
+                  <option key={room.id} value={room.id}>
+                    {room.number}
+                  </option>
+                ))}
+              </Select>
             </div>
             <div className="grid gap-2">
-               <Label htmlFor="service">Service</Label>
-               <Select>
-                  <option>Housekeeping</option>
-                  <option>Room Service</option>
-                  <option>Maintenance</option>
-               </Select>
+              <Label htmlFor="service">Service</Label>
+              <Select
+                value={form.serviceId}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, serviceId: event.target.value }))
+                }
+              >
+                <option value="">Select service</option>
+                {services.map((service) => (
+                  <option key={service.id} value={service.id}>
+                    {service.name}
+                  </option>
+                ))}
+              </Select>
             </div>
             <div className="grid gap-2">
-               <Label htmlFor="priority">Priority</Label>
-               <Select>
-                  <option>Normal</option>
-                  <option>High</option>
-                  <option>Low</option>
-               </Select>
+              <Label htmlFor="notes">Notes</Label>
+              <Input
+                id="notes"
+                value={form.notes}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, notes: event.target.value }))
+                }
+                placeholder="Optional notes"
+              />
             </div>
           </div>
           <DialogFooter>
-             <Button variant="outline" onClick={() => setIsCreateOpen(false)}>Cancel</Button>
-             <Button onClick={() => setIsCreateOpen(false)}>Create</Button>
+            <Button variant="outline" onClick={() => setIsCreateOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={createRequest}>Create</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Filters Bar */}
-      <div className="bg-white rounded-2xl p-2 shadow-sm flex flex-col md:flex-row gap-2">
+      <div className="card-surface p-2 flex flex-col md:flex-row gap-2">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <Input 
-            placeholder="Search by room or service..." 
-            className="pl-10 border-transparent bg-transparent focus:bg-gray-50 rounded-xl" 
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground/40" />
+          <Input
+            placeholder="Search by room or service…"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            className="pl-10 border-transparent bg-transparent rounded-md focus:bg-background"
           />
         </div>
         <div className="flex items-center gap-2 px-2">
-          <Button variant="ghost" className="gap-2 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl">
-            <Filter className="h-4 w-4" />
-            Filter
+          <div className="hidden md:block h-6 w-px bg-[color:var(--border)] mx-1" />
+          <span className="text-xs text-foreground/50 font-mono uppercase tracking-wider">View</span>
+          <Button variant="ghost" size="sm" className="h-8 text-xs rounded-md bg-background font-medium">
+            Board
           </Button>
-          <div className="h-6 w-px bg-gray-200 mx-2"></div>
-          <div className="flex items-center gap-2">
-             <span className="text-sm text-gray-500">View:</span>
-             <Button variant="ghost" size="sm" className="text-indigo-600 bg-indigo-50 font-medium rounded-lg">Board</Button>
-             <Button variant="ghost" size="sm" className="text-gray-500 hover:bg-gray-50 rounded-lg">List</Button>
-          </div>
+          <Button variant="ghost" size="sm" className="h-8 text-xs rounded-md text-foreground/50">
+            List
+          </Button>
         </div>
       </div>
 
-      {/* Kanban Board */}
       <div className="grid md:grid-cols-3 gap-6 h-full items-start">
         {columns.map((col) => (
-          <div key={col.title} className="flex flex-col gap-4">
+          <div
+            key={col.title}
+            className="flex flex-col gap-4"
+            onDragOver={(event) => event.preventDefault()}
+            onDrop={(event) => {
+              const requestId = event.dataTransfer.getData("requestId");
+              if (requestId) {
+                updateStatus(requestId, col.status);
+              }
+            }}
+          >
             <div className="flex items-center justify-between px-1">
               <div className="flex items-center gap-2">
-                <div className={`h-2.5 w-2.5 rounded-full ${col.color}`}></div>
-                <h3 className="font-bold text-gray-700">{col.title}</h3>
-                <span className="bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-full font-medium">{col.count}</span>
+                <div className={`h-2.5 w-2.5 rounded-full ${col.dotClass}`} />
+                <h3 className="font-medium text-sm text-ink">{col.title}</h3>
+                <span className="bg-surface text-foreground/60 text-[11px] px-2 py-0.5 rounded-full font-mono">
+                  {filteredRequests.filter((request) => request.status === col.status).length}
+                </span>
               </div>
-              <Button variant="ghost" size="icon" className="h-6 w-6 text-gray-400 hover:text-gray-600">
+              <Button variant="ghost" size="icon" className="h-7 w-7 text-foreground/40">
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </div>
 
             <div className="space-y-3">
-              {requests.filter(r => r.status === col.status).map((req) => (
-                <div 
-                  key={req.id} 
-                  className="group bg-white rounded-2xl p-5 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer border border-transparent hover:border-indigo-100"
-                >
-                  <div className="flex justify-between items-start mb-3">
-                    <div className="bg-gray-50 text-gray-700 text-xs font-bold px-2 py-1 rounded-lg">
-                      Room {req.room}
-                    </div>
-                    {req.priority === "High" && (
-                      <div className="bg-red-50 text-red-600 text-[10px] font-bold px-2 py-1 rounded-lg uppercase tracking-wide">
-                        High Priority
+              {filteredRequests
+                .filter((request) => request.status === col.status)
+                .map((req) => (
+                  <div
+                    key={req.id}
+                    draggable
+                    onDragStart={(event) => event.dataTransfer.setData("requestId", req.id)}
+                    className="group card-surface p-4 cursor-pointer border border-[color:var(--border)] hover:border-primary/25 transition-colors"
+                  >
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="bg-surface text-ink text-[11px] font-mono px-2 py-1 rounded-md border border-[color:var(--border)]">
+                        Room {req.room.number}
                       </div>
-                    )}
-                  </div>
-                  
-                  <h4 className="font-bold text-gray-900 mb-1">{req.service}</h4>
-                  
-                  <div className="flex items-center gap-1 text-xs text-gray-400 mb-4">
-                    <Clock className="h-3 w-3" />
-                    <span>{req.time}</span>
-                  </div>
-
-                  <div className="flex items-center justify-between pt-3 border-t border-gray-50">
-                    <div className="flex items-center gap-2">
-                      {req.assignee === "Unassigned" ? (
-                         <div className="h-6 w-6 rounded-full bg-gray-100 border border-white flex items-center justify-center text-gray-400">
-                           <span className="sr-only">Unassigned</span>
-                           <Plus className="h-3 w-3" />
-                         </div>
-                      ) : (
-                        <div className="h-6 w-6 rounded-full bg-indigo-100 text-indigo-600 border border-white flex items-center justify-center text-[10px] font-bold">
-                          {req.assignee.charAt(0)}
+                      {req.status === "NEW" && (
+                        <div className="bg-primary/10 text-primary text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded-md">
+                          New
                         </div>
                       )}
-                      <span className="text-xs text-gray-500 font-medium">{req.assignee}</span>
+                    </div>
+
+                    <h4 className="font-medium text-ink mb-1">{req.service.name}</h4>
+
+                    <div className="flex items-center gap-1 text-[11px] text-foreground/50 mb-4 font-mono">
+                      <Clock className="h-3 w-3" />
+                      <span>{new Date(req.createdAt).toLocaleString()}</span>
+                    </div>
+
+                    <div className="flex items-center justify-between pt-3 border-t border-[color:var(--border)]">
+                      <div className="flex items-center gap-2">
+                        {!req.assignee ? (
+                          <div className="h-6 w-6 rounded-full bg-surface border border-[color:var(--border)] flex items-center justify-center text-foreground/40">
+                            <span className="sr-only">Unassigned</span>
+                            <Plus className="h-3 w-3" />
+                          </div>
+                        ) : (
+                          <div className="h-6 w-6 rounded-full bg-primary/15 text-primary border border-[color:var(--border)] flex items-center justify-center text-[10px] font-semibold">
+                            {req.assignee.name?.charAt(0) ?? "S"}
+                          </div>
+                        )}
+                        <span className="text-xs text-foreground/55">
+                          {req.assignee?.name ?? "Unassigned"}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-              
-              <button 
+                ))}
+
+              <button
+                type="button"
                 onClick={() => setIsCreateOpen(true)}
-                className="w-full py-3 rounded-xl border-2 border-dashed border-gray-200 text-gray-400 text-sm font-medium hover:border-indigo-200 hover:text-indigo-500 hover:bg-indigo-50/50 transition-all flex items-center justify-center gap-2"
+                className="w-full py-3 rounded-md border border-dashed border-[color:var(--border)] text-sm text-foreground/50 hover:border-primary/30 hover:text-primary hover:bg-primary/5 transition-colors flex items-center justify-center gap-2"
               >
                 <Plus className="h-4 w-4" />
-                Add Card
+                Add card
               </button>
             </div>
           </div>
