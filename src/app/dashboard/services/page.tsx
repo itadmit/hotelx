@@ -21,6 +21,7 @@ import Link from "next/link";
 
 export default function ServicesPage() {
   const [isAddServiceOpen, setIsAddServiceOpen] = useState(false);
+  const [isAddCategoryOpen, setIsAddCategoryOpen] = useState(false);
   const [activityFilter, setActivityFilter] = useState<"all" | "active" | "inactive">("all");
   const [services, setServices] = useState<
     Array<{
@@ -34,7 +35,9 @@ export default function ServicesPage() {
       category: { id: string; name: string };
     }>
   >([]);
-  const [categories, setCategories] = useState<Array<{ id: string; name: string }>>([]);
+  const [categories, setCategories] = useState<
+    Array<{ id: string; name: string; slug: string; parentId: string | null }>
+  >([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [newService, setNewService] = useState({
@@ -43,6 +46,11 @@ export default function ServicesPage() {
     price: "",
     estimatedTime: "",
     description: "",
+  });
+  const [newCategory, setNewCategory] = useState({
+    name: "",
+    slug: "",
+    parentId: "",
   });
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
@@ -92,6 +100,31 @@ export default function ServicesPage() {
     await loadData();
   }
 
+  async function createCategory() {
+    const name = newCategory.name.trim();
+    if (!name) return;
+    const slugSource = newCategory.slug.trim() || name;
+    const slug = slugSource
+      .toLowerCase()
+      .replace(/[^a-z0-9-]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+    if (!slug) return;
+
+    await fetch("/api/categories", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name,
+        slug,
+        parentId: newCategory.parentId || null,
+      }),
+    });
+
+    setNewCategory({ name: "", slug: "", parentId: "" });
+    setIsAddCategoryOpen(false);
+    await loadData();
+  }
+
   const filteredServices = useMemo(() => {
     const text = search.trim().toLowerCase();
     return services.filter((service) => {
@@ -114,6 +147,30 @@ export default function ServicesPage() {
     [services]
   );
 
+  const categoriesById = useMemo(
+    () => new Map(categories.map((category) => [category.id, category])),
+    [categories]
+  );
+  const rootCategories = useMemo(
+    () => categories.filter((category) => !category.parentId),
+    [categories]
+  );
+  const leafCategories = useMemo(() => {
+    const parentIds = new Set(
+      categories.filter((category) => category.parentId).map((category) => category.parentId)
+    );
+    return categories.filter((category) => !parentIds.has(category.id));
+  }, [categories]);
+  const categoryOptions = useMemo(() => {
+    return leafCategories.map((category) => {
+      const parent = category.parentId ? categoriesById.get(category.parentId) : null;
+      return {
+        id: category.id,
+        name: parent ? `${parent.name} / ${category.name}` : category.name,
+      };
+    });
+  }, [leafCategories, categoriesById]);
+
   function toggleActivityFilter() {
     setActivityFilter((prev) => {
       if (prev === "all") return "active";
@@ -133,13 +190,23 @@ export default function ServicesPage() {
         title="Services & menu"
         description="Everything guests can order — synced with categories and pricing."
       >
-        <Button
-          onClick={() => setIsAddServiceOpen(true)}
-          className="gap-2 h-9 text-xs bg-primary hover:bg-primary/90 rounded-md"
-        >
-          <Plus className="h-3.5 w-3.5" />
-          Add service
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={() => setIsAddCategoryOpen(true)}
+            variant="outline"
+            className="gap-2 h-9 text-xs rounded-md"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            Add category
+          </Button>
+          <Button
+            onClick={() => setIsAddServiceOpen(true)}
+            className="gap-2 h-9 text-xs bg-primary hover:bg-primary/90 rounded-md"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            Add service
+          </Button>
+        </div>
       </DashboardPageHeader>
 
       <Dialog open={isAddServiceOpen} onOpenChange={setIsAddServiceOpen}>
@@ -168,7 +235,7 @@ export default function ServicesPage() {
                 }
               >
                 <option value="">Select category</option>
-                {categories.map((category) => (
+                {categoryOptions.map((category) => (
                   <option key={category.id} value={category.id}>
                     {category.name}
                   </option>
@@ -216,6 +283,61 @@ export default function ServicesPage() {
               Cancel
             </Button>
             <Button onClick={createService}>Create</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isAddCategoryOpen} onOpenChange={setIsAddCategoryOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add category</DialogTitle>
+            <DialogDescription>
+              Create a top-level category or a room-service subcategory.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label>Name</Label>
+              <Input
+                placeholder="e.g. Desserts"
+                value={newCategory.name}
+                onChange={(event) =>
+                  setNewCategory((prev) => ({ ...prev, name: event.target.value }))
+                }
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label>Slug (optional)</Label>
+              <Input
+                placeholder="e.g. room-desserts"
+                value={newCategory.slug}
+                onChange={(event) =>
+                  setNewCategory((prev) => ({ ...prev, slug: event.target.value }))
+                }
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label>Parent category (optional)</Label>
+              <Select
+                value={newCategory.parentId}
+                onChange={(event) =>
+                  setNewCategory((prev) => ({ ...prev, parentId: event.target.value }))
+                }
+              >
+                <option value="">Top-level category</option>
+                {rootCategories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsAddCategoryOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={createCategory}>Create category</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

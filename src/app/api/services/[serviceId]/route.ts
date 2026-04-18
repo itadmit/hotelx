@@ -59,9 +59,37 @@ export async function PATCH(
       )
     }
 
+    const nextData = { ...parsed.data }
+
+    if (nextData.categoryId) {
+      const category = await prisma.category.findFirst({
+        where: {
+          id: nextData.categoryId,
+          hotelId: user.hotelId!,
+        },
+        select: {
+          id: true,
+          _count: { select: { children: true } },
+        },
+      })
+
+      if (!category) {
+        return NextResponse.json({ error: "Category not found" }, { status: 404 })
+      }
+
+      if (category._count.children > 0) {
+        return NextResponse.json(
+          { error: "Please choose a subcategory (leaf category)." },
+          { status: 400 }
+        )
+      }
+
+      nextData.categoryId = category.id
+    }
+
     const result = await prisma.service.updateMany({
       where: { id: serviceId, hotelId: user.hotelId! },
-      data: parsed.data,
+      data: nextData,
     })
 
     if (result.count === 0) {

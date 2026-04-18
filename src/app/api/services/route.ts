@@ -47,9 +47,32 @@ export async function POST(request: Request) {
       )
     }
 
+    const category = await prisma.category.findFirst({
+      where: {
+        id: parsed.data.categoryId,
+        hotelId: user.hotelId!,
+      },
+      select: {
+        id: true,
+        _count: { select: { children: true } },
+      },
+    })
+
+    if (!category) {
+      return NextResponse.json({ error: "Category not found" }, { status: 404 })
+    }
+
+    if (category._count.children > 0) {
+      return NextResponse.json(
+        { error: "Please choose a subcategory (leaf category)." },
+        { status: 400 }
+      )
+    }
+
     const service = await prisma.service.create({
       data: {
         ...parsed.data,
+        categoryId: category.id,
         price: parsed.data.price ?? null,
         hotelId: user.hotelId!,
       },

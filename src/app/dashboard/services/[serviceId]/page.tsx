@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { use, useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,7 +17,9 @@ export default function ServiceEditorPage({
   params: Promise<{ serviceId: string }>;
 }) {
   const { serviceId } = use(params);
-  const [categories, setCategories] = useState<Array<{ id: string; name: string }>>([]);
+  const [categories, setCategories] = useState<
+    Array<{ id: string; name: string; parentId: string | null }>
+  >([]);
   const [form, setForm] = useState({
     name: "",
     description: "",
@@ -29,6 +31,25 @@ export default function ServiceEditorPage({
   });
   const [paymentsEnabled, setPaymentsEnabled] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
+
+  const categoryById = useMemo(
+    () => new Map(categories.map((category) => [category.id, category])),
+    [categories]
+  );
+  const leafCategoryOptions = useMemo(() => {
+    const parentIds = new Set(
+      categories.filter((category) => category.parentId).map((category) => category.parentId)
+    );
+    return categories
+      .filter((category) => !parentIds.has(category.id))
+      .map((category) => {
+        const parent = category.parentId ? categoryById.get(category.parentId) : null;
+        return {
+          id: category.id,
+          name: parent ? `${parent.name} / ${category.name}` : category.name,
+        };
+      });
+  }, [categories, categoryById]);
 
   useEffect(() => {
     async function init() {
@@ -131,7 +152,7 @@ export default function ServiceEditorPage({
                 }
               >
                 <option value="">Select category</option>
-                {categories.map((category) => (
+                {leafCategoryOptions.map((category) => (
                   <option key={category.id} value={category.id}>
                     {category.name}
                   </option>

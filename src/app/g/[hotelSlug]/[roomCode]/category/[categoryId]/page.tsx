@@ -208,7 +208,7 @@ export default async function CategoryPage({
         {isRoomServiceHub ? (
           <>
             <p className="mt-2.5 text-sm text-foreground/65 leading-snug max-w-sm">
-              למעלה: גלילה בין מחלקות התפריט. למטה: כל המנות — בחרו פריט ונשלח לחדר.
+              Browse subcategories in the strip below, then order from the menu.
             </p>
             <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-foreground/45">
               {servicesToRender.length}{" "}
@@ -245,8 +245,9 @@ export default async function CategoryPage({
             items={category.children}
             hotelSlug={hotelSlug}
             roomCode={roomCode}
+            variant="compact"
             descriptionsBySlug={roomServiceSubcategoryCopy}
-            pageLabel="תפריט שירות חדרים"
+            pageLabel="Room service subcategories"
           />
         </section>
       ) : null}

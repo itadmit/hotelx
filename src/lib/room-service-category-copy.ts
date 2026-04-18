@@ -1,8 +1,8 @@
-/** Hebrew blurbs for room-service subcategories (guest category cards). */
+/** English blurbs for room-service subcategories (guest category cards). */
 export const roomServiceSubcategoryCopy: Record<string, string> = {
-  "room-breakfast": "ארוחות בוקר, ברנץ׳ קל, קפה ומיץ טרי.",
-  "room-starter": "סלטים, פלטות פתיחה ונשנושים לפני העיקרית.",
-  "room-main": "מנות חמות, כריכים ומנות שף מלאות.",
-  "room-desserts": "קינוחים חמים, מרינים ופירות העונה.",
-  "room-beverages": "יין, קוקטיילים, מים ובקבוקים קרים.",
+  "room-breakfast": "Breakfast, light brunch, coffee, and fresh juices.",
+  "room-starter": "Salads, opening plates, and small bites.",
+  "room-main": "Hot mains, sandwiches, and chef specials.",
+  "room-desserts": "Warm desserts, pastries, and seasonal fruit.",
+  "room-beverages": "Wine, cocktails, water, and chilled drinks.",
 };

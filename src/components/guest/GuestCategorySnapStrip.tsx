@@ -15,7 +15,7 @@ export type SnapCategoryItem = {
 
 function defaultGuestCardBody(item: SnapCategoryItem): string {
   return item.slug === "room-service"
-    ? "בוקר, מנה ראשונה, עיקרית, קינוחים ושתייה — נכנסים לתפריט המלא."
+    ? "Breakfast, starters, mains, desserts, and drinks — open the full menu."
     : "Tap to browse everything in this department.";
 }
 
@@ -32,6 +32,7 @@ type Props = {
   items: SnapCategoryItem[];
   hotelSlug: string;
   roomCode: string;
+  variant?: "cards" | "compact";
   /** Second line under the title on each card (client-only callback) */
   getDescription?: (item: SnapCategoryItem, index: number) => string;
   /** Server-safe copy per category `slug` */
@@ -44,6 +45,7 @@ export function GuestCategorySnapStrip({
   items,
   hotelSlug,
   roomCode,
+  variant = "cards",
   getDescription,
   descriptionsBySlug,
   pageLabel,
@@ -75,6 +77,29 @@ export function GuestCategorySnapStrip({
   }
 
   if (items.length === 0) return null;
+
+  if (variant === "compact") {
+    return (
+      <div className="-mx-5 px-5">
+        <div
+          className="flex items-center gap-2 overflow-x-auto scrollbar-none pb-1"
+          role="tablist"
+          aria-label={pageLabel ?? "Category tabs"}
+        >
+          {items.map((category, index) => (
+            <Link
+              key={category.id}
+              href={`/g/${hotelSlug}/${roomCode}/category/${category.id}`}
+              prefetch={index < 4}
+              className="shrink-0 inline-flex items-center h-9 px-3 rounded-full border border-[color:var(--border)] bg-card text-[13px] font-medium text-ink whitespace-nowrap hover:bg-surface transition-colors"
+            >
+              {category.name}
+            </Link>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>

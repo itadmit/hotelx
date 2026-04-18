@@ -8,6 +8,7 @@ const createCategorySchema = z.object({
   slug: z.string().min(2),
   icon: z.string().optional(),
   order: z.number().int().min(0).optional(),
+  parentId: z.string().min(1).nullable().optional(),
 })
 
 export async function GET() {
@@ -15,7 +16,15 @@ export async function GET() {
     const user = await requireSessionUser()
     const categories = await prisma.category.findMany({
       where: { hotelId: user.hotelId! },
-      orderBy: [{ order: "asc" }, { name: "asc" }],
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        icon: true,
+        order: true,
+        parentId: true,
+      },
+      orderBy: [{ parentId: "asc" }, { order: "asc" }, { name: "asc" }],
     })
 
     return NextResponse.json({ categories })
@@ -43,9 +52,41 @@ export async function POST(request: Request) {
       )
     }
 
+    const normalizedSlug = parsed.data.slug
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9-]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+
+    if (!normalizedSlug) {
+      return NextResponse.json({ error: "Invalid slug" }, { status: 400 })
+    }
+
+    let parentId: string | null = parsed.data.parentId ?? null
+    if (parentId) {
+      const parent = await prisma.category.findFirst({
+        where: {
+          id: parentId,
+          hotelId: user.hotelId!,
+        },
+        select: { id: true },
+      })
+      if (!parent) {
+        return NextResponse.json(
+          { error: "Parent category not found in your hotel" },
+          { status: 400 }
+        )
+      }
+      parentId = parent.id
+    }
+
     const category = await prisma.category.create({
       data: {
-        ...parsed.data,
+        name: parsed.data.name.trim(),
+        slug: normalizedSlug,
+        icon: parsed.data.icon,
+        order: parsed.data.order ?? 0,
+        parentId,
         hotelId: user.hotelId!,
       },
     })

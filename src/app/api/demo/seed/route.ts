@@ -45,37 +45,57 @@ export async function POST() {
       const children = demoCategories.filter((c) => c.parentSlug)
 
       for (const category of roots) {
-        if (!slugToCategory.has(category.slug)) {
-          const created = await tx.category.create({
-            data: {
-              name: category.name,
-              slug: category.slug,
-              icon: category.icon,
-              order: category.order,
+        const upserted = await tx.category.upsert({
+          where: {
+            hotelId_slug: {
               hotelId,
-              parentId: null,
+              slug: category.slug,
             },
-          })
-          slugToCategory.set(created.slug, created.id)
-        }
+          },
+          update: {
+            name: category.name,
+            icon: category.icon,
+            order: category.order,
+            parentId: null,
+          },
+          create: {
+            name: category.name,
+            slug: category.slug,
+            icon: category.icon,
+            order: category.order,
+            hotelId,
+            parentId: null,
+          },
+        })
+        slugToCategory.set(upserted.slug, upserted.id)
       }
 
       for (const category of children) {
-        if (!slugToCategory.has(category.slug)) {
-          const parentId = slugToCategory.get(category.parentSlug!)
-          if (!parentId) continue
-          const created = await tx.category.create({
-            data: {
-              name: category.name,
-              slug: category.slug,
-              icon: category.icon,
-              order: category.order,
+        const parentId = slugToCategory.get(category.parentSlug!)
+        if (!parentId) continue
+        const upserted = await tx.category.upsert({
+          where: {
+            hotelId_slug: {
               hotelId,
-              parentId,
+              slug: category.slug,
             },
-          })
-          slugToCategory.set(created.slug, created.id)
-        }
+          },
+          update: {
+            name: category.name,
+            icon: category.icon,
+            order: category.order,
+            parentId,
+          },
+          create: {
+            name: category.name,
+            slug: category.slug,
+            icon: category.icon,
+            order: category.order,
+            hotelId,
+            parentId,
+          },
+        })
+        slugToCategory.set(upserted.slug, upserted.id)
       }
 
       const createdRooms = []
@@ -100,11 +120,23 @@ export async function POST() {
         if (!categoryId) continue
 
         const existing = await tx.service.findFirst({
-          where: { hotelId, name: service.name, categoryId },
+          where: { hotelId, name: service.name },
           select: { id: true },
         })
 
-        if (!existing) {
+        if (existing) {
+          await tx.service.update({
+            where: { id: existing.id },
+            data: {
+              description: service.description,
+              price: service.price,
+              estimatedTime: service.estimatedTime,
+              requirePayment: service.requirePayment ?? false,
+              image: service.image ?? null,
+              categoryId,
+            },
+          })
+        } else {
           createdServices.push(
             await tx.service.create({
               data: {

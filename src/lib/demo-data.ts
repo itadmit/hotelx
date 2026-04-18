@@ -13,7 +13,7 @@ export const demoCategories: Array<{
   order: number;
   parentSlug?: string | null;
 }> = [
-  { name: "שירות חדרים", slug: "room-service", icon: "Utensils", order: 1 },
+  { name: "Room Service", slug: "room-service", icon: "Utensils", order: 1 },
   { name: "Housekeeping", slug: "housekeeping", icon: "Sparkles", order: 10 },
   { name: "Transport", slug: "transport", icon: "Car", order: 11 },
   { name: "Maintenance", slug: "maintenance", icon: "Wrench", order: 12 },
@@ -24,37 +24,37 @@ export const demoCategories: Array<{
     order: 13,
   },
   { name: "Info", slug: "info", icon: "Info", order: 14 },
-  // תתי-קטגוריות תחת שירות חדרים
+  // Room-service subcategories
   {
-    name: "ארוחות בוקר",
+    name: "Breakfast",
     slug: "room-breakfast",
     icon: "Coffee",
     order: 1,
     parentSlug: "room-service",
   },
   {
-    name: "מנה ראשונה",
+    name: "Starters",
     slug: "room-starter",
     icon: "Salad",
     order: 2,
     parentSlug: "room-service",
   },
   {
-    name: "מנה עיקרית",
+    name: "Mains",
     slug: "room-main",
     icon: "UtensilsCrossed",
     order: 3,
     parentSlug: "room-service",
   },
   {
-    name: "קינוחים",
+    name: "Desserts",
     slug: "room-desserts",
     icon: "IceCream",
     order: 4,
     parentSlug: "room-service",
   },
   {
-    name: "שתייה",
+    name: "Drinks",
     slug: "room-beverages",
     icon: "Wine",
     order: 5,
@@ -79,7 +79,7 @@ export const demoServices: Array<{
   requirePayment: boolean;
   image?: string | null;
 }> = [
-  // ארוחות בוקר
+  // Breakfast
   {
     categorySlug: "room-breakfast",
     name: "Continental breakfast",
@@ -116,7 +116,7 @@ export const demoServices: Array<{
     requirePayment: false,
     image: U("photo-1622597467836-f3285f2131b8"),
   },
-  // מנה ראשונה
+  // Starters
   {
     categorySlug: "room-starter",
     name: "Caesar salad",
@@ -144,7 +144,7 @@ export const demoServices: Array<{
     requirePayment: false,
     image: U("photo-1486297678162-eb2a19b0a32d"),
   },
-  // מנה עיקרית
+  // Mains
   {
     categorySlug: "room-main",
     name: "Club sandwich",
@@ -190,7 +190,7 @@ export const demoServices: Array<{
     requirePayment: false,
     image: U("photo-1573080496989-a02c924033d6"),
   },
-  // קינוחים
+  // Desserts
   {
     categorySlug: "room-desserts",
     name: "Valrhona chocolate soufflé",
@@ -218,7 +218,7 @@ export const demoServices: Array<{
     requirePayment: false,
     image: U("photo-1558326567-98ae24055966"),
   },
-  // שתייה
+  // Drinks
   {
     categorySlug: "room-beverages",
     name: "Champagne & strawberries",

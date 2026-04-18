@@ -1,6 +1,5 @@
 const greetings = [
   { lang: "EN", text: "Welcome" },
-  { lang: "HE", text: "ברוכים הבאים" },
   { lang: "FR", text: "Bienvenue" },
   { lang: "ES", text: "Bienvenidos" },
   { lang: "IT", text: "Benvenuti" },
@@ -13,6 +12,7 @@ const greetings = [
   { lang: "TR", text: "Hoş geldiniz" },
   { lang: "KR", text: "환영합니다" },
   { lang: "GR", text: "Καλώς ήρθατε" },
+  { lang: "HE", text: "ברוכים הבאים" },
 ];
 
 export function LanguagesMarquee() {
