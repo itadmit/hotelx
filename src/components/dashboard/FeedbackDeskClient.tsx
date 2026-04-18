@@ -336,39 +336,53 @@ export function FeedbackDeskClient() {
 
         {/* Right column */}
         <aside className="space-y-4">
-          {/* Reputation card — mirrors Performance card */}
-          <div className="card-surface border-white/15 bg-primary p-5 text-primary-foreground shadow-sm">
-            <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em] text-primary-foreground/75">
-              <TrendingUp className="h-3 w-3" />
-              Reputation
+          {/* Reputation card — light variant, sibling of Performance */}
+          <div className="card-surface p-5 relative overflow-hidden">
+            <span
+              aria-hidden
+              className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-emerald-soft/60 blur-2xl"
+            />
+            <div className="relative flex items-center justify-between">
+              <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em] text-foreground/55">
+                <TrendingUp className="h-3 w-3 text-emerald-brand" />
+                Reputation
+              </div>
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-soft text-emerald-brand font-mono text-[9px] uppercase tracking-[0.16em]">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-brand animate-pulse" />
+                live
+              </span>
             </div>
-            <div className="mt-3">
-              <p className="numeral text-5xl text-primary-foreground">
-                {counters.csat ?? "—"}
-                {counters.csat != null ? (
-                  <span className="text-xl text-primary-foreground/65 ml-1">
-                    %
-                  </span>
-                ) : null}
-              </p>
-              <p className="text-xs text-primary-foreground/75 mt-1">
-                Guest satisfaction score
-              </p>
+
+            <div className="relative mt-4 flex items-end gap-4">
+              <CsatRing value={counters.csat} />
+              <div className="pb-1">
+                <p className="text-xs text-foreground/65">
+                  Guest satisfaction score
+                </p>
+                <p className="text-[11px] text-foreground/45 mt-0.5">
+                  Based on {counters.positive + counters.open + counters.resolved}{" "}
+                  rating
+                  {counters.positive + counters.open + counters.resolved === 1
+                    ? ""
+                    : "s"}
+                </p>
+              </div>
             </div>
-            <div className="mt-5 pt-4 border-t border-white/15 grid grid-cols-2 gap-4">
+
+            <div className="relative mt-5 pt-4 border-t border-[color:var(--border)] grid grid-cols-2 gap-4">
               <div>
-                <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-primary-foreground/65">
+                <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-foreground/50">
                   Happy
                 </p>
-                <p className="numeral text-2xl text-primary-foreground mt-1">
+                <p className="numeral text-2xl text-ink mt-1">
                   {counters.positive}
                 </p>
               </div>
               <div>
-                <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-primary-foreground/65">
+                <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-foreground/50">
                   Open
                 </p>
-                <p className="numeral text-2xl text-primary-foreground mt-1">
+                <p className="numeral text-2xl text-ink mt-1">
                   {counters.open}
                 </p>
               </div>
@@ -402,6 +416,51 @@ export function FeedbackDeskClient() {
             </div>
           </div>
         </aside>
+      </div>
+    </div>
+  );
+}
+
+function CsatRing({ value }: { value: number | null }) {
+  const size = 72;
+  const stroke = 6;
+  const radius = (size - stroke) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const pct = value ?? 0;
+  const dash = (circumference * pct) / 100;
+
+  return (
+    <div className="relative" style={{ width: size, height: size }}>
+      <svg width={size} height={size} className="-rotate-90">
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke="var(--border)"
+          strokeWidth={stroke}
+        />
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          fill="none"
+          stroke="currentColor"
+          className="text-emerald-brand"
+          strokeWidth={stroke}
+          strokeLinecap="round"
+          strokeDasharray={`${dash} ${circumference - dash}`}
+        />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="numeral text-xl text-ink leading-none">
+          {value ?? "—"}
+        </span>
+        {value != null ? (
+          <span className="font-mono text-[8px] uppercase tracking-[0.18em] text-foreground/55 mt-0.5">
+            csat
+          </span>
+        ) : null}
       </div>
     </div>
   );

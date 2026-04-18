@@ -91,21 +91,25 @@ export function FeedbackDeskSkeleton() {
 
         {/* Right column */}
         <aside className="space-y-4">
-          {/* Reputation card — same emerald block, just lower-contrast bars on top */}
-          <div className="card-surface bg-primary p-5 text-primary-foreground border-white/15 shadow-sm">
-            <div className="flex items-center gap-2">
-              <div className="h-3 w-3 rounded bg-white/20" />
-              <div className="h-3 w-24 rounded bg-white/20" />
+          {/* Reputation card — light variant */}
+          <div className="card-surface p-5 relative overflow-hidden">
+            <span className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-emerald-soft/40 blur-2xl" />
+            <div className="relative flex items-center justify-between">
+              <Bar className="h-3 w-24" />
+              <Bar className="h-5 w-12 rounded-full" />
             </div>
-            <div className="mt-3 space-y-2">
-              <div className="h-12 w-32 rounded-md bg-white/20" />
-              <div className="h-3 w-40 rounded bg-white/15" />
+            <div className="relative mt-4 flex items-end gap-4">
+              <div className="h-[72px] w-[72px] rounded-full border-[6px] border-[color:var(--surface-2)]" />
+              <div className="pb-1 space-y-2">
+                <Bar className="h-3 w-36" />
+                <Bar className="h-2.5 w-24" />
+              </div>
             </div>
-            <div className="mt-5 pt-4 border-t border-white/15 grid grid-cols-2 gap-4">
+            <div className="relative mt-5 pt-4 border-t border-[color:var(--border)] grid grid-cols-2 gap-4">
               {Array.from({ length: 2 }).map((_, i) => (
                 <div key={i} className="space-y-2">
-                  <div className="h-2.5 w-12 rounded bg-white/20" />
-                  <div className="h-7 w-16 rounded bg-white/20" />
+                  <Bar className="h-2.5 w-12" />
+                  <Bar className="h-7 w-16" />
                 </div>
               ))}
             </div>
