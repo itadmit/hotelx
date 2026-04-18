@@ -3,21 +3,148 @@
 import Link from "next/link";
 import { Search, Menu, Command, ExternalLink } from "lucide-react";
 import { useSession } from "next-auth/react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { ThemeToggle } from "@/components/dashboard/ThemeToggle";
 import { NotificationsBell } from "@/components/dashboard/NotificationsBell";
 
+type DashboardPageSearchItem = {
+  title: string;
+  description: string;
+  href: string;
+  keywords: string[];
+};
+
+const DASHBOARD_PAGES: DashboardPageSearchItem[] = [
+  {
+    title: "Overview",
+    description: "Front desk overview with KPIs and recent activity.",
+    href: "/dashboard",
+    keywords: ["home", "overview", "dashboard", "activity", "kpi"],
+  },
+  {
+    title: "Requests",
+    description: "Track and update guest requests in board/list views.",
+    href: "/dashboard/requests",
+    keywords: ["tickets", "tasks", "requests", "board", "status"],
+  },
+  {
+    title: "Rooms",
+    description: "Manage rooms, occupancy context, and room access.",
+    href: "/dashboard/rooms",
+    keywords: ["room", "suite", "accommodation", "keys"],
+  },
+  {
+    title: "Services",
+    description: "Create and edit hotel services, categories, and pricing.",
+    href: "/dashboard/services",
+    keywords: ["service", "menu", "amenities", "pricing"],
+  },
+  {
+    title: "QR Codes",
+    description: "Generate and print room QR codes for guest access.",
+    href: "/dashboard/qr",
+    keywords: ["qr", "code", "print", "scan"],
+  },
+  {
+    title: "Payments",
+    description: "Configure payment settings and service payment rules.",
+    href: "/dashboard/payments",
+    keywords: ["payment", "billing", "checkout", "card"],
+  },
+  {
+    title: "Analytics",
+    description: "View performance and operational analytics reports.",
+    href: "/dashboard/reports",
+    keywords: ["reports", "analytics", "insights", "metrics"],
+  },
+  {
+    title: "Team",
+    description: "Add staff to team and manage roles and access.",
+    href: "/dashboard/team",
+    keywords: ["staff", "team", "employees", "roles", "access", "add staff to team"],
+  },
+  {
+    title: "Hotel Settings",
+    description: "Edit hotel profile, identity, and guest-facing defaults.",
+    href: "/dashboard/hotel-settings",
+    keywords: ["settings", "hotel profile", "branding", "configuration"],
+  },
+  {
+    title: "Wi-Fi",
+    description: "Set guest Wi-Fi information shown in the guest app.",
+    href: "/dashboard/guest-info/wifi",
+    keywords: ["wifi", "internet", "network", "guest info"],
+  },
+  {
+    title: "About",
+    description: "Set the hotel story and about text for guests.",
+    href: "/dashboard/guest-info/about",
+    keywords: ["about", "story", "hotel info", "guest info"],
+  },
+  {
+    title: "Amenities",
+    description: "Configure amenities and featured guest information.",
+    href: "/dashboard/guest-info/amenities",
+    keywords: ["amenities", "facilities", "features", "guest info"],
+  },
+  {
+    title: "Helpful Info",
+    description: "Publish helpful guest instructions and local guidance.",
+    href: "/dashboard/guest-info/helpful",
+    keywords: ["help", "faq", "instructions", "guest info", "tips"],
+  },
+];
 
 export function Header({ onOpenMobile }: { onOpenMobile: () => void }) {
   const { data } = useSession();
+  const router = useRouter();
+  const pathname = usePathname();
+  const inputRef = useRef<HTMLInputElement>(null);
   const userName = data?.user?.name ?? "Hotel User";
   const role = (data?.user?.role ?? "Manager").toString();
   const hotelSlug = data?.user?.hotelSlug ?? null;
+  const [query, setQuery] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
   const initials = userName
     .split(" ")
     .map((part) => part[0])
     .join("")
     .slice(0, 2)
     .toUpperCase();
+  const filteredPages = useMemo(() => {
+    const term = query.trim().toLowerCase();
+    if (!term) return DASHBOARD_PAGES.slice(0, 6);
+
+    return DASHBOARD_PAGES.filter((page) => {
+      const haystack = [
+        page.title,
+        page.description,
+        page.href,
+        ...page.keywords,
+      ]
+        .join(" ")
+        .toLowerCase();
+      return haystack.includes(term);
+    }).slice(0, 8);
+  }, [query]);
+
+  useEffect(() => {
+    const handleShortcut = (event: KeyboardEvent) => {
+      const isCmdOrCtrl = event.metaKey || event.ctrlKey;
+      if (!isCmdOrCtrl || event.key.toLowerCase() !== "k") return;
+      event.preventDefault();
+      inputRef.current?.focus();
+    };
+    window.addEventListener("keydown", handleShortcut);
+    return () => window.removeEventListener("keydown", handleShortcut);
+  }, []);
+
+  function goToPage(href: string) {
+    setIsOpen(false);
+    setQuery("");
+    router.push(href);
+  }
 
   return (
     <header className="sticky top-0 z-40 h-16 w-full px-4 sm:px-6 lg:px-8 flex items-center gap-3 bg-background/85 backdrop-blur-md border-b border-[color:var(--border)]">
@@ -32,18 +159,69 @@ export function Header({ onOpenMobile }: { onOpenMobile: () => void }) {
       </button>
 
       {/* Search */}
-      <div className="flex-1 min-w-0 max-w-xl">
+      <div className="relative flex-1 min-w-0 max-w-xl">
         <label className="group relative flex items-center h-10 rounded-md bg-surface border border-[color:var(--border)] focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/15 transition-all">
           <Search className="absolute left-3 h-4 w-4 text-foreground/40 group-focus-within:text-primary transition-colors" />
           <input
             type="search"
-            placeholder="Search guests, rooms, services…"
+            ref={inputRef}
+            value={query}
+            onFocus={() => setIsOpen(true)}
+            onChange={(event) => {
+              setQuery(event.target.value);
+              setIsOpen(true);
+            }}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+                const first = filteredPages[0];
+                if (first) {
+                  goToPage(first.href);
+                }
+              }
+            }}
+            onBlur={() => {
+              window.setTimeout(() => setIsOpen(false), 120);
+            }}
+            placeholder="Search pages, features, actions…"
             className="w-full h-full pl-9 pr-16 bg-transparent text-sm text-ink placeholder:text-foreground/40 outline-none"
           />
           <kbd className="hidden sm:flex absolute right-2.5 items-center gap-0.5 h-6 px-1.5 rounded bg-background border border-[color:var(--border)] font-mono text-[10px] text-foreground/50">
             <Command className="h-3 w-3" />K
           </kbd>
         </label>
+        {isOpen ? (
+          <div className="absolute left-0 right-0 mt-2 rounded-xl border border-[color:var(--border)] bg-background shadow-lg overflow-hidden z-50">
+            {filteredPages.length === 0 ? (
+              <p className="px-3 py-2.5 text-xs text-foreground/55">
+                No pages matched. Try another keyword.
+              </p>
+            ) : (
+              <ul className="max-h-80 overflow-auto py-1">
+                {filteredPages.map((page) => {
+                  const isActive = pathname === page.href;
+                  return (
+                    <li key={page.href}>
+                      <button
+                        type="button"
+                        onMouseDown={(event) => event.preventDefault()}
+                        onClick={() => goToPage(page.href)}
+                        className="w-full text-left px-3 py-2.5 hover:bg-surface transition-colors"
+                      >
+                        <p
+                          className={`text-sm font-medium ${isActive ? "text-primary" : "text-ink"}`}
+                        >
+                          {page.title}
+                        </p>
+                        <p className="text-xs text-foreground/55">{page.description}</p>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
+        ) : null}
       </div>
 
       {/* Right side */}
