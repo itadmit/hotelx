@@ -18,7 +18,7 @@ export class ResendEmailProvider implements EmailProvider {
     const key = process.env.RESEND_API_KEY ?? "";
     this.client = key ? new Resend(key) : null;
     this.defaultFromEmail =
-      process.env.EMAIL_FROM ?? "HotelX <onboarding@resend.dev>";
+      process.env.EMAIL_FROM ?? "HotelX <hello@hotelx.app>";
     this.defaultFromName = process.env.EMAIL_FROM_NAME ?? "HotelX";
   }
 
