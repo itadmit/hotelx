@@ -31,6 +31,36 @@ export const metadata: Metadata = {
   title: "HotelX — The Concierge Operating System",
   description:
     "A QR-first guest experience platform. Guests scan, staff respond, managers see everything — beautifully.",
+  icons: {
+    icon: [
+      { url: "/icons/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icons/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+    ],
+    apple: [
+      { url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
+  manifest: "/manifest.json",
+  openGraph: {
+    title: "HotelX — The Concierge Operating System",
+    description:
+      "QR concierge for hotels — lift in-room spend, raise your Booking score, cut calls to reception. Live in 48 hours.",
+    url: siteUrl,
+    siteName: "HotelX",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "HotelX — The Concierge Operating System",
+    description:
+      "QR concierge for hotels — lift in-room spend, raise your Booking score, cut calls to reception.",
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "HotelX",
+  },
 };
 
 export default function RootLayout({
