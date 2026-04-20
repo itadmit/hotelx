@@ -12,8 +12,30 @@ import prisma from "@/lib/prisma";
 import { DemoBookingForm } from "./DemoBookingForm";
 
 async function pickDemoTarget() {
-  const room = await prisma.room.findFirst({
-    where: { code: "R101" },
+  const hotel = await prisma.hotel.findFirst({
+    where: { slug: "plaza-hotel-milano" },
+    select: {
+      slug: true,
+      name: true,
+      rooms: {
+        take: 1,
+        orderBy: { number: "asc" },
+        select: { code: true, number: true },
+      },
+    },
+  });
+
+  if (hotel?.rooms?.[0]) {
+    return {
+      hotelSlug: hotel.slug,
+      hotelName: hotel.name,
+      roomCode: hotel.rooms[0].code,
+      roomNumber: hotel.rooms[0].number,
+    };
+  }
+
+  const fallback = await prisma.room.findFirst({
+    orderBy: { number: "asc" },
     select: {
       code: true,
       number: true,
@@ -21,12 +43,12 @@ async function pickDemoTarget() {
     },
   });
 
-  if (room?.hotel?.slug) {
+  if (fallback?.hotel?.slug) {
     return {
-      hotelSlug: room.hotel.slug,
-      hotelName: room.hotel.name,
-      roomCode: room.code,
-      roomNumber: room.number,
+      hotelSlug: fallback.hotel.slug,
+      hotelName: fallback.hotel.name,
+      roomCode: fallback.code,
+      roomNumber: fallback.number,
     };
   }
 
