@@ -30,6 +30,8 @@ import {
 import { cn } from "@/lib/utils";
 import { DashboardPageLoading } from "@/components/dashboard/DashboardPageLoading";
 import { GuestInfoOnboarding } from "@/components/dashboard/GuestInfoOnboarding";
+import { fetchDashboardBundle } from "@/lib/dashboard-bundle";
+import type { GuestInfoCompletionStatus } from "@/lib/guest-info-completion";
 import { FirstTimeWelcomeModal } from "@/components/dashboard/FirstTimeWelcomeModal";
 import {
   DemoImportDialog,
@@ -81,7 +83,8 @@ export default function DashboardPage() {
   const [confirmAction, setConfirmAction] = useState<null | "reset">(null);
   const [actionRunning, setActionRunning] = useState<null | "reset">(null);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
-  const [onboardingRefreshKey, setOnboardingRefreshKey] = useState(0);
+  const [guestCompletion, setGuestCompletion] =
+    useState<GuestInfoCompletionStatus | null>(null);
   const [toast, setToast] = useState<{
     tone: "success" | "error";
     title: string;
@@ -114,22 +117,15 @@ export default function DashboardPage() {
     }
     setLoading(true);
     try {
-      const [analyticsRes, reqRes, roomsRes, servicesRes] = await Promise.all([
-        fetch("/api/analytics/overview", { cache: "no-store" }),
-        fetch("/api/requests", { cache: "no-store" }),
-        fetch("/api/rooms", { cache: "no-store" }),
-        fetch("/api/services", { cache: "no-store" }),
-      ]);
+      const bundle = await fetchDashboardBundle({
+        reuseInitialPass: isInitial,
+      });
 
-      const analyticsData = await analyticsRes.json();
-      const reqData = await reqRes.json();
-      const roomData = await roomsRes.json();
-      const serviceData = await servicesRes.json();
-
-      setStats(analyticsData.stats ?? null);
-      setRequests(reqData.requests ?? []);
-      setRooms(roomData.rooms ?? []);
-      setServices(serviceData.services ?? []);
+      setStats(bundle.stats ?? null);
+      setRequests(bundle.requests ?? []);
+      setRooms(bundle.rooms ?? []);
+      setServices(bundle.services ?? []);
+      setGuestCompletion(bundle.guestCompletion);
     } finally {
       setLoading(false);
       if (isInitial) {
@@ -158,7 +154,6 @@ export default function DashboardPage() {
           ? `${detailParts.join(" · ")}.`
           : "Your dashboard now shows real-looking data.",
     });
-    setOnboardingRefreshKey((k) => k + 1);
     loadData();
   }
 
@@ -204,7 +199,6 @@ export default function DashboardPage() {
           // ignore
         }
       }
-      setOnboardingRefreshKey((k) => k + 1);
       await loadData();
     } catch {
       showToast({
@@ -296,7 +290,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Onboarding nudge — only renders if any of the 4 guest-info pieces are missing. */}
-      <GuestInfoOnboarding refreshKey={onboardingRefreshKey} />
+      <GuestInfoOnboarding completion={guestCompletion} loading={loading} />
 
       {/* KPI Grid */}
       <div className="grid gap-3 sm:gap-4 grid-cols-2 xl:grid-cols-4">

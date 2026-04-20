@@ -13,6 +13,7 @@ import {
 import { GuestNotificationsBell } from "@/components/guest/NotificationsBell";
 import { ActiveRequestsStrip } from "@/components/guest/ActiveRequestsStrip";
 import { guestCategoryIcon } from "@/lib/guest-category-icons";
+import { trackGuestScan } from "@/lib/gtag";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -75,6 +76,11 @@ export function GuestHome({
   guestFirstName,
 }: Props) {
   const router = useRouter();
+
+  useEffect(() => {
+    trackGuestScan(hotelSlug);
+  }, [hotelSlug]);
+
   const hour = new Date().getHours();
   const greet =
     hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";

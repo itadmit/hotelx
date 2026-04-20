@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { TrackedLink } from "@/components/TrackedLink";
 import {
   ArrowUpRight,
   BellRing,
@@ -58,20 +59,22 @@ export function Hero() {
               className="reveal mt-8 sm:mt-9 flex flex-col sm:flex-row gap-3 sm:justify-start justify-center lg:justify-start"
               style={{ animationDelay: "320ms" }}
             >
-              <Link
+              <TrackedLink
                 href="/signup"
+                trackLabel="hero_signup"
                 className="group inline-flex items-center justify-center gap-2 h-12 pl-6 pr-5 rounded-full bg-emerald-brand text-primary-foreground font-medium hover:bg-ink transition-colors"
               >
                 Start your free trial
                 <ArrowUpRight className="h-4 w-4 transition-transform group-hover:rotate-45" />
-              </Link>
-              <Link
+              </TrackedLink>
+              <TrackedLink
                 href="/demo"
+                trackLabel="hero_demo"
                 className="inline-flex items-center justify-center gap-2 h-12 px-6 rounded-full border border-[color:var(--border)] bg-card text-ink font-medium hover:bg-surface transition-colors"
               >
                 See live demo
                 <ArrowUpRight className="h-4 w-4" />
-              </Link>
+              </TrackedLink>
             </div>
 
             {/* Two micro-KPI chips — the marketing manager's eye candy */}

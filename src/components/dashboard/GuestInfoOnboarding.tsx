@@ -11,18 +11,12 @@ import {
   X,
   CheckCircle2,
 } from "lucide-react";
-
-type Status = {
-  wifi: boolean;
-  about: boolean;
-  amenities: boolean;
-  helpful: boolean;
-};
+import type { GuestInfoCompletionStatus } from "@/lib/guest-info-completion";
 
 const DISMISS_KEY = "hotelx:guest-info-onboarding-dismissed";
 
 const STEPS: Array<{
-  key: keyof Status;
+  key: keyof GuestInfoCompletionStatus;
   title: string;
   description: string;
   href: string;
@@ -64,71 +58,29 @@ const STEPS: Array<{
 ];
 
 /**
- * Onboarding nudge that appears on the dashboard overview when the hotel
- * hasn't filled in the guest-facing info yet. Once the staff dismisses it,
- * we remember the choice for the rest of the browser session so it doesn't
- * keep nagging on every navigation. It will reappear after a hard reload
- * (or new tab) until all four pieces are filled.
+ * Onboarding nudge driven by dashboard bundle data (no separate `/api/hotel/*` fetch).
  */
 export function GuestInfoOnboarding({
-  refreshKey = 0,
+  completion,
+  loading,
 }: {
-  /**
-   * Bump this number from the parent (e.g. after the demo import succeeds)
-   * to force the banner to re-fetch its completion status. Without this, the
-   * banner would stay visible until a hard refresh because it only checks
-   * once on mount.
-   */
-  refreshKey?: number;
-} = {}) {
-  const [status, setStatus] = useState<Status | null>(null);
+  completion: GuestInfoCompletionStatus | null;
+  loading: boolean;
+}) {
   const [dismissed, setDismissed] = useState(false);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Respect a previous dismissal for this session.
-    if (typeof window !== "undefined") {
-      try {
-        if (window.sessionStorage.getItem(DISMISS_KEY) === "1") {
-          setDismissed(true);
-        }
-      } catch {
-        // sessionStorage may be blocked — that's fine, we just always show.
+    try {
+      if (
+        typeof window !== "undefined" &&
+        window.sessionStorage.getItem(DISMISS_KEY) === "1"
+      ) {
+        setDismissed(true);
       }
+    } catch {
+      // sessionStorage may be blocked — that's fine, we just always show.
     }
-
-    let cancelled = false;
-    (async () => {
-      try {
-        const [infoRes, amenitiesRes] = await Promise.all([
-          fetch("/api/hotel/info", { cache: "no-store" }),
-          fetch("/api/hotel/amenities", { cache: "no-store" }),
-        ]);
-        const infoJson = await infoRes.json();
-        const amenitiesJson = await amenitiesRes.json();
-        if (cancelled) return;
-        const info = infoJson?.info ?? null;
-        const amenities = (amenitiesJson?.amenities ?? []) as unknown[];
-        setStatus({
-          wifi: Boolean(info?.wifiName || info?.wifiPassword),
-          about: Boolean(info?.about && String(info.about).trim().length > 0),
-          amenities: amenities.length > 0,
-          helpful: Boolean(
-            info?.helpfulInfo && String(info.helpfulInfo).trim().length > 0
-          ),
-        });
-      } catch {
-        // If the call fails we just hide — the dashboard shouldn't crash on
-        // a missing helper endpoint.
-        if (!cancelled) setStatus(null);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [refreshKey]);
+  }, []);
 
   function dismiss() {
     setDismissed(true);
@@ -139,9 +91,9 @@ export function GuestInfoOnboarding({
     }
   }
 
-  if (loading || dismissed || !status) return null;
+  if (loading || dismissed || !completion) return null;
 
-  const missing = STEPS.filter((step) => !status[step.key]);
+  const missing = STEPS.filter((step) => !completion[step.key]);
   if (missing.length === 0) return null;
 
   const completed = STEPS.length - missing.length;
@@ -178,7 +130,7 @@ export function GuestInfoOnboarding({
 
       <div className="relative mt-5 grid gap-2 sm:grid-cols-2">
         {STEPS.map((step) => {
-          const done = status[step.key];
+          const done = completion[step.key];
           return (
             <Link
               key={step.key}
@@ -200,7 +152,7 @@ export function GuestInfoOnboarding({
                   <step.Icon className="h-4 w-4" strokeWidth={2} />
                 )}
               </span>
-              <div className="flex-1 min-w-0">
+              <div className="min-w-0">
                 <p
                   className={`text-sm font-medium leading-tight ${
                     done ? "text-foreground/55 line-through" : "text-ink"

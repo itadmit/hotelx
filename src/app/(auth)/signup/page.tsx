@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
+import { trackSignup } from "@/lib/gtag";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -36,7 +37,7 @@ export default function SignupPage() {
         throw new Error(result.error || "Something went wrong");
       }
 
-      // Successful registration
+      trackSignup("email");
       router.push("/login?registered=true");
     } catch (err) {
       if (err instanceof Error) {

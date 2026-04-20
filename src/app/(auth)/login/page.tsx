@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
+import { trackLogin } from "@/lib/gtag";
 
 export default function LoginPage() {
   return (
@@ -47,7 +48,7 @@ function LoginForm() {
         return;
       }
 
-      // Successful login
+      trackLogin("email");
       router.push("/dashboard");
       router.refresh();
     } catch (err) {
