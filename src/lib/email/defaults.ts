@@ -45,4 +45,17 @@ export const DEFAULT_TEMPLATES: Record<EmailTemplateKind, EmailTemplate> = {
     ctaLabel: "Open dashboard",
     ctaUrl: "{{loginUrl}}",
   },
+  WELCOME: {
+    subject: "Welcome to HotelX, {{guestName}} — let's get {{hotelName}} live",
+    heading: "Welcome aboard, {{guestName}}.",
+    body:
+      "You've just created {{hotelName}} on HotelX — and you're three steps away from a fully digital guest experience.\n\n" +
+      "1. Add your rooms — import your room list so every QR code maps to the right guest.\n\n" +
+      "2. Create services & menus — room service, spa bookings, restaurant orders. Set prices, photos, and availability.\n\n" +
+      "3. Print QR codes — place them in each room. Guests scan and they're in.\n\n" +
+      "The whole setup takes about 30 minutes. If you'd prefer a guided walkthrough, we'd love to hop on a free onboarding call — just reply to this email and we'll find a time.\n\n" +
+      "We're here to help at every step.",
+    ctaLabel: "Open your dashboard",
+    ctaUrl: "{{dashboardUrl}}",
+  },
 };

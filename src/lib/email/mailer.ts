@@ -40,6 +40,14 @@ export async function resolveTemplate(
       return toEmailTemplate(override);
     }
   }
+
+  const global = await prisma.hotelEmailTemplate.findFirst({
+    where: { hotelId: null, kind, isActive: true },
+  });
+  if (global) {
+    return toEmailTemplate(global);
+  }
+
   return DEFAULT_TEMPLATES[kind];
 }
 

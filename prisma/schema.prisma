@@ -309,7 +309,7 @@ enum FeedbackStatus {
 
 model HotelEmailTemplate {
   id        String           @id @default(cuid())
-  hotelId   String
+  hotelId   String?
   kind      EmailTemplateKind
   subject   String
   heading   String
@@ -319,7 +319,7 @@ model HotelEmailTemplate {
   isActive  Boolean          @default(true)
   updatedAt DateTime         @updatedAt
   createdAt DateTime         @default(now())
-  hotel     Hotel            @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+  hotel     Hotel?           @relation(fields: [hotelId], references: [id], onDelete: Cascade)
 
   @@unique([hotelId, kind])
 }
@@ -329,6 +329,7 @@ enum EmailTemplateKind {
   FEEDBACK_APOLOGY
   PASSWORD_RESET
   TEAM_INVITE
+  WELCOME
 }
 
 model EmailLog {

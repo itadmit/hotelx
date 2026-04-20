@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limit";
+import { sendTemplatedEmail } from "@/lib/email/mailer";
 
 // Validation schema
 const registerSchema = z.object({
@@ -84,6 +85,21 @@ export async function POST(request: Request) {
 
       return { user, hotel };
     });
+
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://hotelx.app";
+
+    sendTemplatedEmail({
+      to: email,
+      hotelId: result.hotel.id,
+      template: "WELCOME",
+      variables: {
+        guestName: name,
+        hotelName,
+        email,
+        dashboardUrl: `${siteUrl}/dashboard`,
+      },
+      replyTo: "yogev@tadmit.co.il",
+    }).catch((err) => console.error("[register] welcome email failed:", err));
 
     return NextResponse.json(
       { 

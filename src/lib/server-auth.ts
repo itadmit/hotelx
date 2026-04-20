@@ -20,3 +20,28 @@ export async function requireSessionUser() {
 
   return session.user
 }
+
+const SUPER_ADMIN_EMAILS = (
+  process.env.SUPER_ADMIN_EMAILS ?? "yogev@itadmit.co.il"
+)
+  .split(",")
+  .map((e) => e.trim().toLowerCase())
+
+export async function requireSuperAdmin() {
+  const session = await auth()
+
+  if (!session?.user?.id || !session.user.email) {
+    throw new ApiAuthError("Unauthorized")
+  }
+
+  if (!SUPER_ADMIN_EMAILS.includes(session.user.email.toLowerCase())) {
+    throw new ApiAuthError("Forbidden")
+  }
+
+  return session.user
+}
+
+export function isSuperAdmin(email: string | null | undefined): boolean {
+  if (!email) return false
+  return SUPER_ADMIN_EMAILS.includes(email.toLowerCase())
+}
