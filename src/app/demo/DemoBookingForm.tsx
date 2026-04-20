@@ -2,17 +2,40 @@
 
 import { useState } from "react";
 import { CheckCircle2, Loader2, Send } from "lucide-react";
+import { trackCTAClick } from "@/lib/gtag";
 
 export function DemoBookingForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 900));
-    setIsLoading(false);
-    setSubmitted(true);
+    setError(null);
+
+    const formData = new FormData(event.currentTarget);
+    const data = Object.fromEntries(formData);
+
+    try {
+      const res = await fetch("/api/demo-request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      if (!res.ok) {
+        const json = await res.json();
+        throw new Error(json.error || "Something went wrong");
+      }
+
+      trackCTAClick("demo_request_submitted");
+      setSubmitted(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to submit");
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   if (submitted) {
@@ -87,6 +110,10 @@ export function DemoBookingForm() {
           </>
         )}
       </button>
+
+      {error && (
+        <p className="mt-3 text-sm text-clay text-center">{error}</p>
+      )}
 
       <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-foreground/45 text-center">
         We&apos;ll respond within 24 hours · No card required
