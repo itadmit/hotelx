@@ -17,6 +17,7 @@ model User {
   role             Role           @default(STAFF)
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
+  lastLoginAt      DateTime?
   hotelId          String?
   assignedRequests Request[]
   notifications    Notification[]
@@ -36,6 +37,7 @@ model Hotel {
   googleReviewUrl    String?
   bookingReviewUrl   String?
   supportEmail       String?
+  demoSeedAt      DateTime?
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
   categories      Category[]

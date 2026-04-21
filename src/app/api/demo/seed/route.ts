@@ -379,6 +379,12 @@ export async function POST() {
         }
         sendStep("samples", "done", { detail: `${createdRequests} sample requests` })
 
+        const demoSeedAt = new Date()
+        await prisma.hotel.update({
+          where: { id: hotelId },
+          data: { demoSeedAt },
+        })
+
         send("done", {
           message: "Demo data imported successfully",
           result: {

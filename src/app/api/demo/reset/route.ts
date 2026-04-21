@@ -19,6 +19,11 @@ export async function POST() {
     const removedAmenities = await prisma.hotelAmenity.deleteMany({ where: { hotelId } })
     await prisma.hotelInfo.deleteMany({ where: { hotelId } })
 
+    await prisma.hotel.update({
+      where: { id: hotelId },
+      data: { demoSeedAt: null },
+    })
+
     return NextResponse.json({
       message: "Hotel data reset completed",
       result: {

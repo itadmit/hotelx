@@ -103,6 +103,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.impersonatorEmail =
           (user as { impersonatorEmail?: string | null }).impersonatorEmail ??
           null
+
+        const impersonator = (user as { impersonatorEmail?: string | null })
+          .impersonatorEmail
+        if (!impersonator) {
+          void prisma.user
+            .update({
+              where: { id: user.id },
+              data: { lastLoginAt: new Date() },
+            })
+            .catch((e) => console.error("[auth] lastLoginAt update failed", e))
+        }
       }
       return token
     },

@@ -31,13 +31,36 @@ type UserRow = {
   email: string;
   role: string;
   createdAt: string;
+  lastLoginAt: string | null;
+  engagementLabel: string;
+  manualRoomsAfterDemo: number | null;
+  manualServicesAfterDemo: number | null;
   hotel: {
     id: string;
     name: string;
     slug: string;
-    _count: { rooms: number; categories: number; requests: number };
+    createdAt: string;
+    updatedAt: string;
+    demoSeedAt: string | null;
+    _count: {
+      rooms: number;
+      categories: number;
+      requests: number;
+      services: number;
+    };
   } | null;
 };
+
+function fmtShort(iso: string | null | undefined): string {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
 
 export default function SuperAdminPage() {
   const [stats, setStats] = useState<Stats | null>(null);
@@ -157,6 +180,18 @@ export default function SuperAdminPage() {
                   Activity
                 </th>
                 <th className="px-5 py-3 text-left font-mono text-[10px] uppercase tracking-widest text-foreground/50">
+                  Engagement
+                </th>
+                <th className="px-5 py-3 text-left font-mono text-[10px] uppercase tracking-widest text-foreground/50">
+                  Last login
+                </th>
+                <th className="px-5 py-3 text-left font-mono text-[10px] uppercase tracking-widest text-foreground/50">
+                  Demo seed
+                </th>
+                <th className="px-5 py-3 text-left font-mono text-[10px] uppercase tracking-widest text-foreground/50">
+                  After demo
+                </th>
+                <th className="px-5 py-3 text-left font-mono text-[10px] uppercase tracking-widest text-foreground/50">
                   Registered
                 </th>
                 <th className="px-5 py-3 text-right font-mono text-[10px] uppercase tracking-widest text-foreground/50">
@@ -200,13 +235,42 @@ export default function SuperAdminPage() {
                   </td>
                   <td className="px-5 py-3.5">
                     {u.hotel ? (
-                      <div className="flex items-center gap-3 text-xs text-foreground/55">
+                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-foreground/55">
                         <span>{u.hotel._count.rooms} rooms</span>
                         <span className="text-foreground/25">·</span>
-                        <span>{u.hotel._count.categories} categories</span>
+                        <span>{u.hotel._count.categories} cat.</span>
                         <span className="text-foreground/25">·</span>
-                        <span>{u.hotel._count.requests} requests</span>
+                        <span>{u.hotel._count.services} svc.</span>
+                        <span className="text-foreground/25">·</span>
+                        <span>{u.hotel._count.requests} req.</span>
                       </div>
+                    ) : (
+                      <span className="text-foreground/40">—</span>
+                    )}
+                  </td>
+                  <td className="px-5 py-3.5 max-w-[200px]">
+                    <span className="inline-flex px-2 py-1 rounded-lg bg-surface border border-[color:var(--border)] text-[11px] text-foreground/75 leading-snug">
+                      {u.engagementLabel}
+                    </span>
+                  </td>
+                  <td className="px-5 py-3.5 text-xs text-foreground/60 whitespace-nowrap">
+                    {u.lastLoginAt ? fmtShort(u.lastLoginAt) : (
+                      <span className="text-amber-brand font-medium">Never</span>
+                    )}
+                  </td>
+                  <td className="px-5 py-3.5 text-xs text-foreground/60 whitespace-nowrap">
+                    {u.hotel?.demoSeedAt ? fmtShort(u.hotel.demoSeedAt) : "—"}
+                  </td>
+                  <td className="px-5 py-3.5 text-xs text-foreground/60">
+                    {u.manualRoomsAfterDemo != null &&
+                    u.manualServicesAfterDemo != null &&
+                    (u.manualRoomsAfterDemo > 0 || u.manualServicesAfterDemo > 0) ? (
+                      <span>
+                        +{u.manualRoomsAfterDemo} rooms · +
+                        {u.manualServicesAfterDemo} services
+                      </span>
+                    ) : u.hotel?.demoSeedAt ? (
+                      <span className="text-foreground/40">None</span>
                     ) : (
                       <span className="text-foreground/40">—</span>
                     )}
@@ -265,7 +329,7 @@ export default function SuperAdminPage() {
               {users.length === 0 && (
                 <tr>
                   <td
-                    colSpan={5}
+                    colSpan={9}
                     className="px-5 py-12 text-center text-foreground/40"
                   >
                     Loading...
