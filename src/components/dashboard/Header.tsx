@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Search, Menu, Command, ExternalLink } from "lucide-react";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { ThemeToggle } from "@/components/dashboard/ThemeToggle";
@@ -104,6 +104,7 @@ export function Header({ onOpenMobile }: { onOpenMobile: () => void }) {
   const userName = data?.user?.name ?? "Hotel User";
   const role = (data?.user?.role ?? "Manager").toString();
   const hotelSlug = data?.user?.hotelSlug ?? null;
+  const impersonatorEmail = data?.user?.impersonatorEmail ?? null;
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const initials = userName
@@ -147,7 +148,33 @@ export function Header({ onOpenMobile }: { onOpenMobile: () => void }) {
   }
 
   return (
-    <header className="sticky top-0 z-40 h-16 w-full px-4 sm:px-6 lg:px-8 flex items-center gap-3 bg-background/85 backdrop-blur-md border-b border-[color:var(--border)]">
+    <div className="sticky top-0 z-40">
+      {impersonatorEmail ? (
+        <div className="flex flex-wrap items-center justify-between gap-2 px-4 sm:px-6 lg:px-8 py-2.5 border-b border-[color:var(--border)] bg-amber-soft text-sm text-foreground/80">
+          <p className="min-w-0">
+            <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-amber-brand">
+              Super admin view
+            </span>
+            <span className="mx-2 text-foreground/30">·</span>
+            Signed in as{" "}
+            <span className="font-medium text-ink">{data?.user?.email}</span>
+            <span className="text-foreground/50">
+              {" "}
+              (admin: {impersonatorEmail})
+            </span>
+          </p>
+          <button
+            type="button"
+            onClick={() =>
+              signOut({ callbackUrl: "/login?message=signed-out-view" })
+            }
+            className="shrink-0 inline-flex items-center justify-center h-8 px-3 rounded-full border border-[color:var(--border)] bg-card text-ink text-xs font-medium hover:bg-surface transition-colors"
+          >
+            Exit view
+          </button>
+        </div>
+      ) : null}
+      <header className="h-16 w-full px-4 sm:px-6 lg:px-8 flex items-center gap-3 bg-background/85 backdrop-blur-md border-b border-[color:var(--border)]">
       {/* Mobile menu trigger */}
       <button
         type="button"
@@ -259,5 +286,6 @@ export function Header({ onOpenMobile }: { onOpenMobile: () => void }) {
         </div>
       </div>
     </header>
+    </div>
   );
 }

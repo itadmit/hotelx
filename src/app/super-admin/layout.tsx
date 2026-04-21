@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/app/api/auth/[...nextauth]/route";
-import { isSuperAdmin } from "@/lib/server-auth";
+import { isSuperAdminSession } from "@/lib/server-auth";
 import Link from "next/link";
 import { LayoutDashboard, Mail, ArrowLeft } from "lucide-react";
 
@@ -11,7 +11,7 @@ export default async function SuperAdminLayout({
 }) {
   const session = await auth();
 
-  if (!session?.user?.email || !isSuperAdmin(session.user.email)) {
+  if (!session?.user?.email || !isSuperAdminSession(session.user)) {
     redirect("/");
   }
 

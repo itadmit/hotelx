@@ -9,6 +9,7 @@ declare module "next-auth" {
       role: string
       hotelId: string | null
       hotelSlug: string | null
+      impersonatorEmail: string | null
     }
   }
 
@@ -19,6 +20,7 @@ declare module "next-auth" {
     role: string
     hotelId: string | null
     hotelSlug: string | null
+    impersonatorEmail?: string | null
   }
 }
 
@@ -28,6 +30,7 @@ declare module "next-auth/jwt" {
     role: string
     hotelId: string | null
     hotelSlug: string | null
+    impersonatorEmail?: string | null
   }
 }
 

@@ -11,7 +11,10 @@ import {
   Hotel,
   CalendarDays,
   CheckCircle,
+  LogIn,
 } from "lucide-react";
+import { signIn } from "next-auth/react";
+import { IMPERSONATE_LOGIN_EMAIL } from "@/lib/impersonation-constants";
 
 type Stats = {
   users: number;
@@ -41,6 +44,7 @@ export default function SuperAdminPage() {
   const [users, setUsers] = useState<UserRow[]>([]);
   const [sending, setSending] = useState<string | null>(null);
   const [sentIds, setSentIds] = useState<Set<string>>(new Set());
+  const [viewingAs, setViewingAs] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     const [statsRes, usersRes] = await Promise.all([
@@ -68,6 +72,27 @@ export default function SuperAdminPage() {
       }
     } finally {
       setSending(null);
+    }
+  }
+
+  async function viewAsUser(userId: string) {
+    setViewingAs(userId);
+    try {
+      const res = await fetch("/api/super-admin/impersonate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId }),
+      });
+      if (!res.ok) return;
+      const data = (await res.json()) as { token?: string };
+      if (!data.token) return;
+      await signIn("credentials", {
+        email: IMPERSONATE_LOGIN_EMAIL,
+        password: data.token,
+        callbackUrl: "/dashboard",
+      });
+    } finally {
+      setViewingAs(null);
     }
   }
 
@@ -197,25 +222,43 @@ export default function SuperAdminPage() {
                     </div>
                   </td>
                   <td className="px-5 py-3.5 text-right">
-                    {sentIds.has(u.id) ? (
-                      <span className="inline-flex items-center gap-1 text-emerald-brand text-xs">
-                        <CheckCircle className="h-3.5 w-3.5" />
-                        Sent
-                      </span>
-                    ) : (
-                      <button
-                        onClick={() => sendWelcome(u.id)}
-                        disabled={sending === u.id}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-brand text-primary-foreground text-xs font-medium hover:bg-ink transition-colors disabled:opacity-50"
-                      >
-                        {sending === u.id ? (
-                          <Loader2 className="h-3 w-3 animate-spin" />
-                        ) : (
-                          <Send className="h-3 w-3" />
-                        )}
-                        Send Welcome
-                      </button>
-                    )}
+                    <div className="flex flex-col sm:flex-row items-end sm:items-center justify-end gap-2">
+                      {u.hotel ? (
+                        <button
+                          type="button"
+                          onClick={() => viewAsUser(u.id)}
+                          disabled={viewingAs === u.id}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[color:var(--border)] bg-card text-ink text-xs font-medium hover:bg-surface transition-colors disabled:opacity-50"
+                        >
+                          {viewingAs === u.id ? (
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                          ) : (
+                            <LogIn className="h-3 w-3" />
+                          )}
+                          Open as user
+                        </button>
+                      ) : null}
+                      {sentIds.has(u.id) ? (
+                        <span className="inline-flex items-center gap-1 text-emerald-brand text-xs">
+                          <CheckCircle className="h-3.5 w-3.5" />
+                          Welcome sent
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => sendWelcome(u.id)}
+                          disabled={sending === u.id}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-brand text-primary-foreground text-xs font-medium hover:bg-ink transition-colors disabled:opacity-50"
+                        >
+                          {sending === u.id ? (
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                          ) : (
+                            <Send className="h-3 w-3" />
+                          )}
+                          Send Welcome
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}

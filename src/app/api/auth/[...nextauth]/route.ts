@@ -3,6 +3,8 @@ import Credentials from "next-auth/providers/credentials"
 import bcrypt from "bcryptjs"
 import prisma from "@/lib/prisma"
 import { checkRateLimit, RATE_LIMITS } from "@/lib/rate-limit"
+import { IMPERSONATE_LOGIN_EMAIL } from "@/lib/impersonation-constants"
+import { verifyImpersonationToken } from "@/lib/impersonation-token"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   trustHost: true,
@@ -18,10 +20,35 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }
 
         try {
+          const emailRaw = String(credentials.email).toLowerCase()
+          const password = credentials.password as string
+
+          if (emailRaw === IMPERSONATE_LOGIN_EMAIL.toLowerCase()) {
+            const payload = verifyImpersonationToken(password)
+            if (!payload) return null
+
+            const user = await prisma.user.findUnique({
+              where: { id: payload.targetUserId },
+              include: { hotel: true },
+            })
+
+            if (!user?.hotelId) return null
+
+            return {
+              id: user.id,
+              email: user.email,
+              name: user.name,
+              role: user.role,
+              hotelId: user.hotelId,
+              hotelSlug: user.hotel?.slug ?? null,
+              impersonatorEmail: payload.adminEmail,
+            }
+          }
+
           const headers = (request as Request | undefined)?.headers
           const forwardedFor = headers?.get("x-forwarded-for")
           const ip = forwardedFor?.split(",")[0]?.trim() ?? "unknown"
-          const email = String(credentials.email).toLowerCase()
+          const email = emailRaw
           const rate = checkRateLimit(`login:${ip}:${email}`, RATE_LIMITS.login)
 
           if (!rate.allowed) {
@@ -42,7 +69,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           }
 
           const isPasswordValid = await bcrypt.compare(
-            credentials.password as string,
+            password,
             user.password
           )
 
@@ -56,7 +83,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             name: user.name,
             role: user.role,
             hotelId: user.hotelId,
-            hotelSlug: user.hotel?.slug ?? null
+            hotelSlug: user.hotel?.slug ?? null,
+            impersonatorEmail: null,
           }
         } catch (error) {
           console.error("Auth error:", error)
@@ -72,6 +100,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.role = user.role
         token.hotelId = user.hotelId ?? null
         token.hotelSlug = user.hotelSlug ?? null
+        token.impersonatorEmail =
+          (user as { impersonatorEmail?: string | null }).impersonatorEmail ??
+          null
       }
       return token
     },
@@ -81,6 +112,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.role = token.role as string
         session.user.hotelId = (token.hotelId as string | null) ?? null
         session.user.hotelSlug = (token.hotelSlug as string | null) ?? null
+        session.user.impersonatorEmail =
+          (token.impersonatorEmail as string | null) ?? null
       }
       return session
     }
