@@ -382,8 +382,9 @@ export default function ServicesPage() {
           <DialogHeader>
             <DialogTitle>Add category</DialogTitle>
             <DialogDescription>
-              Create a top-level category or a room-service subcategory. Icons appear
-              on the guest concierge home.
+              Top-level categories (no parent) appear as tiles on the guest home.
+              Food menus should live as subcategories under Room Service so they stay
+              inside that hub. Icons on the home grid use the parent category only.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
