@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server"
+import type { Prisma } from "@prisma/client"
 import prisma from "@/lib/prisma"
 import { ApiAuthError, requireSessionUser } from "@/lib/server-auth"
 import { z } from "zod"
+import { normalizeServiceImage, zServiceImage } from "@/lib/zod-service-image"
 
 const updateServiceSchema = z.object({
   name: z.string().min(2).optional(),
@@ -12,6 +14,7 @@ const updateServiceSchema = z.object({
   isActive: z.boolean().optional(),
   isFeatured: z.boolean().optional(),
   requirePayment: z.boolean().optional(),
+  image: zServiceImage,
 })
 
 export async function GET(
@@ -60,12 +63,18 @@ export async function PATCH(
       )
     }
 
-    const nextData = { ...parsed.data }
+    const { categoryId, image, ...scalarUpdates } = parsed.data
 
-    if (nextData.categoryId) {
+    const data: Prisma.ServiceUncheckedUpdateManyInput = { ...scalarUpdates }
+
+    if (image !== undefined) {
+      data.image = normalizeServiceImage(image) ?? null
+    }
+
+    if (categoryId) {
       const category = await prisma.category.findFirst({
         where: {
-          id: nextData.categoryId,
+          id: categoryId,
           hotelId: user.hotelId!,
         },
         select: {
@@ -85,12 +94,12 @@ export async function PATCH(
         )
       }
 
-      nextData.categoryId = category.id
+      data.categoryId = category.id
     }
 
     const result = await prisma.service.updateMany({
       where: { id: serviceId, hotelId: user.hotelId! },
-      data: nextData,
+      data,
     })
 
     if (result.count === 0) {

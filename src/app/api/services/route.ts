@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import prisma from "@/lib/prisma"
 import { ApiAuthError, requireSessionUser } from "@/lib/server-auth"
 import { z } from "zod"
+import { normalizeServiceImage, zServiceImage } from "@/lib/zod-service-image"
 
 const createServiceSchema = z.object({
   name: z.string().min(2),
@@ -12,6 +13,7 @@ const createServiceSchema = z.object({
   isActive: z.boolean().optional(),
   isFeatured: z.boolean().optional(),
   requirePayment: z.boolean().optional(),
+  image: zServiceImage,
 })
 
 export async function GET() {
@@ -70,12 +72,16 @@ export async function POST(request: Request) {
       )
     }
 
+    const { image, ...rest } = parsed.data
+    const imageNorm = image !== undefined ? normalizeServiceImage(image) : undefined
+
     const service = await prisma.service.create({
       data: {
-        ...parsed.data,
+        ...rest,
         categoryId: category.id,
         price: parsed.data.price ?? null,
         hotelId: user.hotelId!,
+        ...(imageNorm !== undefined ? { image: imageNorm ?? null } : {}),
       },
       include: { category: true },
     })

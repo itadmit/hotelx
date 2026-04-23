@@ -10,6 +10,7 @@ import { ArrowLeft, Save, Star } from "lucide-react";
 import Link from "next/link";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
 import { DashboardPageLoading } from "@/components/dashboard/DashboardPageLoading";
+import { ServiceImageField } from "@/components/dashboard/ServiceImageField";
 
 export default function ServiceEditorPage({
   params,
@@ -29,6 +30,7 @@ export default function ServiceEditorPage({
     isActive: true,
     isFeatured: false,
     requirePayment: false,
+    image: null as string | null,
   });
   const [paymentsEnabled, setPaymentsEnabled] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
@@ -78,6 +80,7 @@ export default function ServiceEditorPage({
             isActive: Boolean(service.isActive),
             isFeatured: Boolean(service.isFeatured),
             requirePayment: Boolean(service.requirePayment),
+            image: typeof service.image === "string" ? service.image : null,
           });
         }
       } finally {
@@ -94,6 +97,7 @@ export default function ServiceEditorPage({
       body: JSON.stringify({
         ...form,
         price: form.price ? Number(form.price) : null,
+        image: form.image,
       }),
     });
   }
@@ -118,6 +122,18 @@ export default function ServiceEditorPage({
       </div>
 
       <form className="grid gap-6 md:grid-cols-2">
+        <Card className="card-surface border-0 shadow-none md:col-span-2">
+          <CardHeader className="pb-2">
+            <CardTitle className="font-display text-lg">Photo</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ServiceImageField
+              value={form.image}
+              onChange={(image) => setForm((prev) => ({ ...prev, image }))}
+            />
+          </CardContent>
+        </Card>
+
         <Card className="card-surface border-0 shadow-none">
           <CardHeader className="pb-2">
             <CardTitle className="font-display text-lg">Basics</CardTitle>

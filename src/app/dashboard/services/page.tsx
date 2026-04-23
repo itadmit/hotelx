@@ -17,6 +17,7 @@ import {
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
 import { ServicesPageSkeleton } from "@/components/dashboard/ServicesPageSkeleton";
 import { CategoryIconPicker } from "@/components/dashboard/CategoryIconPicker";
+import { ServiceImageField } from "@/components/dashboard/ServiceImageField";
 import { resolveCategoryIcon } from "@/lib/category-icons";
 import { Search, Plus, MoreHorizontal, Filter, Clock, DollarSign, Star, Info, Palette } from "lucide-react";
 import { InfoTooltip } from "@/components/ui/info-tooltip";
@@ -56,6 +57,7 @@ export default function ServicesPage() {
     price: "",
     estimatedTime: "",
     description: "",
+    image: null as string | null,
   });
   const [newCategory, setNewCategory] = useState({
     name: "",
@@ -103,6 +105,7 @@ export default function ServicesPage() {
       body: JSON.stringify({
         ...newService,
         price: newService.price ? Number(newService.price) : null,
+        image: newService.image,
       }),
     });
     setNewService({
@@ -111,6 +114,7 @@ export default function ServicesPage() {
       price: "",
       estimatedTime: "",
       description: "",
+      image: null,
     });
     setIsAddServiceOpen(false);
     await loadData();
@@ -266,7 +270,17 @@ export default function ServicesPage() {
             Add category
           </Button>
           <Button
-            onClick={() => setIsAddServiceOpen(true)}
+            onClick={() => {
+              setNewService({
+                name: "",
+                categoryId: "",
+                price: "",
+                estimatedTime: "",
+                description: "",
+                image: null,
+              });
+              setIsAddServiceOpen(true);
+            }}
             className="gap-2 h-9 text-xs bg-primary hover:bg-primary/90 rounded-md"
           >
             <Plus className="h-3.5 w-3.5" />
@@ -343,6 +357,10 @@ export default function ServicesPage() {
                 }
               />
             </div>
+            <ServiceImageField
+              value={newService.image}
+              onChange={(image) => setNewService((prev) => ({ ...prev, image }))}
+            />
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsAddServiceOpen(false)}>
