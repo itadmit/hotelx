@@ -6,7 +6,7 @@ export default function GuestLayout({
   return (
     <div
       data-theme="maison"
-      className="relative min-h-screen text-ink antialiased bg-background sm:bg-wash overflow-hidden"
+      className="relative min-h-screen text-ink antialiased bg-background sm:bg-wash overflow-x-hidden"
     >
       {/* Desktop ambient background — large architectural grid like the /demo page.
           Hidden on mobile so the guest app stays full-bleed. */}

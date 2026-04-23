@@ -113,7 +113,7 @@ export default async function ServicePage({
   const showsPayment = service.requirePayment && paymentsEnabled;
 
   return (
-    <main className="mx-auto w-full max-w-[480px] min-h-screen sm:min-h-[calc(100vh-3rem)] sm:my-6 bg-background text-ink flex flex-col sm:rounded-[28px] sm:border sm:border-[color:var(--border)]/70 sm:shadow-[0_20px_60px_-30px_rgba(31,41,28,0.25)] sm:overflow-hidden">
+    <main className="mx-auto w-full max-w-[480px] min-h-screen sm:min-h-[calc(100vh-3rem)] sm:my-6 bg-background text-ink flex flex-col sm:rounded-[28px] sm:border sm:border-[color:var(--border)]/70 sm:shadow-[0_20px_60px_-30px_rgba(31,41,28,0.25)] sm:overflow-x-hidden">
       {/* Image hero */}
       <div className="relative h-72 sm:h-80 overflow-hidden bg-surface">
         {/* eslint-disable-next-line @next/next/no-img-element */}

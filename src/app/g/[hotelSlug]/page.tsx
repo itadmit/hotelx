@@ -27,7 +27,7 @@ export default async function HotelLandingPage({
   const initials = hotel.name.slice(0, 1).toUpperCase();
 
   return (
-    <main className="mx-auto w-full max-w-[480px] min-h-screen sm:min-h-[calc(100vh-3rem)] sm:my-6 bg-background text-ink flex flex-col px-5 pt-10 pb-12 sm:pb-10 sm:rounded-[28px] sm:border sm:border-[color:var(--border)]/70 sm:shadow-[0_20px_60px_-30px_rgba(31,41,28,0.25)] sm:overflow-hidden">
+    <main className="mx-auto w-full max-w-[480px] min-h-screen sm:min-h-[calc(100vh-3rem)] sm:my-6 bg-background text-ink flex flex-col px-5 pt-10 pb-12 sm:pb-10 sm:rounded-[28px] sm:border sm:border-[color:var(--border)]/70 sm:shadow-[0_20px_60px_-30px_rgba(31,41,28,0.25)] sm:overflow-x-hidden">
       {/* Brand block */}
       <div className="flex items-center gap-3">
         <span className="relative h-12 w-12 rounded-xl bg-emerald-brand flex items-center justify-center text-primary-foreground shrink-0">

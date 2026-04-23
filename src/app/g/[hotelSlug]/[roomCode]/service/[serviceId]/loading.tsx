@@ -1,6 +1,6 @@
 export default function GuestServiceLoading() {
   return (
-    <main className="mx-auto w-full max-w-[480px] min-h-screen sm:min-h-[calc(100vh-3rem)] sm:my-6 bg-background text-ink flex flex-col sm:rounded-[28px] sm:border sm:border-[color:var(--border)]/70 sm:shadow-[0_20px_60px_-30px_rgba(31,41,28,0.25)] sm:overflow-hidden animate-pulse">
+    <main className="mx-auto w-full max-w-[480px] min-h-screen sm:min-h-[calc(100vh-3rem)] sm:my-6 bg-background text-ink flex flex-col sm:rounded-[28px] sm:border sm:border-[color:var(--border)]/70 sm:shadow-[0_20px_60px_-30px_rgba(31,41,28,0.25)] sm:overflow-x-hidden animate-pulse">
       <section className="relative h-72 bg-surface">
         <div className="absolute top-4 left-4 h-10 w-10 rounded-full bg-card" />
         <div className="absolute top-4 right-4 h-7 w-24 rounded-full bg-card" />

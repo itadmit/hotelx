@@ -152,7 +152,7 @@ export function GuestHome({
   }
 
   return (
-    <main className="mx-auto w-full max-w-[480px] min-h-screen sm:min-h-[calc(100vh-3rem)] sm:my-6 bg-background text-ink flex flex-col pb-12 sm:pb-10 sm:rounded-[28px] sm:border sm:border-[color:var(--border)]/70 sm:shadow-[0_20px_60px_-30px_rgba(31,41,28,0.25)] sm:overflow-hidden">
+    <main className="mx-auto w-full max-w-[480px] min-h-screen sm:min-h-[calc(100vh-3rem)] sm:my-6 bg-background text-ink flex flex-col pb-12 sm:pb-10 sm:rounded-[28px] sm:border sm:border-[color:var(--border)]/70 sm:shadow-[0_20px_60px_-30px_rgba(31,41,28,0.25)] sm:overflow-x-hidden">
       {/* Sticky brand header */}
       <header className="sticky top-0 z-30 px-5 pt-6 pb-3 bg-background/85 backdrop-blur-md border-b border-[color:var(--border)]/60 flex items-center justify-between">
         <div className="flex items-center gap-2.5 min-w-0">
@@ -251,12 +251,16 @@ export function GuestHome({
       {/* Categories — root departments (grid).
           The first tile is the built-in "Hotel info" hub (Wi-Fi, About, etc.) */}
       <section className="px-5 mt-7">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2">
           <p className="eyebrow">Concierge</p>
-          <span className="font-mono text-[10px] text-foreground/40">
-            {categories.length + 1} categories
+          <span className="font-mono text-[10px] text-foreground/40 text-right leading-snug">
+            {categories.length + 1} on home
           </span>
         </div>
+        <p className="mt-1.5 text-[11px] text-foreground/50 leading-snug">
+          Every top-level department from your hotel appears here. Scroll to see
+          all tiles; departments with subcategories open them inside.
+        </p>
         <div className="mt-3 grid grid-cols-2 gap-2.5">
           <Link
             href={`/g/${hotelSlug}/${roomCode}/info`}

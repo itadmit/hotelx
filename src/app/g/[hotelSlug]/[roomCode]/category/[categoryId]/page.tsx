@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { resolveCategoryIcon } from "@/lib/category-icons";
 import { GuestCategorySnapStrip } from "@/components/guest/GuestCategorySnapStrip";
 import { roomServiceSubcategoryCopy } from "@/lib/room-service-category-copy";
+import { isRoomServiceHubSlug } from "@/lib/room-service-hub";
 
 function formatPrice(price: unknown): string {
   if (price === null || price === undefined) return "—";
@@ -140,8 +141,8 @@ export default async function CategoryPage({
 
   const leafServices = category.services;
   const hasChildren = category.children.length > 0;
-  /** Horizontal subcategory strip + one menu list — only for room service hub */
-  const isRoomServiceHub = hasChildren && category.slug === "room-service";
+  /** Horizontal subcategory strip + one menu list — in-room dining hubs (not only `room-service`). */
+  const isRoomServiceHub = hasChildren && isRoomServiceHubSlug(category.slug);
 
   let roomMenuServices: ServiceRow[] = [];
   if (isRoomServiceHub) {
@@ -176,9 +177,35 @@ export default async function CategoryPage({
   const servicesToRender = isRoomServiceHub ? roomMenuServices : leafServices;
   const showServices = !hasChildren || isRoomServiceHub;
 
+  const roomServiceSections =
+    isRoomServiceHub && roomMenuServices.length > 0
+      ? (() => {
+          const childIds = new Set(category.children.map((c) => c.id));
+          const ordered = category.children.map((child) => ({
+            child,
+            services: roomMenuServices
+              .filter((s) => s.categoryId === child.id)
+              .sort((a, b) => a.name.localeCompare(b.name)),
+          }));
+          const orphans = roomMenuServices.filter((s) => !childIds.has(s.categoryId));
+          if (orphans.length > 0) {
+            ordered.push({
+              child: {
+                id: "__other__",
+                name: "Other",
+                icon: null,
+                slug: "uncategorised",
+              },
+              services: orphans.sort((a, b) => a.name.localeCompare(b.name)),
+            });
+          }
+          return ordered.filter((g) => g.services.length > 0);
+        })()
+      : [];
+
   const Icon = resolveCategoryIcon(category.icon);
   return (
-    <main className="mx-auto w-full max-w-[480px] min-h-screen sm:min-h-[calc(100vh-3rem)] sm:my-6 bg-background text-ink flex flex-col pb-12 sm:pb-10 sm:rounded-[28px] sm:border sm:border-[color:var(--border)]/70 sm:shadow-[0_20px_60px_-30px_rgba(31,41,28,0.25)] sm:overflow-hidden">
+    <main className="mx-auto w-full max-w-[480px] min-h-screen sm:min-h-[calc(100vh-3rem)] sm:my-6 bg-background text-ink flex flex-col pb-12 sm:pb-10 sm:rounded-[28px] sm:border sm:border-[color:var(--border)]/70 sm:shadow-[0_20px_60px_-30px_rgba(31,41,28,0.25)] sm:overflow-x-hidden">
       <header className="sticky top-0 z-30 px-4 py-3 bg-background/85 backdrop-blur-md border-b border-[color:var(--border)]/60 flex items-center gap-2">
         <Link
           href={`/g/${hotelSlug}/${roomCode}`}
@@ -267,31 +294,61 @@ export default async function CategoryPage({
       ) : null}
 
       {showServices ? (
-        <section className="px-5 mt-6 space-y-3">
+        <>
           {servicesToRender.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-[color:var(--border)] p-6 text-center">
-              <p className="text-sm text-foreground/60">
-                No services in this category yet.
-              </p>
-              <Link
-                href={`/g/${hotelSlug}/${roomCode}`}
-                className="mt-3 inline-flex items-center gap-1.5 text-sm text-emerald-brand font-medium"
-              >
-                Back to home
-                <ChevronRight className="h-3.5 w-3.5" />
-              </Link>
-            </div>
-          ) : null}
-
-          {servicesToRender.map((service) => (
-            <ServiceCard
-              key={service.id}
-              service={service}
-              hotelSlug={hotelSlug}
-              roomCode={roomCode}
-            />
-          ))}
-        </section>
+            <section className="px-5 mt-6">
+              <div className="rounded-xl border border-dashed border-[color:var(--border)] p-6 text-center">
+                <p className="text-sm text-foreground/60">
+                  No services in this category yet.
+                </p>
+                <Link
+                  href={`/g/${hotelSlug}/${roomCode}`}
+                  className="mt-3 inline-flex items-center gap-1.5 text-sm text-emerald-brand font-medium"
+                >
+                  Back to home
+                  <ChevronRight className="h-3.5 w-3.5" />
+                </Link>
+              </div>
+            </section>
+          ) : isRoomServiceHub && roomServiceSections.length > 0 ? (
+            roomServiceSections.map((group) => (
+              <section key={group.child.id} className="px-5 mt-6 space-y-3">
+                <div className="flex items-center gap-3">
+                  <p className="eyebrow shrink-0">{group.child.name}</p>
+                  <span
+                    className="h-px flex-1 min-w-0 bg-[color:var(--border)] opacity-70"
+                    aria-hidden
+                  />
+                  <span className="font-mono text-[10px] text-foreground/40 shrink-0">
+                    {group.services.length}{" "}
+                    {group.services.length === 1 ? "item" : "items"}
+                  </span>
+                </div>
+                <div className="space-y-3">
+                  {group.services.map((service) => (
+                    <ServiceCard
+                      key={service.id}
+                      service={service}
+                      hotelSlug={hotelSlug}
+                      roomCode={roomCode}
+                    />
+                  ))}
+                </div>
+              </section>
+            ))
+          ) : (
+            <section className="px-5 mt-6 space-y-3">
+              {servicesToRender.map((service) => (
+                <ServiceCard
+                  key={service.id}
+                  service={service}
+                  hotelSlug={hotelSlug}
+                  roomCode={roomCode}
+                />
+              ))}
+            </section>
+          )}
+        </>
       ) : null}
 
       <div className="mt-auto pt-10" />
