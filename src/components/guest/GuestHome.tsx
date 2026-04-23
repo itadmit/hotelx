@@ -107,6 +107,31 @@ export function GuestHome({
     }
   }, [eligibleFeatured.length]);
 
+  const [homeCategories, setHomeCategories] = useState(categories);
+  useEffect(() => {
+    setHomeCategories(categories);
+  }, [categories]);
+
+  useEffect(() => {
+    const ac = new AbortController();
+    const q = new URLSearchParams({
+      hotelSlug,
+      roomCode,
+    });
+    fetch(`/api/public/guest-categories?${q.toString()}`, {
+      cache: "no-store",
+      signal: ac.signal,
+    })
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error("bad status"))))
+      .then((data: { categories?: Category[] }) => {
+        if (Array.isArray(data.categories)) {
+          setHomeCategories(data.categories);
+        }
+      })
+      .catch(() => {});
+    return () => ac.abort();
+  }, [hotelSlug, roomCode]);
+
   const featuredService =
     eligibleFeatured[featuredIndex] ?? eligibleFeatured[0] ?? services[0];
   // Don't repeat the featured service in the "Popular now" list below.
@@ -254,12 +279,12 @@ export function GuestHome({
         <div className="flex items-center justify-between gap-2">
           <p className="eyebrow">Concierge</p>
           <span className="font-mono text-[10px] text-foreground/40 text-right leading-snug">
-            {categories.length + 1} on home
+            1 + {homeCategories.length} tiles
           </span>
         </div>
         <p className="mt-1.5 text-[11px] text-foreground/50 leading-snug">
-          Every top-level department from your hotel appears here. Scroll to see
-          all tiles; departments with subcategories open them inside.
+          Hotel info plus {homeCategories.length} top-level departments. Scroll to
+          see every tile; sub-menus open inside a department.
         </p>
         <div className="mt-3 grid grid-cols-2 gap-2.5">
           <Link
@@ -281,7 +306,7 @@ export function GuestHome({
             </p>
           </Link>
 
-          {categories.map((category, index) => {
+          {homeCategories.map((category, index) => {
             const Icon = resolveCategoryIcon(category.icon);
             const accent = categoryAccents[index % categoryAccents.length];
             return (

@@ -1,7 +1,11 @@
 import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
+import { connection } from "next/server";
 import { GuestHome } from "@/components/guest/GuestHome";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 function guestCookieName(hotelSlug: string) {
   return `hotelx_guest_${hotelSlug.replace(/[^a-z0-9-]/gi, "_")}`;
@@ -27,24 +31,15 @@ export default async function GuestHomePage({
   const sp = (await searchParams) ?? {};
   const isDemo = sp.demo === "1" || sp.demo === "true";
 
-  // One round-trip: fetch the hotel + its top-level categories, the active
-  // services (sorted so the priciest paid one wins as the legacy "featured"),
-  // and the requested room — all in a single query.
+  await connection();
+
+  // Hotel + services + room in one query; root categories loaded separately so
+  // nested relation limits / stale bundling never truncate the home grid.
   const hotel = await prisma.hotel.findUnique({
     where: { slug: hotelSlug },
     select: {
       id: true,
       name: true,
-      categories: {
-        where: { parentId: null },
-        select: {
-          id: true,
-          name: true,
-          icon: true,
-          slug: true,
-        },
-        orderBy: [{ order: "asc" }, { name: "asc" }],
-      },
       services: {
         select: {
           id: true,
@@ -69,6 +64,17 @@ export default async function GuestHomePage({
   }
 
   const room = hotel.rooms[0];
+
+  const rootCategories = await prisma.category.findMany({
+    where: { hotelId: hotel.id, parentId: null },
+    orderBy: [{ order: "asc" }, { name: "asc" }],
+    select: {
+      id: true,
+      name: true,
+      icon: true,
+      slug: true,
+    },
+  });
 
   // Pull out the explicit "featured" upsells the hotel starred. If none are
   // starred we gracefully fall back to the legacy heuristic (priciest paid
@@ -118,7 +124,7 @@ export default async function GuestHomePage({
       roomCode={roomCode}
       roomNumber={room.number}
       guestFirstName={guestFirstName}
-      categories={hotel.categories.map((c) => ({
+      categories={rootCategories.map((c) => ({
         id: c.id,
         name: c.name,
         icon: c.icon,
