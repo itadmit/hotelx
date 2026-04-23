@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server"
 import { z } from "zod"
 import prisma from "@/lib/prisma"
-import { loadGuestHomeCategoryTiles } from "@/lib/guest-home-root-categories"
 
 const querySchema = z.object({
   hotelSlug: z.string().min(1),
@@ -37,7 +36,16 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Not found" }, { status: 404 })
     }
 
-    const categories = await loadGuestHomeCategoryTiles(room.hotelId)
+    const categories = await prisma.category.findMany({
+      where: { hotelId: room.hotelId, parentId: null },
+      orderBy: [{ order: "asc" }, { name: "asc" }],
+      select: {
+        id: true,
+        name: true,
+        icon: true,
+        slug: true,
+      },
+    })
 
     return NextResponse.json(
       { categories },

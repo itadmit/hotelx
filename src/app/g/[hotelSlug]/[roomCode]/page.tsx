@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
 import { connection } from "next/server";
 import { GuestHome } from "@/components/guest/GuestHome";
-import { loadGuestHomeCategoryTiles } from "@/lib/guest-home-root-categories";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -66,7 +65,16 @@ export default async function GuestHomePage({
 
   const room = hotel.rooms[0];
 
-  const rootCategories = await loadGuestHomeCategoryTiles(hotel.id);
+  const rootCategories = await prisma.category.findMany({
+    where: { hotelId: hotel.id, parentId: null },
+    orderBy: [{ order: "asc" }, { name: "asc" }],
+    select: {
+      id: true,
+      name: true,
+      icon: true,
+      slug: true,
+    },
+  });
 
   // Pull out the explicit "featured" upsells the hotel starred. If none are
   // starred we gracefully fall back to the legacy heuristic (priciest paid
