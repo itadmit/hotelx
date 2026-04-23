@@ -140,7 +140,9 @@ export function isValidCategoryIconKey(key: string): key is CategoryIconKey {
 /** Resolve Lucide icon from DB `Category.icon` string (PascalCase). */
 export function resolveCategoryIcon(key: string | null | undefined): LucideIcon {
   if (key && ICON_MAP[key]) return ICON_MAP[key];
-  return Info;
+  // Never default to `Info` — null icons looked like the real "Info" department
+  // on the guest home grid (e.g. Spa with no icon set).
+  return ConciergeBell;
 }
 
 /** @deprecated use resolveCategoryIcon */
