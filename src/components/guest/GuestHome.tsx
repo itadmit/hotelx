@@ -276,16 +276,12 @@ export function GuestHome({
       {/* Categories — root departments (grid).
           The first tile is the built-in "Hotel info" hub (Wi-Fi, About, etc.) */}
       <section className="px-5 mt-7">
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center justify-between">
           <p className="eyebrow">Concierge</p>
-          <span className="font-mono text-[10px] text-foreground/40 text-right leading-snug">
-            1 + {homeCategories.length} tiles
+          <span className="font-mono text-[10px] text-foreground/40">
+            {homeCategories.length + 1} categories
           </span>
         </div>
-        <p className="mt-1.5 text-[11px] text-foreground/50 leading-snug">
-          Hotel info plus {homeCategories.length} top-level departments. Scroll to
-          see every tile; sub-menus open inside a department.
-        </p>
         <div className="mt-3 grid grid-cols-2 gap-2.5">
           <Link
             href={`/g/${hotelSlug}/${roomCode}/info`}
