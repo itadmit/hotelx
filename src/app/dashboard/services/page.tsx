@@ -18,8 +18,20 @@ import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader"
 import { ServicesPageSkeleton } from "@/components/dashboard/ServicesPageSkeleton";
 import { CategoryIconPicker } from "@/components/dashboard/CategoryIconPicker";
 import { ServiceImageField } from "@/components/dashboard/ServiceImageField";
+import { ServiceEditModal } from "@/components/dashboard/ServiceEditModal";
 import { resolveCategoryIcon } from "@/lib/category-icons";
-import { Search, Plus, MoreHorizontal, Filter, Clock, DollarSign, Star, Info, Palette } from "lucide-react";
+import {
+  Search,
+  Plus,
+  MoreHorizontal,
+  Filter,
+  Clock,
+  DollarSign,
+  Star,
+  Info,
+  Palette,
+  Pencil,
+} from "lucide-react";
 import { InfoTooltip } from "@/components/ui/info-tooltip";
 import Link from "next/link";
 
@@ -71,6 +83,7 @@ export default function ServicesPage() {
     "new" | string | null
   >(null);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [editingServiceId, setEditingServiceId] = useState<string | null>(null);
 
   async function loadData(options?: { initial?: boolean }) {
     const isInitial = options?.initial ?? false;
@@ -461,6 +474,16 @@ export default function ServicesPage() {
         </DialogContent>
       </Dialog>
 
+      <ServiceEditModal
+        open={editingServiceId != null}
+        onOpenChange={(open) => {
+          if (!open) setEditingServiceId(null);
+        }}
+        serviceId={editingServiceId}
+        categories={categories}
+        onSaved={() => loadData()}
+      />
+
       <CategoryIconPicker
         open={categoryIconPickerOpen}
         onOpenChange={(open) => {
@@ -649,13 +672,19 @@ export default function ServicesPage() {
                       />
                     </button>
                   </InfoTooltip>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-foreground/40 opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
+                  <InfoTooltip content="Edit name, photo, category, pricing, and status">
+                    <button
+                      type="button"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        setEditingServiceId(service.id);
+                      }}
+                      aria-label={`Edit ${service.name}`}
+                      className="h-8 w-8 rounded-md flex items-center justify-center text-foreground/45 hover:text-ink hover:bg-surface border border-transparent hover:border-[color:var(--border)] transition-colors"
+                    >
+                      <Pencil className="h-4 w-4" strokeWidth={2} />
+                    </button>
+                  </InfoTooltip>
                 </div>
 
                 <div className="flex items-start gap-3 mb-4">
