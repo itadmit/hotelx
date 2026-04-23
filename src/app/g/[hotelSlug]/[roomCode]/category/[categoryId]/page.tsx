@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ChevronLeft, Clock, ChevronRight } from "lucide-react";
 import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
-import { guestCategoryIcon } from "@/lib/guest-category-icons";
+import { resolveCategoryIcon } from "@/lib/category-icons";
 import { GuestCategorySnapStrip } from "@/components/guest/GuestCategorySnapStrip";
 import { roomServiceSubcategoryCopy } from "@/lib/room-service-category-copy";
 
@@ -176,7 +176,7 @@ export default async function CategoryPage({
   const servicesToRender = isRoomServiceHub ? roomMenuServices : leafServices;
   const showServices = !hasChildren || isRoomServiceHub;
 
-  const Icon = guestCategoryIcon(category.icon);
+  const Icon = resolveCategoryIcon(category.icon);
   return (
     <main className="mx-auto w-full max-w-[480px] min-h-screen sm:min-h-[calc(100vh-3rem)] sm:my-6 bg-background text-ink flex flex-col pb-12 sm:pb-10 sm:rounded-[28px] sm:border sm:border-[color:var(--border)]/70 sm:shadow-[0_20px_60px_-30px_rgba(31,41,28,0.25)] sm:overflow-hidden">
       <header className="sticky top-0 z-30 px-4 py-3 bg-background/85 backdrop-blur-md border-b border-[color:var(--border)]/60 flex items-center gap-2">

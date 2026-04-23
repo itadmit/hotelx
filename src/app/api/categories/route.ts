@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import prisma from "@/lib/prisma"
 import { ApiAuthError, requireSessionUser } from "@/lib/server-auth"
+import { isValidCategoryIconKey } from "@/lib/category-icons"
 import { z } from "zod"
 
 const createCategorySchema = z.object({
@@ -42,7 +43,10 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const user = await requireSessionUser()
-    const body = await request.json()
+    const body = await request.json() as Record<string, unknown>
+    if (body.parentId === "") {
+      body.parentId = null
+    }
     const parsed = createCategorySchema.safeParse(body)
 
     if (!parsed.success) {
@@ -60,6 +64,11 @@ export async function POST(request: Request) {
 
     if (!normalizedSlug) {
       return NextResponse.json({ error: "Invalid slug" }, { status: 400 })
+    }
+
+    const iconCandidate = (parsed.data.icon ?? "Info").trim() || "Info"
+    if (!isValidCategoryIconKey(iconCandidate)) {
+      return NextResponse.json({ error: "Invalid icon key" }, { status: 400 })
     }
 
     let parentId: string | null = parsed.data.parentId ?? null
@@ -84,7 +93,7 @@ export async function POST(request: Request) {
       data: {
         name: parsed.data.name.trim(),
         slug: normalizedSlug,
-        icon: parsed.data.icon,
+        icon: iconCandidate,
         order: parsed.data.order ?? 0,
         parentId,
         hotelId: user.hotelId!,

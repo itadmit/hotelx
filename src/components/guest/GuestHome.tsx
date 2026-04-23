@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { GuestNotificationsBell } from "@/components/guest/NotificationsBell";
 import { ActiveRequestsStrip } from "@/components/guest/ActiveRequestsStrip";
-import { guestCategoryIcon } from "@/lib/guest-category-icons";
+import { resolveCategoryIcon } from "@/lib/category-icons";
 import { trackGuestScan } from "@/lib/gtag";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -278,7 +278,7 @@ export function GuestHome({
           </Link>
 
           {categories.map((category, index) => {
-            const Icon = guestCategoryIcon(category.icon);
+            const Icon = resolveCategoryIcon(category.icon);
             const accent = categoryAccents[index % categoryAccents.length];
             return (
               <Link

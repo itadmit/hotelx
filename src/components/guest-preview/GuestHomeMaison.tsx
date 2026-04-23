@@ -10,7 +10,7 @@ import {
   User,
   Wifi,
 } from "lucide-react";
-import { guestCategoryIcon } from "@/lib/guest-category-icons";
+import { resolveCategoryIcon } from "@/lib/category-icons";
 
 /** Rotating accent surfaces — same palette as Hero mockup categories */
 const categoryAccents = [
@@ -168,7 +168,7 @@ export function GuestHomeMaison({
 
         <div className="mt-3 grid grid-cols-2 gap-2.5">
           {categories.map((category, index) => {
-            const Icon = guestCategoryIcon(category.icon);
+            const Icon = resolveCategoryIcon(category.icon);
             const accent = categoryAccents[index % categoryAccents.length];
             return (
               <Link

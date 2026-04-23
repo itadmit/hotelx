@@ -16,7 +16,9 @@ import {
 } from "@/components/ui/dialog";
 import { DashboardPageHeader } from "@/components/dashboard/DashboardPageHeader";
 import { ServicesPageSkeleton } from "@/components/dashboard/ServicesPageSkeleton";
-import { Search, Plus, MoreHorizontal, Filter, Clock, DollarSign, Star, Info } from "lucide-react";
+import { CategoryIconPicker } from "@/components/dashboard/CategoryIconPicker";
+import { resolveCategoryIcon } from "@/lib/category-icons";
+import { Search, Plus, MoreHorizontal, Filter, Clock, DollarSign, Star, Info, Palette } from "lucide-react";
 import { InfoTooltip } from "@/components/ui/info-tooltip";
 import Link from "next/link";
 
@@ -38,7 +40,13 @@ export default function ServicesPage() {
     }>
   >([]);
   const [categories, setCategories] = useState<
-    Array<{ id: string; name: string; slug: string; parentId: string | null }>
+    Array<{
+      id: string;
+      name: string;
+      slug: string;
+      parentId: string | null;
+      icon: string | null;
+    }>
   >([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [search, setSearch] = useState("");
@@ -53,7 +61,13 @@ export default function ServicesPage() {
     name: "",
     slug: "",
     parentId: "",
+    icon: "Utensils",
   });
+  const [categoryFormError, setCategoryFormError] = useState<string | null>(null);
+  const [categoryIconPickerOpen, setCategoryIconPickerOpen] = useState(false);
+  const [categoryIconPickerTarget, setCategoryIconPickerTarget] = useState<
+    "new" | string | null
+  >(null);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
   async function loadData(options?: { initial?: boolean }) {
@@ -130,18 +144,37 @@ export default function ServicesPage() {
       .replace(/^-+|-+$/g, "");
     if (!slug) return;
 
-    await fetch("/api/categories", {
+    setCategoryFormError(null);
+    const res = await fetch("/api/categories", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         name,
         slug,
-        parentId: newCategory.parentId || null,
+        icon: newCategory.icon,
+        parentId: newCategory.parentId ? newCategory.parentId : null,
       }),
     });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      setCategoryFormError(
+        typeof data.error === "string" ? data.error : "Could not create category"
+      );
+      return;
+    }
 
-    setNewCategory({ name: "", slug: "", parentId: "" });
+    setNewCategory({ name: "", slug: "", parentId: "", icon: "Utensils" });
     setIsAddCategoryOpen(false);
+    await loadData();
+  }
+
+  async function patchCategoryIcon(categoryId: string, icon: string) {
+    const res = await fetch(`/api/categories/${categoryId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ icon }),
+    });
+    if (!res.ok) return;
     await loadData();
   }
 
@@ -216,7 +249,16 @@ export default function ServicesPage() {
       >
         <div className="flex items-center gap-2">
           <Button
-            onClick={() => setIsAddCategoryOpen(true)}
+            onClick={() => {
+              setNewCategory({
+                name: "",
+                slug: "",
+                parentId: "",
+                icon: "Utensils",
+              });
+              setCategoryFormError(null);
+              setIsAddCategoryOpen(true);
+            }}
             variant="outline"
             className="gap-2 h-9 text-xs rounded-md"
           >
@@ -311,15 +353,49 @@ export default function ServicesPage() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={isAddCategoryOpen} onOpenChange={setIsAddCategoryOpen}>
+      <Dialog
+        open={isAddCategoryOpen}
+        onOpenChange={(open) => {
+          setIsAddCategoryOpen(open);
+          if (!open) setCategoryFormError(null);
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add category</DialogTitle>
             <DialogDescription>
-              Create a top-level category or a room-service subcategory.
+              Create a top-level category or a room-service subcategory. Icons appear
+              on the guest concierge home.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
+            {categoryFormError ? (
+              <p className="text-sm text-clay bg-amber-soft/40 border border-[color:var(--border)] rounded-lg px-3 py-2">
+                {categoryFormError}
+              </p>
+            ) : null}
+            <div className="grid gap-2">
+              <Label>Icon</Label>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCategoryIconPickerTarget("new");
+                    setCategoryIconPickerOpen(true);
+                  }}
+                  className="inline-flex items-center gap-2 h-10 px-3 rounded-xl border border-[color:var(--border)] bg-surface hover:bg-background text-ink text-sm transition-colors"
+                >
+                  {(() => {
+                    const Icon = resolveCategoryIcon(newCategory.icon);
+                    return <Icon className="h-4 w-4 shrink-0" strokeWidth={2} />;
+                  })()}
+                  <span className="font-mono text-xs text-foreground/60">
+                    {newCategory.icon}
+                  </span>
+                  <Palette className="h-3.5 w-3.5 text-foreground/40 ml-1" />
+                </button>
+              </div>
+            </div>
             <div className="grid gap-2">
               <Label>Name</Label>
               <Input
@@ -366,6 +442,29 @@ export default function ServicesPage() {
         </DialogContent>
       </Dialog>
 
+      <CategoryIconPicker
+        open={categoryIconPickerOpen}
+        onOpenChange={(open) => {
+          setCategoryIconPickerOpen(open);
+          if (!open) setCategoryIconPickerTarget(null);
+        }}
+        value={
+          categoryIconPickerTarget === "new"
+            ? newCategory.icon
+            : categoryIconPickerTarget
+              ? categories.find((c) => c.id === categoryIconPickerTarget)?.icon ??
+                "Info"
+              : "Info"
+        }
+        onChange={(key) => {
+          if (categoryIconPickerTarget === "new") {
+            setNewCategory((prev) => ({ ...prev, icon: key }));
+          } else if (categoryIconPickerTarget) {
+            void patchCategoryIcon(categoryIconPickerTarget, key);
+          }
+        }}
+      />
+
       <div className="grid lg:grid-cols-[260px_1fr] gap-6 lg:gap-8 items-start">
         <div className="card-surface p-5 space-y-6 lg:sticky lg:top-24">
           <div>
@@ -373,26 +472,51 @@ export default function ServicesPage() {
               Categories
             </h3>
             <nav className="space-y-0.5">
-              {[{ id: "all", name: "All services" }, ...categories].map((cat) => (
-                <button
+              {[{ id: "all", name: "All services", icon: null as string | null }, ...categories].map((cat) => (
+                <div
                   key={cat.id}
-                  type="button"
-                  onClick={() => setSelectedCategory(cat.id)}
-                  className={`w-full text-left px-3 py-2.5 rounded-md text-sm transition-colors ${
-                    selectedCategory === cat.id
-                      ? "bg-background text-ink font-medium border border-[color:var(--border)]"
-                      : "text-foreground/60 hover:bg-background/80 hover:text-ink"
+                  className={`flex items-stretch gap-0.5 rounded-md transition-colors ${
+                    selectedCategory === cat.id ? "bg-background/50" : ""
                   }`}
                 >
-                  <div className="flex items-center justify-between gap-2">
-                    <span>{cat.name}</span>
-                    {selectedCategory === cat.id && (
-                      <span className="font-mono text-[10px] text-primary bg-primary/10 px-1.5 py-0.5 rounded-full">
-                        {filteredServices.length}
-                      </span>
-                    )}
-                  </div>
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedCategory(cat.id)}
+                    className={`flex-1 min-w-0 text-left px-3 py-2.5 rounded-md text-sm transition-colors ${
+                      selectedCategory === cat.id
+                        ? "text-ink font-medium"
+                        : "text-foreground/60 hover:bg-background/80 hover:text-ink"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="truncate">{cat.name}</span>
+                      {selectedCategory === cat.id && (
+                        <span className="font-mono text-[10px] text-primary bg-primary/10 px-1.5 py-0.5 rounded-full shrink-0">
+                          {filteredServices.length}
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                  {cat.id !== "all" ? (
+                    <button
+                      type="button"
+                      aria-label={`Change icon for ${cat.name}`}
+                      title="Change icon"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setCategoryIconPickerTarget(cat.id);
+                        setCategoryIconPickerOpen(true);
+                      }}
+                      className="shrink-0 w-9 flex items-center justify-center rounded-md border border-transparent hover:border-[color:var(--border)] hover:bg-surface text-foreground/50 hover:text-ink transition-colors"
+                    >
+                      {(() => {
+                        const Icon = resolveCategoryIcon(cat.icon);
+                        return <Icon className="h-3.5 w-3.5" strokeWidth={2} />;
+                      })()}
+                    </button>
+                  ) : null}
+                </div>
               ))}
             </nav>
           </div>

@@ -3,6 +3,8 @@ import { Sparkles } from "lucide-react";
 import prisma from "@/lib/prisma";
 import { HotelCheckInForm } from "@/components/guest/HotelCheckInForm";
 
+export const dynamic = "force-dynamic";
+
 export default async function HotelLandingPage({
   params,
 }: {

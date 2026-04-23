@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
-import { guestCategoryIcon } from "@/lib/guest-category-icons";
+import { resolveCategoryIcon } from "@/lib/category-icons";
 import { cn } from "@/lib/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -110,7 +110,7 @@ export function GuestCategorySnapStrip({
           className="flex w-full overflow-x-auto snap-x snap-mandatory scrollbar-none gap-0 pb-1 scroll-smooth"
         >
           {items.map((category, index) => {
-            const Icon = guestCategoryIcon(category.icon);
+            const Icon = resolveCategoryIcon(category.icon);
             const accent = categoryAccents[index % categoryAccents.length];
             return (
               <Link
