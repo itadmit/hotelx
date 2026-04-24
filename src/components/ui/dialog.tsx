@@ -26,6 +26,15 @@ export function Dialog({ open, onOpenChange, children }: DialogProps) {
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onOpenChange]);
 
+  React.useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [open]);
+
   if (!open) return null;
 
   return (
