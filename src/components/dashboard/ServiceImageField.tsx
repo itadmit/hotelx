@@ -5,7 +5,7 @@ import { ImagePlus, Trash2, Loader2, Link2 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { fileToCompressedDataUrl, isAllowedServiceImageValue } from "@/lib/image-compress";
+import { fileToCompressedBlob, isAllowedServiceImageValue } from "@/lib/image-compress";
 
 const PLACEHOLDER =
   "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=640&q=80";
@@ -27,8 +27,16 @@ export function ServiceImageField({ value, onChange }: Props) {
     setError(null);
     setBusy(true);
     try {
-      const dataUrl = await fileToCompressedDataUrl(file);
-      onChange(dataUrl);
+      const blob = await fileToCompressedBlob(file);
+      const form = new FormData();
+      form.append("file", blob, "upload.jpg");
+      form.append("kind", "service");
+      const res = await fetch("/api/uploads/image", { method: "POST", body: form });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(typeof data.error === "string" ? data.error : "Upload failed");
+      }
+      onChange(data.url);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Upload failed");
     } finally {
