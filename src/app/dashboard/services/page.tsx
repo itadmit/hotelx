@@ -20,8 +20,234 @@ import { CategoryIconPicker } from "@/components/dashboard/CategoryIconPicker";
 import { ServiceImageField } from "@/components/dashboard/ServiceImageField";
 import { ServiceEditModal } from "@/components/dashboard/ServiceEditModal";
 import { resolveCategoryIcon } from "@/lib/category-icons";
+import {
+  DndContext,
+  type DragEndEvent,
+  PointerSensor,
+  KeyboardSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  useSortable,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 const HOTEL_INFO_ID = "__hotel_info__";
+
+type CatRow = {
+  id: string;
+  name: string;
+  slug: string;
+  parentId: string | null;
+  icon: string | null;
+  order: number;
+};
+
+type CategoryRowProps = {
+  cat: CatRow;
+  selected: boolean;
+  selectedCount: number;
+  menuPill?: boolean;
+  indent?: boolean;
+  onSelect: (id: string) => void;
+  onEditIcon: (id: string) => void;
+  onDelete: (cat: CatRow) => void;
+};
+
+function SortableCategoryRow(props: CategoryRowProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: props.cat.id });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+  const { cat, selected, selectedCount, menuPill, indent, onSelect, onEditIcon, onDelete } = props;
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`group flex items-stretch gap-0.5 rounded-md transition-colors ${
+        indent ? "ml-4" : ""
+      } ${selected ? "bg-background/50" : ""} ${
+        isDragging ? "opacity-40 relative z-10" : ""
+      }`}
+    >
+      <button
+        type="button"
+        aria-label={`Drag to reorder ${cat.name}`}
+        {...attributes}
+        {...listeners}
+        className="shrink-0 w-6 flex items-center justify-center text-foreground/30 hover:text-foreground/70 cursor-grab active:cursor-grabbing touch-none"
+      >
+        <GripVertical className="h-3.5 w-3.5" strokeWidth={2} />
+      </button>
+      <button
+        type="button"
+        onClick={() => onSelect(cat.id)}
+        className={`flex-1 min-w-0 text-left px-2 py-2.5 rounded-md text-sm transition-colors ${
+          selected
+            ? "text-ink font-medium"
+            : "text-foreground/60 hover:bg-background/80 hover:text-ink"
+        }`}
+      >
+        <div className="flex items-center justify-between gap-2">
+          <span className="truncate inline-flex items-center gap-1.5">
+            {cat.name}
+            {menuPill ? (
+              <span className="font-mono text-[9px] uppercase tracking-wider text-emerald-brand bg-emerald-soft/70 px-1.5 py-0.5 rounded">
+                Menu
+              </span>
+            ) : null}
+          </span>
+          {selected && (
+            <span className="font-mono text-[10px] text-primary bg-primary/10 px-1.5 py-0.5 rounded-full shrink-0">
+              {selectedCount}
+            </span>
+          )}
+        </div>
+      </button>
+      <button
+        type="button"
+        aria-label={`Change icon for ${cat.name}`}
+        title="Change icon"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onEditIcon(cat.id);
+        }}
+        className="shrink-0 w-9 flex items-center justify-center rounded-md border border-transparent hover:border-[color:var(--border)] hover:bg-surface text-foreground/50 hover:text-ink transition-colors"
+      >
+        {(() => {
+          const Icon = resolveCategoryIcon(cat.icon);
+          return <Icon className="h-3.5 w-3.5" strokeWidth={2} />;
+        })()}
+      </button>
+      <button
+        type="button"
+        aria-label={`Delete ${cat.name}`}
+        title="Delete"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onDelete(cat);
+        }}
+        className="shrink-0 w-8 flex items-center justify-center rounded-md border border-transparent text-foreground/30 opacity-0 group-hover:opacity-100 hover:border-clay/30 hover:bg-clay/5 hover:text-clay transition-all"
+      >
+        <Trash2 className="h-3.5 w-3.5" strokeWidth={2} />
+      </button>
+    </div>
+  );
+}
+
+function NonDraggableCategoryRow(props: Omit<CategoryRowProps, "menuPill" | "indent"> & { menuPill?: boolean }) {
+  const { cat, selected, selectedCount, menuPill, onSelect, onEditIcon, onDelete } = props;
+  return (
+    <div
+      className={`group flex items-stretch gap-0.5 rounded-md transition-colors ${
+        selected ? "bg-background/50" : ""
+      }`}
+    >
+      <div className="shrink-0 w-6" />
+      <button
+        type="button"
+        onClick={() => onSelect(cat.id)}
+        className={`flex-1 min-w-0 text-left px-2 py-2.5 rounded-md text-sm transition-colors ${
+          selected
+            ? "text-ink font-medium"
+            : "text-foreground/60 hover:bg-background/80 hover:text-ink"
+        }`}
+      >
+        <div className="flex items-center justify-between gap-2">
+          <span className="truncate inline-flex items-center gap-1.5">
+            {cat.name}
+            {menuPill ? (
+              <span className="font-mono text-[9px] uppercase tracking-wider text-emerald-brand bg-emerald-soft/70 px-1.5 py-0.5 rounded">
+                Menu
+              </span>
+            ) : null}
+          </span>
+          {selected && (
+            <span className="font-mono text-[10px] text-primary bg-primary/10 px-1.5 py-0.5 rounded-full shrink-0">
+              {selectedCount}
+            </span>
+          )}
+        </div>
+      </button>
+      <button
+        type="button"
+        aria-label={`Change icon for ${cat.name}`}
+        title="Change icon"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onEditIcon(cat.id);
+        }}
+        className="shrink-0 w-9 flex items-center justify-center rounded-md border border-transparent hover:border-[color:var(--border)] hover:bg-surface text-foreground/50 hover:text-ink transition-colors"
+      >
+        {(() => {
+          const Icon = resolveCategoryIcon(cat.icon);
+          return <Icon className="h-3.5 w-3.5" strokeWidth={2} />;
+        })()}
+      </button>
+      <button
+        type="button"
+        aria-label={`Delete ${cat.name}`}
+        title="Delete"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onDelete(cat);
+        }}
+        className="shrink-0 w-8 flex items-center justify-center rounded-md border border-transparent text-foreground/30 opacity-0 group-hover:opacity-100 hover:border-clay/30 hover:bg-clay/5 hover:text-clay transition-all"
+      >
+        <Trash2 className="h-3.5 w-3.5" strokeWidth={2} />
+      </button>
+    </div>
+  );
+}
+
+function SortableHotelInfoRow() {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: HOTEL_INFO_ID });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`flex items-stretch gap-0.5 rounded-md transition-colors border border-emerald-brand/20 bg-emerald-soft/30 ${
+        isDragging ? "opacity-40 relative z-10" : ""
+      }`}
+    >
+      <button
+        type="button"
+        aria-label="Drag to reorder Hotel info"
+        {...attributes}
+        {...listeners}
+        className="shrink-0 w-6 flex items-center justify-center text-emerald-brand/50 hover:text-emerald-brand cursor-grab active:cursor-grabbing touch-none"
+      >
+        <GripVertical className="h-3.5 w-3.5" strokeWidth={2} />
+      </button>
+      <div className="flex-1 min-w-0 px-2 py-2.5 text-sm text-emerald-brand/90">
+        <div className="flex items-center gap-1.5">
+          <span className="truncate">Hotel info</span>
+          <span className="font-mono text-[9px] uppercase tracking-wider text-emerald-brand/80 bg-emerald-brand/10 px-1.5 py-0.5 rounded">
+            System
+          </span>
+        </div>
+      </div>
+      <div className="shrink-0 w-9" />
+      <div className="shrink-0 w-8" />
+    </div>
+  );
+}
 import {
   Search,
   Plus,
@@ -71,8 +297,6 @@ export default function ServicesPage() {
   >([]);
   const [scope, setScope] = useState<"services" | "menu">("services");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [draggingId, setDraggingId] = useState<string | null>(null);
-  const [dragOverId, setDragOverId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [newService, setNewService] = useState({
     name: "",
@@ -366,6 +590,17 @@ export default function ServicesPage() {
       if (prev === "active") return "inactive";
       return "all";
     });
+  }
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  async function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    await reorderByIds(String(active.id), String(over.id));
   }
 
   function groupKeyOf(id: string): string {
@@ -766,175 +1001,40 @@ export default function ServicesPage() {
               </button>
 
               {(() => {
-                const dragHandlers = (rowId: string) => ({
-                  onDragOver: (e: React.DragEvent<HTMLDivElement>) => {
-                    if (!draggingId) return;
-                    if (groupKeyOf(draggingId) !== groupKeyOf(rowId)) return;
-                    e.preventDefault();
-                    e.dataTransfer.dropEffect = "move";
-                    if (dragOverId !== rowId) setDragOverId(rowId);
-                  },
-                  onDragLeave: () => {
-                    if (dragOverId === rowId) setDragOverId(null);
-                  },
-                  onDrop: (e: React.DragEvent<HTMLDivElement>) => {
-                    e.preventDefault();
-                    if (draggingId) void reorderByIds(draggingId, rowId);
-                    setDraggingId(null);
-                    setDragOverId(null);
-                  },
-                });
-
-                const gripHandlers = (rowId: string) => ({
-                  draggable: true,
-                  onDragStart: (e: React.DragEvent<HTMLDivElement>) => {
-                    setDraggingId(rowId);
-                    e.dataTransfer.effectAllowed = "move";
-                  },
-                  onDragEnd: () => {
-                    setDraggingId(null);
-                    setDragOverId(null);
-                  },
-                });
-
-                const renderRow = (
-                  cat: (typeof categories)[number],
-                  {
-                    indent = false,
-                    draggable = true,
-                    menuPill = false,
-                  }: { indent?: boolean; draggable?: boolean; menuPill?: boolean } = {}
-                ) => {
-                  const isDragging = draggable && draggingId === cat.id;
-                  const isOver =
-                    draggable &&
-                    dragOverId === cat.id &&
-                    draggingId &&
-                    draggingId !== cat.id;
-                  return (
-                    <div
-                      key={cat.id}
-                      {...(draggable ? dragHandlers(cat.id) : {})}
-                      className={`group flex items-stretch gap-0.5 rounded-md transition-colors ${
-                        indent ? "ml-4" : ""
-                      } ${selectedCategory === cat.id ? "bg-background/50" : ""} ${
-                        isDragging ? "opacity-40" : ""
-                      } ${isOver ? "ring-2 ring-primary/30" : ""}`}
-                    >
-                      {draggable ? (
-                        <div
-                          role="button"
-                          aria-label={`Drag to reorder ${cat.name}`}
-                          {...gripHandlers(cat.id)}
-                          className="shrink-0 w-6 flex items-center justify-center text-foreground/30 hover:text-foreground/70 cursor-grab active:cursor-grabbing"
-                        >
-                          <GripVertical className="h-3.5 w-3.5" strokeWidth={2} />
-                        </div>
-                      ) : (
-                        <div className="shrink-0 w-6" />
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => setSelectedCategory(cat.id)}
-                        className={`flex-1 min-w-0 text-left px-2 py-2.5 rounded-md text-sm transition-colors ${
-                          selectedCategory === cat.id
-                            ? "text-ink font-medium"
-                            : "text-foreground/60 hover:bg-background/80 hover:text-ink"
-                        }`}
-                      >
-                        <div className="flex items-center justify-between gap-2">
-                          <span className="truncate inline-flex items-center gap-1.5">
-                            {cat.name}
-                            {menuPill ? (
-                              <span className="font-mono text-[9px] uppercase tracking-wider text-emerald-brand bg-emerald-soft/70 px-1.5 py-0.5 rounded">
-                                Menu
-                              </span>
-                            ) : null}
-                          </span>
-                          {selectedCategory === cat.id && (
-                            <span className="font-mono text-[10px] text-primary bg-primary/10 px-1.5 py-0.5 rounded-full shrink-0">
-                              {filteredServices.length}
-                            </span>
-                          )}
-                        </div>
-                      </button>
-                      <button
-                        type="button"
-                        aria-label={`Change icon for ${cat.name}`}
-                        title="Change icon"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          setCategoryIconPickerTarget(cat.id);
-                          setCategoryIconPickerOpen(true);
-                        }}
-                        className="shrink-0 w-9 flex items-center justify-center rounded-md border border-transparent hover:border-[color:var(--border)] hover:bg-surface text-foreground/50 hover:text-ink transition-colors"
-                      >
-                        {(() => {
-                          const Icon = resolveCategoryIcon(cat.icon);
-                          return <Icon className="h-3.5 w-3.5" strokeWidth={2} />;
-                        })()}
-                      </button>
-                      <button
-                        type="button"
-                        aria-label={`Delete ${cat.name}`}
-                        title="Delete"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          void deleteCategory(cat);
-                        }}
-                        className="shrink-0 w-8 flex items-center justify-center rounded-md border border-transparent text-foreground/30 opacity-0 group-hover:opacity-100 hover:border-clay/30 hover:bg-clay/5 hover:text-clay transition-all"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" strokeWidth={2} />
-                      </button>
-                    </div>
-                  );
-                };
-
-                const renderHotelInfoRow = () => {
-                  const isDragging = draggingId === HOTEL_INFO_ID;
-                  const isOver =
-                    dragOverId === HOTEL_INFO_ID &&
-                    draggingId &&
-                    draggingId !== HOTEL_INFO_ID;
-                  return (
-                    <div
-                      key={HOTEL_INFO_ID}
-                      {...dragHandlers(HOTEL_INFO_ID)}
-                      className={`flex items-stretch gap-0.5 rounded-md transition-colors border border-emerald-brand/20 bg-emerald-soft/30 ${
-                        isDragging ? "opacity-40" : ""
-                      } ${isOver ? "ring-2 ring-primary/30" : ""}`}
-                    >
-                      <div
-                        role="button"
-                        aria-label="Drag to reorder Hotel info"
-                        {...gripHandlers(HOTEL_INFO_ID)}
-                        className="shrink-0 w-6 flex items-center justify-center text-emerald-brand/50 hover:text-emerald-brand cursor-grab active:cursor-grabbing"
-                      >
-                        <GripVertical className="h-3.5 w-3.5" strokeWidth={2} />
-                      </div>
-                      <div className="flex-1 min-w-0 px-2 py-2.5 text-sm text-emerald-brand/90">
-                        <div className="flex items-center gap-1.5">
-                          <span className="truncate">Hotel info</span>
-                          <span className="font-mono text-[9px] uppercase tracking-wider text-emerald-brand/80 bg-emerald-brand/10 px-1.5 py-0.5 rounded">
-                            System
-                          </span>
-                        </div>
-                      </div>
-                      <div className="shrink-0 w-9" />
-                      <div className="shrink-0 w-8" />
-                    </div>
-                  );
+                const openIconPicker = (id: string) => {
+                  setCategoryIconPickerTarget(id);
+                  setCategoryIconPickerOpen(true);
                 };
 
                 if (scope === "services") {
-                  return homeTileItems.map((item) =>
-                    item.kind === "hotel-info"
-                      ? renderHotelInfoRow()
-                      : renderRow(item.cat, {
-                          menuPill: childrenByParent.has(item.cat.id),
-                        })
+                  const ids = homeTileItems.map((it) =>
+                    it.kind === "hotel-info" ? HOTEL_INFO_ID : it.cat.id
+                  );
+                  return (
+                    <DndContext
+                      sensors={sensors}
+                      collisionDetection={closestCenter}
+                      onDragEnd={handleDragEnd}
+                    >
+                      <SortableContext items={ids} strategy={verticalListSortingStrategy}>
+                        {homeTileItems.map((item) =>
+                          item.kind === "hotel-info" ? (
+                            <SortableHotelInfoRow key={HOTEL_INFO_ID} />
+                          ) : (
+                            <SortableCategoryRow
+                              key={item.cat.id}
+                              cat={item.cat}
+                              selected={selectedCategory === item.cat.id}
+                              selectedCount={filteredServices.length}
+                              menuPill={childrenByParent.has(item.cat.id)}
+                              onSelect={setSelectedCategory}
+                              onEditIcon={openIconPicker}
+                              onDelete={deleteCategory}
+                            />
+                          )
+                        )}
+                      </SortableContext>
+                    </DndContext>
                   );
                 }
 
@@ -946,14 +1046,46 @@ export default function ServicesPage() {
                     </p>
                   );
                 }
-                return menuRoots.map((root) => (
-                  <div key={root.id} className="space-y-0.5">
-                    {renderRow(root, { draggable: false })}
-                    {(childrenByParent.get(root.id) ?? []).map((child) =>
-                      renderRow(child, { indent: true })
-                    )}
-                  </div>
-                ));
+
+                return (
+                  <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleDragEnd}
+                  >
+                    {menuRoots.map((root) => {
+                      const kids = childrenByParent.get(root.id) ?? [];
+                      const kidIds = kids.map((k) => k.id);
+                      return (
+                        <div key={root.id} className="space-y-0.5">
+                          <NonDraggableCategoryRow
+                            cat={root}
+                            selected={selectedCategory === root.id}
+                            selectedCount={filteredServices.length}
+                            menuPill
+                            onSelect={setSelectedCategory}
+                            onEditIcon={openIconPicker}
+                            onDelete={deleteCategory}
+                          />
+                          <SortableContext items={kidIds} strategy={verticalListSortingStrategy}>
+                            {kids.map((child) => (
+                              <SortableCategoryRow
+                                key={child.id}
+                                cat={child}
+                                indent
+                                selected={selectedCategory === child.id}
+                                selectedCount={filteredServices.length}
+                                onSelect={setSelectedCategory}
+                                onEditIcon={openIconPicker}
+                                onDelete={deleteCategory}
+                              />
+                            ))}
+                          </SortableContext>
+                        </div>
+                      );
+                    })}
+                  </DndContext>
+                );
               })()}
             </nav>
           </div>
