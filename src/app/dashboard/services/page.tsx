@@ -31,6 +31,7 @@ import {
   Info,
   Palette,
   Pencil,
+  GripVertical,
 } from "lucide-react";
 import { InfoTooltip } from "@/components/ui/info-tooltip";
 import Link from "next/link";
@@ -59,9 +60,13 @@ export default function ServicesPage() {
       slug: string;
       parentId: string | null;
       icon: string | null;
+      order: number;
     }>
   >([]);
+  const [scope, setScope] = useState<"services" | "menu">("services");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+  const [dragOverId, setDragOverId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [newService, setNewService] = useState({
     name: "",
@@ -109,6 +114,10 @@ export default function ServicesPage() {
   useEffect(() => {
     loadData({ initial: true });
   }, []);
+
+  useEffect(() => {
+    setSelectedCategory("all");
+  }, [scope]);
 
   async function createService() {
     if (!newService.name || !newService.categoryId) return;
@@ -195,11 +204,68 @@ export default function ServicesPage() {
     await loadData();
   }
 
+  const childrenByParent = useMemo(() => {
+    const map = new Map<string, typeof categories>();
+    categories
+      .filter((c) => c.parentId)
+      .forEach((c) => {
+        const arr = map.get(c.parentId!) ?? [];
+        arr.push(c);
+        map.set(c.parentId!, arr);
+      });
+    map.forEach((arr) => arr.sort((a, b) => a.order - b.order || a.name.localeCompare(b.name)));
+    return map;
+  }, [categories]);
+
+  const menuRoots = useMemo(
+    () =>
+      categories
+        .filter((c) => !c.parentId && childrenByParent.has(c.id))
+        .sort((a, b) => a.order - b.order || a.name.localeCompare(b.name)),
+    [categories, childrenByParent]
+  );
+  const serviceRoots = useMemo(
+    () =>
+      categories
+        .filter((c) => !c.parentId && !childrenByParent.has(c.id))
+        .sort((a, b) => a.order - b.order || a.name.localeCompare(b.name)),
+    [categories, childrenByParent]
+  );
+
+  const descendantIdsOf = useMemo(() => {
+    return (rootId: string): Set<string> => {
+      const set = new Set<string>([rootId]);
+      const stack = [rootId];
+      while (stack.length) {
+        const id = stack.pop()!;
+        const kids = childrenByParent.get(id) ?? [];
+        kids.forEach((k) => {
+          if (!set.has(k.id)) {
+            set.add(k.id);
+            stack.push(k.id);
+          }
+        });
+      }
+      return set;
+    };
+  }, [childrenByParent]);
+
   const filteredServices = useMemo(() => {
     const text = search.trim().toLowerCase();
     return services.filter((service) => {
-      const categoryMatch =
-        selectedCategory === "all" || service.categoryId === selectedCategory;
+      let categoryMatch = true;
+      if (selectedCategory !== "all") {
+        const ids = descendantIdsOf(selectedCategory);
+        categoryMatch = ids.has(service.categoryId);
+      } else if (scope === "menu") {
+        const allowed = new Set<string>();
+        menuRoots.forEach((r) => descendantIdsOf(r.id).forEach((id) => allowed.add(id)));
+        categoryMatch = allowed.has(service.categoryId);
+      } else {
+        const allowed = new Set<string>();
+        serviceRoots.forEach((r) => descendantIdsOf(r.id).forEach((id) => allowed.add(id)));
+        categoryMatch = allowed.has(service.categoryId);
+      }
       const activityMatch =
         activityFilter === "all" ||
         (activityFilter === "active" && service.isActive) ||
@@ -210,7 +276,16 @@ export default function ServicesPage() {
         service.category.name.toLowerCase().includes(text);
       return categoryMatch && activityMatch && textMatch;
     });
-  }, [services, search, selectedCategory, activityFilter]);
+  }, [
+    services,
+    search,
+    selectedCategory,
+    activityFilter,
+    scope,
+    menuRoots,
+    serviceRoots,
+    descendantIdsOf,
+  ]);
 
   const activeCount = useMemo(
     () => services.filter((s) => s.isActive).length,
@@ -251,6 +326,47 @@ export default function ServicesPage() {
       if (prev === "active") return "inactive";
       return "all";
     });
+  }
+
+  function groupKeyOf(cat: (typeof categories)[number]): string {
+    if (cat.parentId) return `child:${cat.parentId}`;
+    if (childrenByParent.has(cat.id)) return "menu-roots";
+    return "service-roots";
+  }
+
+  function siblingsOf(cat: (typeof categories)[number]): typeof categories {
+    if (cat.parentId) return childrenByParent.get(cat.parentId) ?? [];
+    if (childrenByParent.has(cat.id)) return menuRoots;
+    return serviceRoots;
+  }
+
+  async function reorderCategories(sourceId: string, targetId: string) {
+    const source = categories.find((c) => c.id === sourceId);
+    const target = categories.find((c) => c.id === targetId);
+    if (!source || !target || source.id === target.id) return;
+    if (groupKeyOf(source) !== groupKeyOf(target)) return;
+
+    const siblings = siblingsOf(source).slice();
+    const fromIdx = siblings.findIndex((c) => c.id === source.id);
+    const toIdx = siblings.findIndex((c) => c.id === target.id);
+    if (fromIdx < 0 || toIdx < 0) return;
+    const [moved] = siblings.splice(fromIdx, 1);
+    siblings.splice(toIdx, 0, moved);
+
+    const orderById = new Map(siblings.map((c, i) => [c.id, i]));
+    setCategories((prev) =>
+      prev.map((c) => (orderById.has(c.id) ? { ...c, order: orderById.get(c.id)! } : c))
+    );
+
+    await Promise.all(
+      siblings.map((c, i) =>
+        fetch(`/api/categories/${c.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ order: i }),
+        })
+      )
+    );
   }
 
   return (
@@ -509,57 +625,182 @@ export default function ServicesPage() {
 
       <div className="grid lg:grid-cols-[260px_1fr] gap-6 lg:gap-8 items-start">
         <div className="card-surface p-5 space-y-6 lg:sticky lg:top-24">
+          <div
+            role="tablist"
+            aria-label="Category scope"
+            className="grid grid-cols-2 gap-1 p-1 bg-surface rounded-md border border-[color:var(--border)]"
+          >
+            {(["services", "menu"] as const).map((s) => (
+              <button
+                key={s}
+                type="button"
+                role="tab"
+                aria-selected={scope === s}
+                onClick={() => setScope(s)}
+                className={`text-xs font-medium px-3 py-1.5 rounded-[5px] transition-colors ${
+                  scope === s
+                    ? "bg-white text-ink shadow-sm"
+                    : "text-foreground/60 hover:text-ink"
+                }`}
+              >
+                {s === "services" ? "Services" : "Menu"}
+              </button>
+            ))}
+          </div>
+
           <div>
-            <h3 className="font-mono text-[10px] uppercase tracking-[0.18em] text-foreground/50 px-1 mb-2">
-              Categories
-            </h3>
+            <div className="flex items-center justify-between px-1 mb-2">
+              <h3 className="font-mono text-[10px] uppercase tracking-[0.18em] text-foreground/50">
+                {scope === "menu" ? "Menu" : "Categories"}
+              </h3>
+              <InfoTooltip
+                content="Drag the handle to reorder. Order shows up on the guest home tiles."
+                side="left"
+              >
+                <span className="text-foreground/40">
+                  <Info className="h-3 w-3" />
+                </span>
+              </InfoTooltip>
+            </div>
             <nav className="space-y-0.5">
-              {[{ id: "all", name: "All services", icon: null as string | null }, ...categories].map((cat) => (
-                <div
-                  key={cat.id}
-                  className={`flex items-stretch gap-0.5 rounded-md transition-colors ${
-                    selectedCategory === cat.id ? "bg-background/50" : ""
-                  }`}
-                >
-                  <button
-                    type="button"
-                    onClick={() => setSelectedCategory(cat.id)}
-                    className={`flex-1 min-w-0 text-left px-3 py-2.5 rounded-md text-sm transition-colors ${
-                      selectedCategory === cat.id
-                        ? "text-ink font-medium"
-                        : "text-foreground/60 hover:bg-background/80 hover:text-ink"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="truncate">{cat.name}</span>
-                      {selectedCategory === cat.id && (
-                        <span className="font-mono text-[10px] text-primary bg-primary/10 px-1.5 py-0.5 rounded-full shrink-0">
-                          {filteredServices.length}
-                        </span>
-                      )}
-                    </div>
-                  </button>
-                  {cat.id !== "all" ? (
-                    <button
-                      type="button"
-                      aria-label={`Change icon for ${cat.name}`}
-                      title="Change icon"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setCategoryIconPickerTarget(cat.id);
-                        setCategoryIconPickerOpen(true);
-                      }}
-                      className="shrink-0 w-9 flex items-center justify-center rounded-md border border-transparent hover:border-[color:var(--border)] hover:bg-surface text-foreground/50 hover:text-ink transition-colors"
-                    >
-                      {(() => {
-                        const Icon = resolveCategoryIcon(cat.icon);
-                        return <Icon className="h-3.5 w-3.5" strokeWidth={2} />;
-                      })()}
-                    </button>
-                  ) : null}
+              <button
+                type="button"
+                onClick={() => setSelectedCategory("all")}
+                className={`w-full text-left px-3 py-2.5 rounded-md text-sm transition-colors ${
+                  selectedCategory === "all"
+                    ? "bg-background/50 text-ink font-medium"
+                    : "text-foreground/60 hover:bg-background/80 hover:text-ink"
+                }`}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="truncate">
+                    {scope === "menu" ? "All menu items" : "All services"}
+                  </span>
+                  {selectedCategory === "all" && (
+                    <span className="font-mono text-[10px] text-primary bg-primary/10 px-1.5 py-0.5 rounded-full shrink-0">
+                      {filteredServices.length}
+                    </span>
+                  )}
                 </div>
-              ))}
+              </button>
+
+              {(() => {
+                const renderRow = (
+                  cat: (typeof categories)[number],
+                  { indent = false }: { indent?: boolean } = {}
+                ) => {
+                  const isDragging = draggingId === cat.id;
+                  const isOver = dragOverId === cat.id && draggingId && draggingId !== cat.id;
+                  return (
+                    <div
+                      key={cat.id}
+                      onDragOver={(e) => {
+                        if (!draggingId) return;
+                        const src = categories.find((c) => c.id === draggingId);
+                        if (!src || groupKeyOf(src) !== groupKeyOf(cat)) return;
+                        e.preventDefault();
+                        e.dataTransfer.dropEffect = "move";
+                        if (dragOverId !== cat.id) setDragOverId(cat.id);
+                      }}
+                      onDragLeave={() => {
+                        if (dragOverId === cat.id) setDragOverId(null);
+                      }}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        if (draggingId) void reorderCategories(draggingId, cat.id);
+                        setDraggingId(null);
+                        setDragOverId(null);
+                      }}
+                      className={`flex items-stretch gap-0.5 rounded-md transition-colors ${
+                        indent ? "ml-4" : ""
+                      } ${selectedCategory === cat.id ? "bg-background/50" : ""} ${
+                        isDragging ? "opacity-40" : ""
+                      } ${isOver ? "ring-2 ring-primary/30" : ""}`}
+                    >
+                      <div
+                        role="button"
+                        aria-label={`Drag to reorder ${cat.name}`}
+                        draggable
+                        onDragStart={(e) => {
+                          setDraggingId(cat.id);
+                          e.dataTransfer.effectAllowed = "move";
+                        }}
+                        onDragEnd={() => {
+                          setDraggingId(null);
+                          setDragOverId(null);
+                        }}
+                        className="shrink-0 w-6 flex items-center justify-center text-foreground/30 hover:text-foreground/70 cursor-grab active:cursor-grabbing"
+                      >
+                        <GripVertical className="h-3.5 w-3.5" strokeWidth={2} />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedCategory(cat.id)}
+                        className={`flex-1 min-w-0 text-left px-2 py-2.5 rounded-md text-sm transition-colors ${
+                          selectedCategory === cat.id
+                            ? "text-ink font-medium"
+                            : "text-foreground/60 hover:bg-background/80 hover:text-ink"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="truncate">{cat.name}</span>
+                          {selectedCategory === cat.id && (
+                            <span className="font-mono text-[10px] text-primary bg-primary/10 px-1.5 py-0.5 rounded-full shrink-0">
+                              {filteredServices.length}
+                            </span>
+                          )}
+                        </div>
+                      </button>
+                      <button
+                        type="button"
+                        aria-label={`Change icon for ${cat.name}`}
+                        title="Change icon"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setCategoryIconPickerTarget(cat.id);
+                          setCategoryIconPickerOpen(true);
+                        }}
+                        className="shrink-0 w-9 flex items-center justify-center rounded-md border border-transparent hover:border-[color:var(--border)] hover:bg-surface text-foreground/50 hover:text-ink transition-colors"
+                      >
+                        {(() => {
+                          const Icon = resolveCategoryIcon(cat.icon);
+                          return <Icon className="h-3.5 w-3.5" strokeWidth={2} />;
+                        })()}
+                      </button>
+                    </div>
+                  );
+                };
+
+                if (scope === "services") {
+                  if (serviceRoots.length === 0) {
+                    return (
+                      <p className="text-xs text-foreground/50 px-3 py-4">
+                        No service categories yet. Add a top-level category without
+                        subcategories to create one.
+                      </p>
+                    );
+                  }
+                  return serviceRoots.map((r) => renderRow(r));
+                }
+
+                if (menuRoots.length === 0) {
+                  return (
+                    <p className="text-xs text-foreground/50 px-3 py-4">
+                      No menu yet. Add a parent category (e.g. Room Service) and nest
+                      subcategories (Breakfast, Mains, …) under it.
+                    </p>
+                  );
+                }
+                return menuRoots.map((root) => (
+                  <div key={root.id} className="space-y-0.5">
+                    {renderRow(root)}
+                    {(childrenByParent.get(root.id) ?? []).map((child) =>
+                      renderRow(child, { indent: true })
+                    )}
+                  </div>
+                ));
+              })()}
             </nav>
           </div>
 
