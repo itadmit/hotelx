@@ -71,3 +71,57 @@ export async function PATCH(
     );
   }
 }
+
+export async function DELETE(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const user = await requireSessionUser();
+    const { id } = await params;
+
+    const category = await prisma.category.findFirst({
+      where: { id, hotelId: user.hotelId! },
+      select: {
+        id: true,
+        name: true,
+        _count: { select: { services: true, children: true } },
+      },
+    });
+
+    if (!category) {
+      return NextResponse.json({ error: "Category not found" }, { status: 404 });
+    }
+
+    if (category._count.children > 0) {
+      return NextResponse.json(
+        {
+          error: `“${category.name}” has subcategories. Delete or move them first.`,
+        },
+        { status: 409 }
+      );
+    }
+
+    if (category._count.services > 0) {
+      return NextResponse.json(
+        {
+          error: `“${category.name}” has ${category._count.services} service${
+            category._count.services === 1 ? "" : "s"
+          }. Move or delete them first.`,
+        },
+        { status: 409 }
+      );
+    }
+
+    await prisma.category.delete({ where: { id } });
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    if (error instanceof ApiAuthError) {
+      return NextResponse.json({ error: error.message }, { status: 401 });
+    }
+    return NextResponse.json(
+      { error: "Failed to delete category" },
+      { status: 500 }
+    );
+  }
+}

@@ -32,9 +32,9 @@ import {
   Palette,
   Pencil,
   GripVertical,
+  Trash2,
 } from "lucide-react";
 import { InfoTooltip } from "@/components/ui/info-tooltip";
-import Link from "next/link";
 
 export default function ServicesPage() {
   const [isAddServiceOpen, setIsAddServiceOpen] = useState(false);
@@ -50,9 +50,12 @@ export default function ServicesPage() {
       estimatedTime: string | null;
       isActive: boolean;
       isFeatured: boolean;
+      requirePayment: boolean;
+      image: string | null;
       category: { id: string; name: string };
     }>
   >([]);
+  const [paymentsEnabled, setPaymentsEnabled] = useState(false);
   const [categories, setCategories] = useState<
     Array<{
       id: string;
@@ -96,14 +99,17 @@ export default function ServicesPage() {
       setIsInitialLoading(true);
     }
     try {
-      const [servicesRes, categoriesRes] = await Promise.all([
+      const [servicesRes, categoriesRes, hotelRes] = await Promise.all([
         fetch("/api/services", { cache: "no-store" }),
         fetch("/api/categories", { cache: "no-store" }),
+        fetch("/api/hotel", { cache: "no-store" }),
       ]);
       const servicesData = await servicesRes.json();
       const categoriesData = await categoriesRes.json();
+      const hotelData = await hotelRes.json().catch(() => ({}));
       setServices(servicesData.services ?? []);
       setCategories(categoriesData.categories ?? []);
+      setPaymentsEnabled(Boolean(hotelData?.hotel?.paymentsEnabled));
     } finally {
       if (isInitial) {
         setIsInitialLoading(false);
@@ -201,6 +207,25 @@ export default function ServicesPage() {
       body: JSON.stringify({ icon }),
     });
     if (!res.ok) return;
+    await loadData();
+  }
+
+  async function deleteCategory(cat: (typeof categories)[number]) {
+    const ok = window.confirm(
+      `Delete category “${cat.name}”? This can't be undone.`
+    );
+    if (!ok) return;
+    const res = await fetch(`/api/categories/${cat.id}`, { method: "DELETE" });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      alert(
+        typeof data.error === "string"
+          ? data.error
+          : "Could not delete category"
+      );
+      return;
+    }
+    if (selectedCategory === cat.id) setSelectedCategory("all");
     await loadData();
   }
 
@@ -597,6 +622,12 @@ export default function ServicesPage() {
         }}
         serviceId={editingServiceId}
         categories={categories}
+        paymentsEnabled={paymentsEnabled}
+        initialService={
+          editingServiceId
+            ? services.find((s) => s.id === editingServiceId) ?? null
+            : null
+        }
         onSaved={() => loadData()}
       />
 
@@ -711,7 +742,7 @@ export default function ServicesPage() {
                         setDraggingId(null);
                         setDragOverId(null);
                       }}
-                      className={`flex items-stretch gap-0.5 rounded-md transition-colors ${
+                      className={`group flex items-stretch gap-0.5 rounded-md transition-colors ${
                         indent ? "ml-4" : ""
                       } ${selectedCategory === cat.id ? "bg-background/50" : ""} ${
                         isDragging ? "opacity-40" : ""
@@ -767,6 +798,19 @@ export default function ServicesPage() {
                           const Icon = resolveCategoryIcon(cat.icon);
                           return <Icon className="h-3.5 w-3.5" strokeWidth={2} />;
                         })()}
+                      </button>
+                      <button
+                        type="button"
+                        aria-label={`Delete ${cat.name}`}
+                        title="Delete"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          void deleteCategory(cat);
+                        }}
+                        className="shrink-0 w-8 flex items-center justify-center rounded-md border border-transparent text-foreground/30 opacity-0 group-hover:opacity-100 hover:border-clay/30 hover:bg-clay/5 hover:text-clay transition-all"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" strokeWidth={2} />
                       </button>
                     </div>
                   );
@@ -959,12 +1003,6 @@ export default function ServicesPage() {
                   >
                     {service.isActive ? "Active" : "Inactive"}
                   </Badge>
-                  <Link
-                    href={`/dashboard/services/${service.id}`}
-                    className="text-xs font-medium text-primary opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    Edit →
-                  </Link>
                 </div>
               </div>
             ))}

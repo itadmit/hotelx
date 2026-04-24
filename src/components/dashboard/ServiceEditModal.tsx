@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useId, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -15,7 +15,6 @@ import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { ServiceImageField } from "@/components/dashboard/ServiceImageField";
 import { Loader2, Save, Star, Trash2 } from "lucide-react";
-import Link from "next/link";
 
 type CategoryRow = {
   id: string;
@@ -23,11 +22,26 @@ type CategoryRow = {
   parentId: string | null;
 };
 
+type InitialService = {
+  id: string;
+  name: string;
+  description: string | null;
+  categoryId: string;
+  price: string | null;
+  estimatedTime: string | null;
+  isActive: boolean;
+  isFeatured: boolean;
+  requirePayment: boolean;
+  image: string | null;
+};
+
 type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   serviceId: string | null;
   categories: CategoryRow[];
+  paymentsEnabled: boolean;
+  initialService: InitialService | null;
   onSaved: () => void | Promise<void>;
 };
 
@@ -36,14 +50,14 @@ export function ServiceEditModal({
   onOpenChange,
   serviceId,
   categories,
+  paymentsEnabled,
+  initialService,
   onSaved,
 }: Props) {
   const rid = useId();
-  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [paymentsEnabled, setPaymentsEnabled] = useState(false);
   const [form, setForm] = useState({
     name: "",
     description: "",
@@ -76,42 +90,21 @@ export function ServiceEditModal({
       });
   }, [categories, categoryById]);
 
-  const loadService = useCallback(async () => {
-    if (!serviceId) return;
-    setLoading(true);
-    setSaveError(null);
-    try {
-      const [serviceRes, hotelRes] = await Promise.all([
-        fetch(`/api/services/${serviceId}`, { cache: "no-store" }),
-        fetch("/api/hotel", { cache: "no-store" }),
-      ]);
-      const serviceData = await serviceRes.json();
-      const hotelData = await hotelRes.json();
-      const service = serviceData.service;
-      setPaymentsEnabled(Boolean(hotelData?.hotel?.paymentsEnabled));
-      if (service) {
-        setForm({
-          name: service.name ?? "",
-          description: service.description ?? "",
-          categoryId: service.categoryId ?? "",
-          price: service.price != null ? String(service.price) : "",
-          estimatedTime: service.estimatedTime ?? "",
-          isActive: Boolean(service.isActive),
-          isFeatured: Boolean(service.isFeatured),
-          requirePayment: Boolean(service.requirePayment),
-          image: typeof service.image === "string" ? service.image : null,
-        });
-      }
-    } finally {
-      setLoading(false);
-    }
-  }, [serviceId]);
-
   useEffect(() => {
-    if (open && serviceId) {
-      void loadService();
-    }
-  }, [open, serviceId, loadService]);
+    if (!open || !initialService) return;
+    setSaveError(null);
+    setForm({
+      name: initialService.name ?? "",
+      description: initialService.description ?? "",
+      categoryId: initialService.categoryId ?? "",
+      price: initialService.price != null ? String(initialService.price) : "",
+      estimatedTime: initialService.estimatedTime ?? "",
+      isActive: Boolean(initialService.isActive),
+      isFeatured: Boolean(initialService.isFeatured),
+      requirePayment: Boolean(initialService.requirePayment),
+      image: initialService.image ?? null,
+    });
+  }, [open, initialService]);
 
   async function handleDelete() {
     if (!serviceId) return;
@@ -183,13 +176,7 @@ export function ServiceEditModal({
         </DialogHeader>
 
         <div className="overflow-y-auto px-5 py-4 space-y-4 flex-1 min-h-0">
-          {loading ? (
-            <div className="flex items-center justify-center py-16 text-foreground/50 gap-2">
-              <Loader2 className="h-5 w-5 animate-spin text-emerald-brand" />
-              <span className="text-sm">Loading…</span>
-            </div>
-          ) : (
-            <>
+          <>
               <ServiceImageField
                 value={form.image}
                 onChange={(image) => setForm((prev) => ({ ...prev, image }))}
@@ -328,19 +315,7 @@ export function ServiceEditModal({
                   </span>
                 </label>
               </div>
-              {serviceId ? (
-                <p className="text-center pt-1">
-                  <Link
-                    href={`/dashboard/services/${serviceId}`}
-                    className="text-xs font-medium text-primary hover:underline"
-                    onClick={() => onOpenChange(false)}
-                  >
-                    Open full-page editor →
-                  </Link>
-                </p>
-              ) : null}
             </>
-          )}
         </div>
 
         <DialogFooter className="px-5 py-4 border-t border-[color:var(--border)] shrink-0 flex-col sm:flex-row sm:items-center gap-2">
@@ -349,7 +324,7 @@ export function ServiceEditModal({
               type="button"
               variant="ghost"
               className="rounded-xl gap-2 text-clay hover:text-clay hover:bg-clay/10 sm:mr-auto w-full sm:w-auto"
-              disabled={loading || saving || deleting}
+              disabled={saving || deleting}
               onClick={() => void handleDelete()}
             >
               {deleting ? (
@@ -377,7 +352,7 @@ export function ServiceEditModal({
             <Button
               type="button"
               className="rounded-xl flex-1 sm:flex-none gap-2 bg-primary hover:bg-primary/90"
-              disabled={loading || saving || deleting || !form.name.trim() || !form.categoryId}
+              disabled={saving || deleting || !form.name.trim() || !form.categoryId}
               onClick={() => void handleSave()}
             >
               {saving ? (
