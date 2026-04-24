@@ -30,9 +30,9 @@ import {
 } from "@/lib/pricing";
 
 export const metadata: Metadata = {
-  title: "Pricing — HotelX | $29 + $6/room, everything included",
+  title: "Pricing — HotelX | $6/room, no base fee",
   description:
-    "Simple, founders-friendly pricing for hotels: $29/month base + $6 per room. Free onboarding, training, support and 6 months of concierge retainer.",
+    "Simple, founders-friendly pricing for hotels: $6 per room per month, no base fee. Free onboarding, training, support and 6 months of concierge retainer.",
 };
 
 const ONBOARDING_STEPS = [
@@ -80,7 +80,7 @@ const SAMPLE_HOTELS = [
 const FAQ = [
   {
     q: "How exactly does the price work?",
-    a: `A flat $${FOUNDERS.base}/month base plus $${FOUNDERS.perRoom} per room. So a 20-room boutique pays $${foundersMonthly(20)}/mo; a 60-room hotel pays $${foundersMonthly(60)}/mo. No tiers, no surprises.`,
+    a: `A flat $${FOUNDERS.perRoom} per room, per month. No base fee, no tiers. So a 20-room boutique pays $${foundersMonthly(20)}/mo; a 60-room hotel pays $${foundersMonthly(60)}/mo. No surprises.`,
   },
   {
     q: "What's the 'normal' price you keep crossing out?",
@@ -96,11 +96,11 @@ const FAQ = [
   },
   {
     q: "What happens after the 6 free retainer months?",
-    a: `Two options. Keep the dedicated concierge engineer for $${LIST.retainerMonthly}/month \u2014 cancel anytime. Or stop the retainer and keep using the platform; the $${FOUNDERS.base} + $${FOUNDERS.perRoom}/room never changes.`,
+    a: `Two options. Keep the dedicated concierge engineer for $${LIST.retainerMonthly}/month \u2014 cancel anytime. Or stop the retainer and keep using the platform; the $${FOUNDERS.perRoom}/room never changes.`,
   },
   {
     q: "Will the founders price change later?",
-    a: `For your hotel, no. Once you're in, your $${FOUNDERS.base} + $${FOUNDERS.perRoom}/room is locked in. The list price applies only to hotels that join after the founders cohort closes.`,
+    a: `For your hotel, no. Once you're in, your $${FOUNDERS.perRoom}/room is locked in, with no base fee ever. The list price applies only to hotels that join after the founders cohort closes.`,
   },
   {
     q: "Do you take on-site visits?",
@@ -125,15 +125,15 @@ export default function PricingPage() {
               Founders cohort &middot; everything included
             </span>
             <h1 className="mt-6 font-display text-4xl sm:text-5xl md:text-6xl tracking-tight leading-[1.04] text-ink">
-              ${FOUNDERS.base} a month, plus
+              No base fee &mdash; just
               <br />
               <span className="display-italic text-emerald-brand">
-                ${FOUNDERS.perRoom} per room.
+                ${FOUNDERS.perRoom} per room / month.
               </span>
             </h1>
             <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.18em] text-foreground/55">
               <span className="line-through">
-                Normally ${LIST.base} + ${LIST.perRoom}/room
+                Normally ${LIST.base} base + ${LIST.perRoom}/room
               </span>
             </p>
             <p className="mt-6 text-base sm:text-lg text-foreground/70 max-w-2xl mx-auto leading-relaxed">
@@ -413,8 +413,8 @@ export default function PricingPage() {
                     After the 6 founders months, you choose: keep your
                     dedicated concierge engineer for ${LIST.retainerMonthly}
                     /month (cancel any time), or just keep using the platform.
-                    Your $${FOUNDERS.base} + $${FOUNDERS.perRoom}/room never
-                    changes.
+                    Your $${FOUNDERS.perRoom}/room never changes &mdash; still
+                    no base fee.
                   </p>
                 </div>
                 <ul className="grid sm:grid-cols-1 gap-2.5">

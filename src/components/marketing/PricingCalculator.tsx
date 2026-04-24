@@ -19,7 +19,6 @@ export function PricingCalculator() {
   const listMo = listMonthly(rooms);
   const monthlyDiff = monthlySavings(rooms);
   const yearSave = firstYearSavings(rooms);
-  const perRoomCost = (monthly / Math.max(rooms, 1)).toFixed(2);
 
   return (
     <div className="card-elev p-6 sm:p-8 relative overflow-hidden">
@@ -121,8 +120,7 @@ export function PricingCalculator() {
             <span className="text-sm text-foreground/60">/ month</span>
           </div>
           <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.16em] text-foreground/55">
-            ${FOUNDERS.base} base + ${FOUNDERS.perRoom} per room &middot; ~$
-            {perRoomCost} / room
+            ${FOUNDERS.perRoom} per room &middot; no base fee
           </p>
 
           {/* What's included — strike-through anchors */}

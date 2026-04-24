@@ -51,10 +51,10 @@ export function PricingTeaser() {
             id="pricing-heading"
             className="mt-4 sm:mt-5 font-display text-3xl sm:text-4xl md:text-5xl tracking-tight leading-[1.05] text-ink"
           >
-            ${FOUNDERS.base} a month, plus
+            No base fee &mdash; just
             <br />
             <span className="display-italic text-emerald-brand">
-              ${FOUNDERS.perRoom} per room.
+              ${FOUNDERS.perRoom} per room / month.
             </span>
           </h2>
           <p className="mt-4 text-foreground/70">
@@ -66,7 +66,7 @@ export function PricingTeaser() {
           </p>
           <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-foreground/50">
             <span className="line-through">
-              Normally ${LIST.base} + ${LIST.perRoom}/room
+              Normally ${LIST.base} base + ${LIST.perRoom}/room
             </span>
           </p>
         </div>
@@ -97,15 +97,15 @@ export function PricingTeaser() {
               <div className="mt-5 grid sm:grid-cols-[auto_1fr] gap-x-6 gap-y-1 items-baseline">
                 <div className="flex items-baseline gap-2">
                   <span className="numeral text-5xl sm:text-6xl text-ink">
-                    ${FOUNDERS.base}
+                    ${FOUNDERS.perRoom}
                   </span>
                   <span className="text-base text-foreground/60">
-                    + ${FOUNDERS.perRoom}/room / month
+                    / room / month &middot; no base fee
                   </span>
                 </div>
                 <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-foreground/50 sm:text-right">
                   <span className="line-through">
-                    Normally ${LIST.base} + ${LIST.perRoom}/room
+                    Normally ${LIST.base} base + ${LIST.perRoom}/room
                   </span>
                 </p>
               </div>

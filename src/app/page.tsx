@@ -55,9 +55,9 @@ const jsonLd = {
   },
   offers: {
     "@type": "Offer",
-    price: "29",
+    price: "6",
     priceCurrency: "USD",
-    description: "$29/month base + $6/room. 6 months of concierge retainer free.",
+    description: "$6/room per month. No base fee. 6 months of concierge retainer free.",
   },
   aggregateRating: {
     "@type": "AggregateRating",

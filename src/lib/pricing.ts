@@ -16,7 +16,7 @@ export const LIST = {
 } as const;
 
 export const FOUNDERS = {
-  base: 29,
+  base: 0,
   perRoom: 6,
   onboarding: 0,
   training: 0,
