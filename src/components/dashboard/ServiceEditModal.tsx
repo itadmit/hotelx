@@ -142,7 +142,10 @@ export function ServiceEditModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg max-h-[min(90vh,720px)] flex flex-col p-0 gap-0 rounded-xl border-[color:var(--border)] bg-card">
+      <DialogContent
+        className="sm:max-w-lg max-h-[min(90vh,720px)] flex flex-col p-0 gap-0 rounded-xl border-[color:var(--border)] bg-card"
+        bodyClassName="flex flex-col flex-1 min-h-0"
+      >
         <DialogHeader className="px-5 pt-5 pb-3 border-b border-[color:var(--border)] shrink-0">
           <DialogTitle className="font-display text-lg tracking-tight">
             Edit service
