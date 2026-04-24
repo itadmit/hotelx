@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -261,6 +261,9 @@ import {
   Pencil,
   GripVertical,
   Trash2,
+  Loader2,
+  Check,
+  AlertTriangle,
 } from "lucide-react";
 import { InfoTooltip } from "@/components/ui/info-tooltip";
 
@@ -297,6 +300,8 @@ export default function ServicesPage() {
   >([]);
   const [scope, setScope] = useState<"services" | "menu">("services");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const saveStatusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [search, setSearch] = useState("");
   const [newService, setNewService] = useState({
     name: "",
@@ -625,6 +630,20 @@ export default function ServicesPage() {
     return [];
   }
 
+  function beginSave() {
+    if (saveStatusTimerRef.current) clearTimeout(saveStatusTimerRef.current);
+    setSaveStatus("saving");
+  }
+
+  function finishSave(ok: boolean) {
+    if (saveStatusTimerRef.current) clearTimeout(saveStatusTimerRef.current);
+    setSaveStatus(ok ? "saved" : "error");
+    saveStatusTimerRef.current = setTimeout(
+      () => setSaveStatus("idle"),
+      ok ? 1800 : 4000
+    );
+  }
+
   async function reorderByIds(sourceId: string, targetId: string) {
     if (sourceId === targetId) return;
     const key = groupKeyOf(sourceId);
@@ -637,46 +656,52 @@ export default function ServicesPage() {
     const [moved] = siblingIds.splice(fromIdx, 1);
     siblingIds.splice(toIdx, 0, moved);
 
-    if (key === "home-tiles") {
-      const newPos = siblingIds.indexOf(HOTEL_INFO_ID);
-      const catOrder = new Map<string, number>();
-      siblingIds
-        .filter((id) => id !== HOTEL_INFO_ID)
-        .forEach((id, i) => catOrder.set(id, i));
-      setHotelInfoPosition(newPos);
-      setCategories((prev) =>
-        prev.map((c) => (catOrder.has(c.id) ? { ...c, order: catOrder.get(c.id)! } : c))
-      );
-      await Promise.all([
-        fetch("/api/hotel", {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ hotelInfoPosition: newPos }),
-        }),
-        ...Array.from(catOrder.entries()).map(([id, order]) =>
-          fetch(`/api/categories/${id}`, {
-            method: "PATCH",
+    beginSave();
+    try {
+      let responses: Response[];
+      if (key === "home-tiles") {
+        const newPos = siblingIds.indexOf(HOTEL_INFO_ID);
+        const catOrder = new Map<string, number>();
+        siblingIds
+          .filter((id) => id !== HOTEL_INFO_ID)
+          .forEach((id, i) => catOrder.set(id, i));
+        setHotelInfoPosition(newPos);
+        setCategories((prev) =>
+          prev.map((c) => (catOrder.has(c.id) ? { ...c, order: catOrder.get(c.id)! } : c))
+        );
+        responses = await Promise.all([
+          fetch("/api/hotel", {
+            method: "PUT",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ order }),
-          })
-        ),
-      ]);
-      return;
+            body: JSON.stringify({ hotelInfoPosition: newPos }),
+          }),
+          ...Array.from(catOrder.entries()).map(([id, order]) =>
+            fetch(`/api/categories/${id}`, {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ order }),
+            })
+          ),
+        ]);
+      } else {
+        const orderById = new Map(siblingIds.map((id, i) => [id, i]));
+        setCategories((prev) =>
+          prev.map((c) => (orderById.has(c.id) ? { ...c, order: orderById.get(c.id)! } : c))
+        );
+        responses = await Promise.all(
+          siblingIds.map((id, i) =>
+            fetch(`/api/categories/${id}`, {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ order: i }),
+            })
+          )
+        );
+      }
+      finishSave(responses.every((r) => r.ok));
+    } catch {
+      finishSave(false);
     }
-
-    const orderById = new Map(siblingIds.map((id, i) => [id, i]));
-    setCategories((prev) =>
-      prev.map((c) => (orderById.has(c.id) ? { ...c, order: orderById.get(c.id)! } : c))
-    );
-    await Promise.all(
-      siblingIds.map((id, i) =>
-        fetch(`/api/categories/${id}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ order: i }),
-        })
-      )
-    );
   }
 
   return (
@@ -965,18 +990,48 @@ export default function ServicesPage() {
           </div>
 
           <div>
-            <div className="flex items-center justify-between px-1 mb-2">
+            <div className="flex items-center justify-between px-1 mb-2 gap-2">
               <h3 className="font-mono text-[10px] uppercase tracking-[0.18em] text-foreground/50">
                 {scope === "menu" ? "Menu" : "Categories"}
               </h3>
-              <InfoTooltip
-                content="Drag the handle to reorder. Order shows up on the guest home tiles."
-                side="left"
-              >
-                <span className="text-foreground/40">
-                  <Info className="h-3 w-3" />
-                </span>
-              </InfoTooltip>
+              <div className="flex items-center gap-1.5">
+                {saveStatus !== "idle" ? (
+                  <span
+                    aria-live="polite"
+                    className={`flex items-center gap-1 font-mono text-[10px] tracking-wide transition-opacity ${
+                      saveStatus === "error"
+                        ? "text-clay"
+                        : saveStatus === "saved"
+                          ? "text-emerald-brand"
+                          : "text-foreground/50"
+                    }`}
+                  >
+                    {saveStatus === "saving" ? (
+                      <Loader2 className="h-3 w-3 animate-spin" strokeWidth={2.5} />
+                    ) : saveStatus === "saved" ? (
+                      <Check className="h-3 w-3" strokeWidth={3} />
+                    ) : (
+                      <AlertTriangle className="h-3 w-3" strokeWidth={2.5} />
+                    )}
+                    <span>
+                      {saveStatus === "saving"
+                        ? "Saving"
+                        : saveStatus === "saved"
+                          ? "Saved"
+                          : "Save failed"}
+                    </span>
+                  </span>
+                ) : (
+                  <InfoTooltip
+                    content="Drag the handle to reorder. Order shows up on the guest home tiles."
+                    side="left"
+                  >
+                    <span className="text-foreground/40">
+                      <Info className="h-3 w-3" />
+                    </span>
+                  </InfoTooltip>
+                )}
+              </div>
             </div>
             <nav className="space-y-0.5">
               <button
