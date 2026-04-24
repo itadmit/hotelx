@@ -19,6 +19,12 @@ const HOTEL = {
   defaultCurrency: "EUR",
 };
 
+const DEMO_OWNER = {
+  email: "demo@hotelx.app",
+  name: "Demo Hotel",
+  role: "ADMIN",
+};
+
 const ROOMS = [
   { number: "201", code: "PLZ-201", type: "Deluxe Duomo View" },
   { number: "305", code: "PLZ-305", type: "Junior Suite" },
@@ -273,6 +279,20 @@ async function run() {
     create: HOTEL,
   });
   console.log(`Hotel ready: ${hotel.name} (${hotel.id})`);
+
+  // 1b. Demo owner — so the hotel shows up in super-admin and can be opened
+  // via "Open as user" impersonation. Password stays null; super-admin skips it.
+  await prisma.user.upsert({
+    where: { email: DEMO_OWNER.email },
+    update: { hotelId: hotel.id, role: DEMO_OWNER.role, name: DEMO_OWNER.name },
+    create: {
+      email: DEMO_OWNER.email,
+      name: DEMO_OWNER.name,
+      role: DEMO_OWNER.role,
+      hotelId: hotel.id,
+    },
+  });
+  console.log(`Demo owner linked: ${DEMO_OWNER.email}`);
 
   // 2. Hotel info — upsert.
   await prisma.hotelInfo.upsert({
