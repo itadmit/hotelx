@@ -479,7 +479,7 @@ export function GuestHome({
               type="button"
               onClick={logoutGuest}
               disabled={!canLogout || isLoggingOut}
-              className="h-9 px-4 rounded-md bg-clay text-white text-sm font-medium hover:opacity-90 disabled:opacity-50"
+              className="h-9 px-4 rounded-md bg-clay text-white text-sm font-medium hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoggingOut ? "Logging out…" : "Log out"}
             </button>

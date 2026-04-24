@@ -205,15 +205,23 @@ export function ActiveRequestsStrip({ hotelSlug, roomCode }: Props) {
     }
   }
 
-  // Skeleton — reserves vertical space so the rest of the home grid
-  // doesn't jump down when requests arrive.
+  // Skeleton — mirrors the real row layout (icon + two text lines + chevron)
+  // so the arrival of real data feels like a fill-in, not a replacement.
   if (!loaded) {
     return (
       <StripShell>
         <div className="flex items-center justify-between mb-2">
           <p className="eyebrow">Your activity</p>
+          <span className="h-2.5 w-10 rounded-full bg-surface animate-pulse" />
         </div>
-        <div className="h-16 rounded-xl border border-[color:var(--border)] bg-card animate-pulse" />
+        <div className="flex items-center gap-3 px-3.5 py-3 rounded-xl border border-[color:var(--border)] bg-card">
+          <span className="shrink-0 h-9 w-9 rounded-lg bg-surface animate-pulse" />
+          <div className="flex-1 min-w-0 space-y-2">
+            <span className="block h-3 w-32 rounded-full bg-surface animate-pulse" />
+            <span className="block h-2.5 w-44 rounded-full bg-surface animate-pulse" />
+          </div>
+          <span className="shrink-0 h-4 w-4 rounded bg-surface animate-pulse" />
+        </div>
       </StripShell>
     );
   }

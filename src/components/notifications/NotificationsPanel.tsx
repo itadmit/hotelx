@@ -77,9 +77,17 @@ export function NotificationsPanel({
       {/* List */}
       <div className="flex-1 overflow-y-auto">
         {loading && items.length === 0 ? (
-          <div className="px-5 py-10 text-center">
-            <p className="text-sm text-foreground/55">Loading…</p>
-          </div>
+          <ul className="divide-y divide-[color:var(--border)]/70" aria-label="Loading notifications">
+            {[0, 1, 2].map((i) => (
+              <li key={i} className="px-5 py-4 flex items-start gap-3">
+                <span className="shrink-0 h-9 w-9 rounded-lg bg-surface animate-pulse" />
+                <div className="flex-1 min-w-0 space-y-2">
+                  <span className="block h-3 w-3/4 rounded-full bg-surface animate-pulse" />
+                  <span className="block h-2.5 w-1/2 rounded-full bg-surface animate-pulse" />
+                </div>
+              </li>
+            ))}
+          </ul>
         ) : items.length === 0 ? (
           <div className="px-5 py-12 text-center">
             <span className="inline-flex h-12 w-12 rounded-full bg-surface items-center justify-center mb-3">
