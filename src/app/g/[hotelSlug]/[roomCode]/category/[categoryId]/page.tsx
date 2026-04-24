@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import { resolveCategoryIcon } from "@/lib/category-icons";
 import { GuestCategorySnapStrip } from "@/components/guest/GuestCategorySnapStrip";
+import { ServiceCardImage } from "@/components/guest/ServiceCardImage";
 import { roomServiceSubcategoryCopy } from "@/lib/room-service-category-copy";
 import { isRoomServiceHubSlug } from "@/lib/room-service-hub";
 
@@ -41,14 +42,12 @@ function ServiceCard({
     >
       <div className="flex">
         <div className="relative w-28 sm:w-32 h-28 sm:h-32 shrink-0 bg-surface">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <ServiceCardImage
             src={
               service.image ??
               "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=320&q=80"
             }
             alt={service.name}
-            className="absolute inset-0 w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-transparent to-card/0" />
         </div>
@@ -298,12 +297,16 @@ export default async function CategoryPage({
           {servicesToRender.length === 0 ? (
             <section className="px-5 mt-6">
               <div className="rounded-xl border border-dashed border-[color:var(--border)] p-6 text-center">
-                <p className="text-sm text-foreground/60">
-                  No services in this category yet.
+                <p className="text-sm text-ink font-medium">
+                  Coming soon to your room
+                </p>
+                <p className="mt-1 text-xs text-foreground/55 leading-relaxed">
+                  Our concierge is curating this selection. Check back shortly —
+                  or tap Concierge and we&rsquo;ll take care of it in person.
                 </p>
                 <Link
                   href={`/g/${hotelSlug}/${roomCode}`}
-                  className="mt-3 inline-flex items-center gap-1.5 text-sm text-emerald-brand font-medium"
+                  className="mt-4 inline-flex items-center gap-1.5 text-sm text-emerald-brand font-medium"
                 >
                   Back to home
                   <ChevronRight className="h-3.5 w-3.5" />

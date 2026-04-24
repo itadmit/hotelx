@@ -168,7 +168,8 @@ export default function ServiceRequestForm({
             placeholder="E.g. extra ice, no nuts, knock gently…"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            className="w-full px-3.5 py-3 rounded-xl bg-card border border-[color:var(--border)] text-ink text-sm placeholder:text-foreground/40 focus:outline-none focus:border-emerald-brand/40 focus:ring-2 focus:ring-emerald-brand/15 transition-all resize-none"
+            disabled={submitting || isNavigating}
+            className="w-full px-3.5 py-3 rounded-xl bg-card border border-[color:var(--border)] text-ink text-sm placeholder:text-foreground/40 focus:outline-none focus:border-emerald-brand/40 focus:ring-2 focus:ring-emerald-brand/15 transition-all resize-none disabled:opacity-60 disabled:cursor-not-allowed"
           />
         </label>
 
@@ -379,7 +380,8 @@ function StripeCheckout({
             placeholder="4242 4242 4242 4242"
             value={card.number}
             onChange={(e) => setCard({ ...card, number: e.target.value })}
-            className="w-full h-11 pl-9 pr-3 rounded-md bg-surface border border-[color:var(--border)] text-ink text-sm focus:outline-none focus:border-emerald-brand/40 focus:ring-2 focus:ring-emerald-brand/15"
+            disabled={submitting}
+            className="w-full h-11 pl-9 pr-3 rounded-md bg-surface border border-[color:var(--border)] text-ink text-sm focus:outline-none focus:border-emerald-brand/40 focus:ring-2 focus:ring-emerald-brand/15 disabled:opacity-60 disabled:cursor-not-allowed"
           />
         </div>
       </label>
@@ -392,7 +394,8 @@ function StripeCheckout({
             placeholder="12 / 28"
             value={card.exp}
             onChange={(e) => setCard({ ...card, exp: e.target.value })}
-            className="w-full h-11 px-3 rounded-md bg-surface border border-[color:var(--border)] text-ink text-sm focus:outline-none focus:border-emerald-brand/40 focus:ring-2 focus:ring-emerald-brand/15"
+            disabled={submitting}
+            className="w-full h-11 px-3 rounded-md bg-surface border border-[color:var(--border)] text-ink text-sm focus:outline-none focus:border-emerald-brand/40 focus:ring-2 focus:ring-emerald-brand/15 disabled:opacity-60 disabled:cursor-not-allowed"
           />
         </label>
         <label className="block">
@@ -403,7 +406,8 @@ function StripeCheckout({
             placeholder="•••"
             value={card.cvc}
             onChange={(e) => setCard({ ...card, cvc: e.target.value })}
-            className="w-full h-11 px-3 rounded-md bg-surface border border-[color:var(--border)] text-ink text-sm focus:outline-none focus:border-emerald-brand/40 focus:ring-2 focus:ring-emerald-brand/15"
+            disabled={submitting}
+            className="w-full h-11 px-3 rounded-md bg-surface border border-[color:var(--border)] text-ink text-sm focus:outline-none focus:border-emerald-brand/40 focus:ring-2 focus:ring-emerald-brand/15 disabled:opacity-60 disabled:cursor-not-allowed"
           />
         </label>
       </div>

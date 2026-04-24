@@ -3,6 +3,7 @@ import { ChevronLeft, Clock, Sparkles, Wallet, ShieldCheck } from "lucide-react"
 import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import ServiceRequestForm from "@/components/guest/ServiceRequestForm";
+import { ServiceCardImage } from "@/components/guest/ServiceCardImage";
 
 async function getServiceForGuest(hotelSlug: string, serviceId: string) {
   try {
@@ -116,14 +117,12 @@ export default async function ServicePage({
     <main className="mx-auto w-full max-w-[480px] min-h-screen sm:min-h-[calc(100vh-3rem)] sm:my-6 bg-background text-ink flex flex-col sm:rounded-[28px] sm:border sm:border-[color:var(--border)]/70 sm:shadow-[0_20px_60px_-30px_rgba(31,41,28,0.25)] sm:overflow-x-hidden">
       {/* Image hero */}
       <div className="relative h-72 sm:h-80 overflow-hidden bg-surface">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <ServiceCardImage
           src={
             service.image ??
             "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=900&q=80"
           }
           alt={service.name}
-          className="absolute inset-0 w-full h-full object-cover"
         />
         <div className="absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-black/95 via-black/60 to-transparent pointer-events-none" />
 
