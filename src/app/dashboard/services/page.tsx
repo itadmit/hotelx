@@ -20,6 +20,8 @@ import { CategoryIconPicker } from "@/components/dashboard/CategoryIconPicker";
 import { ServiceImageField } from "@/components/dashboard/ServiceImageField";
 import { ServiceEditModal } from "@/components/dashboard/ServiceEditModal";
 import { resolveCategoryIcon } from "@/lib/category-icons";
+
+const HOTEL_INFO_ID = "__hotel_info__";
 import {
   Search,
   Plus,
@@ -56,6 +58,7 @@ export default function ServicesPage() {
     }>
   >([]);
   const [paymentsEnabled, setPaymentsEnabled] = useState(false);
+  const [hotelInfoPosition, setHotelInfoPosition] = useState(0);
   const [categories, setCategories] = useState<
     Array<{
       id: string;
@@ -110,6 +113,7 @@ export default function ServicesPage() {
       setServices(servicesData.services ?? []);
       setCategories(categoriesData.categories ?? []);
       setPaymentsEnabled(Boolean(hotelData?.hotel?.paymentsEnabled));
+      setHotelInfoPosition(Number(hotelData?.hotel?.hotelInfoPosition ?? 0));
     } finally {
       if (isInitial) {
         setIsInitialLoading(false);
@@ -242,20 +246,31 @@ export default function ServicesPage() {
     return map;
   }, [categories]);
 
-  const menuRoots = useMemo(
+  const allRoots = useMemo(
     () =>
       categories
-        .filter((c) => !c.parentId && childrenByParent.has(c.id))
+        .filter((c) => !c.parentId)
         .sort((a, b) => a.order - b.order || a.name.localeCompare(b.name)),
-    [categories, childrenByParent]
+    [categories]
+  );
+  const menuRoots = useMemo(
+    () => allRoots.filter((c) => childrenByParent.has(c.id)),
+    [allRoots, childrenByParent]
   );
   const serviceRoots = useMemo(
-    () =>
-      categories
-        .filter((c) => !c.parentId && !childrenByParent.has(c.id))
-        .sort((a, b) => a.order - b.order || a.name.localeCompare(b.name)),
-    [categories, childrenByParent]
+    () => allRoots.filter((c) => !childrenByParent.has(c.id)),
+    [allRoots, childrenByParent]
   );
+  const homeTileItems = useMemo<
+    Array<{ kind: "cat"; cat: (typeof categories)[number] } | { kind: "hotel-info" }>
+  >(() => {
+    const items: Array<
+      { kind: "cat"; cat: (typeof categories)[number] } | { kind: "hotel-info" }
+    > = allRoots.map((cat) => ({ kind: "cat" as const, cat }));
+    const pos = Math.max(0, Math.min(hotelInfoPosition, items.length));
+    items.splice(pos, 0, { kind: "hotel-info" });
+    return items;
+  }, [allRoots, hotelInfoPosition]);
 
   const descendantIdsOf = useMemo(() => {
     return (rootId: string): Set<string> => {
@@ -353,39 +368,74 @@ export default function ServicesPage() {
     });
   }
 
-  function groupKeyOf(cat: (typeof categories)[number]): string {
+  function groupKeyOf(id: string): string {
+    if (id === HOTEL_INFO_ID) return "home-tiles";
+    const cat = categories.find((c) => c.id === id);
+    if (!cat) return "unknown";
     if (cat.parentId) return `child:${cat.parentId}`;
-    if (childrenByParent.has(cat.id)) return "menu-roots";
-    return "service-roots";
+    return "home-tiles";
   }
 
-  function siblingsOf(cat: (typeof categories)[number]): typeof categories {
-    if (cat.parentId) return childrenByParent.get(cat.parentId) ?? [];
-    if (childrenByParent.has(cat.id)) return menuRoots;
-    return serviceRoots;
+  function siblingIdsOf(id: string): string[] {
+    const key = groupKeyOf(id);
+    if (key === "home-tiles") {
+      return homeTileItems.map((it) =>
+        it.kind === "hotel-info" ? HOTEL_INFO_ID : it.cat.id
+      );
+    }
+    if (key.startsWith("child:")) {
+      const parentId = key.slice("child:".length);
+      return (childrenByParent.get(parentId) ?? []).map((c) => c.id);
+    }
+    return [];
   }
 
-  async function reorderCategories(sourceId: string, targetId: string) {
-    const source = categories.find((c) => c.id === sourceId);
-    const target = categories.find((c) => c.id === targetId);
-    if (!source || !target || source.id === target.id) return;
-    if (groupKeyOf(source) !== groupKeyOf(target)) return;
+  async function reorderByIds(sourceId: string, targetId: string) {
+    if (sourceId === targetId) return;
+    const key = groupKeyOf(sourceId);
+    if (key === "unknown" || key !== groupKeyOf(targetId)) return;
 
-    const siblings = siblingsOf(source).slice();
-    const fromIdx = siblings.findIndex((c) => c.id === source.id);
-    const toIdx = siblings.findIndex((c) => c.id === target.id);
+    const siblingIds = siblingIdsOf(sourceId).slice();
+    const fromIdx = siblingIds.indexOf(sourceId);
+    const toIdx = siblingIds.indexOf(targetId);
     if (fromIdx < 0 || toIdx < 0) return;
-    const [moved] = siblings.splice(fromIdx, 1);
-    siblings.splice(toIdx, 0, moved);
+    const [moved] = siblingIds.splice(fromIdx, 1);
+    siblingIds.splice(toIdx, 0, moved);
 
-    const orderById = new Map(siblings.map((c, i) => [c.id, i]));
+    if (key === "home-tiles") {
+      const newPos = siblingIds.indexOf(HOTEL_INFO_ID);
+      const catOrder = new Map<string, number>();
+      siblingIds
+        .filter((id) => id !== HOTEL_INFO_ID)
+        .forEach((id, i) => catOrder.set(id, i));
+      setHotelInfoPosition(newPos);
+      setCategories((prev) =>
+        prev.map((c) => (catOrder.has(c.id) ? { ...c, order: catOrder.get(c.id)! } : c))
+      );
+      await Promise.all([
+        fetch("/api/hotel", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ hotelInfoPosition: newPos }),
+        }),
+        ...Array.from(catOrder.entries()).map(([id, order]) =>
+          fetch(`/api/categories/${id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ order }),
+          })
+        ),
+      ]);
+      return;
+    }
+
+    const orderById = new Map(siblingIds.map((id, i) => [id, i]));
     setCategories((prev) =>
       prev.map((c) => (orderById.has(c.id) ? { ...c, order: orderById.get(c.id)! } : c))
     );
-
     await Promise.all(
-      siblings.map((c, i) =>
-        fetch(`/api/categories/${c.id}`, {
+      siblingIds.map((id, i) =>
+        fetch(`/api/categories/${id}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ order: i }),
@@ -716,54 +766,73 @@ export default function ServicesPage() {
               </button>
 
               {(() => {
+                const dragHandlers = (rowId: string) => ({
+                  onDragOver: (e: React.DragEvent<HTMLDivElement>) => {
+                    if (!draggingId) return;
+                    if (groupKeyOf(draggingId) !== groupKeyOf(rowId)) return;
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = "move";
+                    if (dragOverId !== rowId) setDragOverId(rowId);
+                  },
+                  onDragLeave: () => {
+                    if (dragOverId === rowId) setDragOverId(null);
+                  },
+                  onDrop: (e: React.DragEvent<HTMLDivElement>) => {
+                    e.preventDefault();
+                    if (draggingId) void reorderByIds(draggingId, rowId);
+                    setDraggingId(null);
+                    setDragOverId(null);
+                  },
+                });
+
+                const gripHandlers = (rowId: string) => ({
+                  draggable: true,
+                  onDragStart: (e: React.DragEvent<HTMLDivElement>) => {
+                    setDraggingId(rowId);
+                    e.dataTransfer.effectAllowed = "move";
+                  },
+                  onDragEnd: () => {
+                    setDraggingId(null);
+                    setDragOverId(null);
+                  },
+                });
+
                 const renderRow = (
                   cat: (typeof categories)[number],
-                  { indent = false }: { indent?: boolean } = {}
+                  {
+                    indent = false,
+                    draggable = true,
+                    menuPill = false,
+                  }: { indent?: boolean; draggable?: boolean; menuPill?: boolean } = {}
                 ) => {
-                  const isDragging = draggingId === cat.id;
-                  const isOver = dragOverId === cat.id && draggingId && draggingId !== cat.id;
+                  const isDragging = draggable && draggingId === cat.id;
+                  const isOver =
+                    draggable &&
+                    dragOverId === cat.id &&
+                    draggingId &&
+                    draggingId !== cat.id;
                   return (
                     <div
                       key={cat.id}
-                      onDragOver={(e) => {
-                        if (!draggingId) return;
-                        const src = categories.find((c) => c.id === draggingId);
-                        if (!src || groupKeyOf(src) !== groupKeyOf(cat)) return;
-                        e.preventDefault();
-                        e.dataTransfer.dropEffect = "move";
-                        if (dragOverId !== cat.id) setDragOverId(cat.id);
-                      }}
-                      onDragLeave={() => {
-                        if (dragOverId === cat.id) setDragOverId(null);
-                      }}
-                      onDrop={(e) => {
-                        e.preventDefault();
-                        if (draggingId) void reorderCategories(draggingId, cat.id);
-                        setDraggingId(null);
-                        setDragOverId(null);
-                      }}
+                      {...(draggable ? dragHandlers(cat.id) : {})}
                       className={`group flex items-stretch gap-0.5 rounded-md transition-colors ${
                         indent ? "ml-4" : ""
                       } ${selectedCategory === cat.id ? "bg-background/50" : ""} ${
                         isDragging ? "opacity-40" : ""
                       } ${isOver ? "ring-2 ring-primary/30" : ""}`}
                     >
-                      <div
-                        role="button"
-                        aria-label={`Drag to reorder ${cat.name}`}
-                        draggable
-                        onDragStart={(e) => {
-                          setDraggingId(cat.id);
-                          e.dataTransfer.effectAllowed = "move";
-                        }}
-                        onDragEnd={() => {
-                          setDraggingId(null);
-                          setDragOverId(null);
-                        }}
-                        className="shrink-0 w-6 flex items-center justify-center text-foreground/30 hover:text-foreground/70 cursor-grab active:cursor-grabbing"
-                      >
-                        <GripVertical className="h-3.5 w-3.5" strokeWidth={2} />
-                      </div>
+                      {draggable ? (
+                        <div
+                          role="button"
+                          aria-label={`Drag to reorder ${cat.name}`}
+                          {...gripHandlers(cat.id)}
+                          className="shrink-0 w-6 flex items-center justify-center text-foreground/30 hover:text-foreground/70 cursor-grab active:cursor-grabbing"
+                        >
+                          <GripVertical className="h-3.5 w-3.5" strokeWidth={2} />
+                        </div>
+                      ) : (
+                        <div className="shrink-0 w-6" />
+                      )}
                       <button
                         type="button"
                         onClick={() => setSelectedCategory(cat.id)}
@@ -774,7 +843,14 @@ export default function ServicesPage() {
                         }`}
                       >
                         <div className="flex items-center justify-between gap-2">
-                          <span className="truncate">{cat.name}</span>
+                          <span className="truncate inline-flex items-center gap-1.5">
+                            {cat.name}
+                            {menuPill ? (
+                              <span className="font-mono text-[9px] uppercase tracking-wider text-emerald-brand bg-emerald-soft/70 px-1.5 py-0.5 rounded">
+                                Menu
+                              </span>
+                            ) : null}
+                          </span>
                           {selectedCategory === cat.id && (
                             <span className="font-mono text-[10px] text-primary bg-primary/10 px-1.5 py-0.5 rounded-full shrink-0">
                               {filteredServices.length}
@@ -816,16 +892,50 @@ export default function ServicesPage() {
                   );
                 };
 
+                const renderHotelInfoRow = () => {
+                  const isDragging = draggingId === HOTEL_INFO_ID;
+                  const isOver =
+                    dragOverId === HOTEL_INFO_ID &&
+                    draggingId &&
+                    draggingId !== HOTEL_INFO_ID;
+                  return (
+                    <div
+                      key={HOTEL_INFO_ID}
+                      {...dragHandlers(HOTEL_INFO_ID)}
+                      className={`flex items-stretch gap-0.5 rounded-md transition-colors border border-emerald-brand/20 bg-emerald-soft/30 ${
+                        isDragging ? "opacity-40" : ""
+                      } ${isOver ? "ring-2 ring-primary/30" : ""}`}
+                    >
+                      <div
+                        role="button"
+                        aria-label="Drag to reorder Hotel info"
+                        {...gripHandlers(HOTEL_INFO_ID)}
+                        className="shrink-0 w-6 flex items-center justify-center text-emerald-brand/50 hover:text-emerald-brand cursor-grab active:cursor-grabbing"
+                      >
+                        <GripVertical className="h-3.5 w-3.5" strokeWidth={2} />
+                      </div>
+                      <div className="flex-1 min-w-0 px-2 py-2.5 text-sm text-emerald-brand/90">
+                        <div className="flex items-center gap-1.5">
+                          <span className="truncate">Hotel info</span>
+                          <span className="font-mono text-[9px] uppercase tracking-wider text-emerald-brand/80 bg-emerald-brand/10 px-1.5 py-0.5 rounded">
+                            System
+                          </span>
+                        </div>
+                      </div>
+                      <div className="shrink-0 w-9" />
+                      <div className="shrink-0 w-8" />
+                    </div>
+                  );
+                };
+
                 if (scope === "services") {
-                  if (serviceRoots.length === 0) {
-                    return (
-                      <p className="text-xs text-foreground/50 px-3 py-4">
-                        No service categories yet. Add a top-level category without
-                        subcategories to create one.
-                      </p>
-                    );
-                  }
-                  return serviceRoots.map((r) => renderRow(r));
+                  return homeTileItems.map((item) =>
+                    item.kind === "hotel-info"
+                      ? renderHotelInfoRow()
+                      : renderRow(item.cat, {
+                          menuPill: childrenByParent.has(item.cat.id),
+                        })
+                  );
                 }
 
                 if (menuRoots.length === 0) {
@@ -838,7 +948,7 @@ export default function ServicesPage() {
                 }
                 return menuRoots.map((root) => (
                   <div key={root.id} className="space-y-0.5">
-                    {renderRow(root)}
+                    {renderRow(root, { draggable: false })}
                     {(childrenByParent.get(root.id) ?? []).map((child) =>
                       renderRow(child, { indent: true })
                     )}

@@ -20,6 +20,7 @@ const updateHotelSchema = z.object({
   googleReviewUrl: z.string().url().nullable().optional(),
   bookingReviewUrl: z.string().url().nullable().optional(),
   supportEmail: z.string().email().nullable().optional(),
+  hotelInfoPosition: z.number().int().min(0).optional(),
 })
 
 export async function GET() {
@@ -41,6 +42,7 @@ export async function GET() {
         googleReviewUrl: true,
         bookingReviewUrl: true,
         supportEmail: true,
+        hotelInfoPosition: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -87,6 +89,7 @@ export async function PUT(request: Request) {
         googleReviewUrl: true,
         bookingReviewUrl: true,
         supportEmail: true,
+        hotelInfoPosition: true,
       },
     })
 

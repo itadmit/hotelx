@@ -53,6 +53,7 @@ type Props = {
   activeServiceIds?: string[];
   logoLetter?: string;
   guestFirstName?: string | null;
+  hotelInfoPosition?: number;
 };
 
 function formatPrice(price: string | null): string {
@@ -74,6 +75,7 @@ export function GuestHome({
   activeServiceIds = [],
   logoLetter,
   guestFirstName,
+  hotelInfoPosition = 0,
 }: Props) {
   const router = useRouter();
 
@@ -273,8 +275,8 @@ export function GuestHome({
         </Link>
       ) : null}
 
-      {/* Categories — root departments (grid).
-          The first tile is the built-in "Hotel info" hub (Wi-Fi, About, etc.) */}
+      {/* Categories — root departments (grid). A built-in "Hotel info" tile
+          (Wi-Fi, About, Amenities) is spliced in at hotelInfoPosition. */}
       <section className="px-5 mt-7">
         <div className="flex items-center justify-between">
           <p className="eyebrow">Concierge</p>
@@ -283,33 +285,36 @@ export function GuestHome({
           </span>
         </div>
         <div className="mt-3 grid grid-cols-2 gap-2.5">
-          <Link
-            href={`/g/${hotelSlug}/${roomCode}/info`}
-            prefetch={true}
-            className="group rounded-xl p-3.5 border border-emerald-brand/25 bg-emerald-soft/40 active:scale-[0.98] transition-transform"
-          >
-            <div className="flex items-center justify-between">
-              <div className="inline-flex items-center justify-center h-10 w-10 rounded-lg bg-emerald-brand text-primary-foreground">
-                <Sparkles className="h-4 w-4" strokeWidth={2} />
-              </div>
-              <ChevronRight className="h-4 w-4 text-emerald-brand/60 group-hover:text-emerald-brand transition-colors" />
-            </div>
-            <p className="mt-3 text-sm font-medium text-ink leading-tight">
-              Hotel info
-            </p>
-            <p className="text-[10px] text-emerald-brand mt-0.5 font-mono uppercase tracking-[0.1em]">
-              Wi-Fi · about · amenities
-            </p>
-          </Link>
-
-          {homeCategories.map((category, index) => {
-            const Icon = resolveCategoryIcon(category.icon);
-            const accent = categoryAccents[index % categoryAccents.length];
-            return (
+          {(() => {
+            const hotelInfoTile = (
               <Link
-                key={category.id}
-                href={`/g/${hotelSlug}/${roomCode}/category/${category.id}`}
-                prefetch={index < 2}
+                key="__hotel_info__"
+                href={`/g/${hotelSlug}/${roomCode}/info`}
+                prefetch={true}
+                className="group rounded-xl p-3.5 border border-emerald-brand/25 bg-emerald-soft/40 active:scale-[0.98] transition-transform"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="inline-flex items-center justify-center h-10 w-10 rounded-lg bg-emerald-brand text-primary-foreground">
+                    <Sparkles className="h-4 w-4" strokeWidth={2} />
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-emerald-brand/60 group-hover:text-emerald-brand transition-colors" />
+                </div>
+                <p className="mt-3 text-sm font-medium text-ink leading-tight">
+                  Hotel info
+                </p>
+                <p className="text-[10px] text-emerald-brand mt-0.5 font-mono uppercase tracking-[0.1em]">
+                  Wi-Fi · about · amenities
+                </p>
+              </Link>
+            );
+            const categoryTiles = homeCategories.map((category, index) => {
+              const Icon = resolveCategoryIcon(category.icon);
+              const accent = categoryAccents[index % categoryAccents.length];
+              return (
+                <Link
+                  key={category.id}
+                  href={`/g/${hotelSlug}/${roomCode}/category/${category.id}`}
+                  prefetch={index < 2}
                 className="group rounded-xl p-3.5 border border-[color:var(--border)] bg-card active:scale-[0.98] transition-transform"
               >
                 <div className="flex items-center justify-between">
@@ -327,8 +332,15 @@ export function GuestHome({
                   Browse
                 </p>
               </Link>
-            );
-          })}
+              );
+            });
+            const pos = Math.max(0, Math.min(hotelInfoPosition, categoryTiles.length));
+            return [
+              ...categoryTiles.slice(0, pos),
+              hotelInfoTile,
+              ...categoryTiles.slice(pos),
+            ];
+          })()}
         </div>
       </section>
 

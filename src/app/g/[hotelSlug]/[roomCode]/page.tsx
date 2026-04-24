@@ -40,6 +40,7 @@ export default async function GuestHomePage({
     select: {
       id: true,
       name: true,
+      hotelInfoPosition: true,
       services: {
         select: {
           id: true,
@@ -138,6 +139,7 @@ export default async function GuestHomePage({
       }))}
       featuredServiceIds={featuredCandidates.map((s) => s.id)}
       activeServiceIds={activeServiceIds}
+      hotelInfoPosition={hotel.hotelInfoPosition}
     />
   );
 }
