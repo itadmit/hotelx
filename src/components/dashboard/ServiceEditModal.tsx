@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
 import { ServiceImageField } from "@/components/dashboard/ServiceImageField";
-import { Loader2, Save, Star } from "lucide-react";
+import { Loader2, Save, Star, Trash2 } from "lucide-react";
 import Link from "next/link";
 
 type CategoryRow = {
@@ -41,6 +41,7 @@ export function ServiceEditModal({
   const rid = useId();
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [paymentsEnabled, setPaymentsEnabled] = useState(false);
   const [form, setForm] = useState({
@@ -111,6 +112,31 @@ export function ServiceEditModal({
       void loadService();
     }
   }, [open, serviceId, loadService]);
+
+  async function handleDelete() {
+    if (!serviceId) return;
+    const serviceName = form.name.trim() || "this service";
+    const ok = window.confirm(
+      `Delete “${serviceName}”? This can't be undone.`
+    );
+    if (!ok) return;
+    setDeleting(true);
+    setSaveError(null);
+    try {
+      const res = await fetch(`/api/services/${serviceId}`, { method: "DELETE" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setSaveError(
+          typeof data.error === "string" ? data.error : "Could not delete service"
+        );
+        return;
+      }
+      await onSaved();
+      onOpenChange(false);
+    } finally {
+      setDeleting(false);
+    }
+  }
 
   async function handleSave() {
     if (!serviceId) return;
@@ -317,13 +343,29 @@ export function ServiceEditModal({
           )}
         </div>
 
-        <DialogFooter className="px-5 py-4 border-t border-[color:var(--border)] shrink-0 flex-col sm:flex-row gap-2">
+        <DialogFooter className="px-5 py-4 border-t border-[color:var(--border)] shrink-0 flex-col sm:flex-row sm:items-center gap-2">
+          {serviceId ? (
+            <Button
+              type="button"
+              variant="ghost"
+              className="rounded-xl gap-2 text-clay hover:text-clay hover:bg-clay/10 sm:mr-auto w-full sm:w-auto"
+              disabled={loading || saving || deleting}
+              onClick={() => void handleDelete()}
+            >
+              {deleting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Trash2 className="h-4 w-4" />
+              )}
+              Delete
+            </Button>
+          ) : null}
           {saveError ? (
-            <p className="text-xs text-clay w-full sm:order-first sm:flex-1 sm:text-left">
+            <p className="text-xs text-clay w-full sm:flex-1 sm:text-left">
               {saveError}
             </p>
           ) : null}
-          <div className="flex gap-2 w-full sm:w-auto sm:ml-auto">
+          <div className="flex gap-2 w-full sm:w-auto">
             <Button
               type="button"
               variant="outline"
@@ -335,7 +377,7 @@ export function ServiceEditModal({
             <Button
               type="button"
               className="rounded-xl flex-1 sm:flex-none gap-2 bg-primary hover:bg-primary/90"
-              disabled={loading || saving || !form.name.trim() || !form.categoryId}
+              disabled={loading || saving || deleting || !form.name.trim() || !form.categoryId}
               onClick={() => void handleSave()}
             >
               {saving ? (
