@@ -43,7 +43,7 @@ const STEP_KEYS = [
 type StepKey = (typeof STEP_KEYS)[number]
 
 const STEP_LABELS: Record<StepKey, string> = {
-  identity: "Renaming hotel to Plaza Hotel",
+  identity: "Applying demo look & feel",
   categories: "Importing menu categories",
   rooms: "Provisioning rooms",
   services: "Loading services & menu items",
@@ -82,43 +82,49 @@ export async function POST() {
       try {
         const user = await requireSessionUser()
         const hotelId = user.hotelId!
-        const hotelCodeSuffix = hotelId.slice(-6).toUpperCase()
+
+        // Preserve the hotel's real name and slug — demo import layers sample
+        // content on top of the guest's own identity, it doesn't overwrite it.
+        const existingHotel = await prisma.hotel.findUnique({
+          where: { id: hotelId },
+          select: { name: true },
+        })
+        const keepName = existingHotel?.name ?? demoHotel.name
 
         send("init", {
           steps: STEP_KEYS.map((key) => ({
             key,
             label: STEP_LABELS[key],
           })),
-          hotelName: demoHotel.name,
+          hotelName: keepName,
         })
 
         const buildUniqueRoomCode = async (baseCode: string) => {
-          let candidate = `${baseCode}-${hotelCodeSuffix}`
+          let candidate = baseCode
           let attempt = 0
-          while (attempt < 10) {
-            const exists = await prisma.room.findUnique({
-              where: { code: candidate },
+          while (attempt < 20) {
+            const exists = await prisma.room.findFirst({
+              where: { hotelId, code: candidate },
               select: { id: true },
             })
             if (!exists) return candidate
             attempt += 1
-            candidate = `${baseCode}-${hotelCodeSuffix}-${attempt}`
+            candidate = `${baseCode}-${attempt}`
           }
           throw new Error("Failed to create unique room code for demo seed")
         }
 
-        // ----- 1. Hotel identity (rename to Plaza Hotel) + payments enabled.
+        // ----- 1. Hotel look & feel (keep the user's own hotel name).
         sendStep("identity", "running")
         await prisma.hotel.update({
           where: { id: hotelId },
           data: {
-            name: demoHotel.name,
             primaryColor: demoHotel.primaryColor,
             defaultCurrency: demoHotel.defaultCurrency,
             paymentsEnabled: true,
           },
         })
-        sendStep("identity", "done", { detail: demoHotel.name })
+        sendStep("identity", "done", { detail: keepName })
 
         // ----- 2. Categories: roots first, then children.
         sendStep("categories", "running", {
@@ -393,7 +399,7 @@ export async function POST() {
             newServices: createdServices,
             newRequests: createdRequests,
             amenities: demoAmenities.length,
-            hotelName: demoHotel.name,
+            hotelName: keepName,
           },
         })
         controller.close()

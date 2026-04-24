@@ -46,14 +46,28 @@ export async function POST(request: Request) {
       )
     }
 
-    const codeSeed = `${parsed.data.number}-${Math.random().toString(36).slice(2, 8)}`
+    // Clean default: letter "R" + the room number (e.g. 101 → "R101").
+    // Strip non-alphanumerics from the number so odd input like "10-1A" still
+    // yields a valid code. If a collision exists within the hotel we append a
+    // short numeric suffix until we find a free slot.
+    const safeNumber = parsed.data.number.replace(/[^A-Za-z0-9]/g, "").toUpperCase()
+    const baseCode = `R${safeNumber}`
+    let code = baseCode
+    for (let attempt = 1; attempt < 20; attempt++) {
+      const clash = await prisma.room.findFirst({
+        where: { hotelId: user.hotelId!, code },
+        select: { id: true },
+      })
+      if (!clash) break
+      code = `${baseCode}-${attempt}`
+    }
 
     const room = await prisma.room.create({
       data: {
         number: parsed.data.number,
         type: parsed.data.type ?? "Standard",
         status: parsed.data.status ?? RoomStatus.ACTIVE,
-        code: codeSeed.toUpperCase(),
+        code,
         hotelId: user.hotelId!,
       },
     })

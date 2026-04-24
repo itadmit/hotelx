@@ -86,7 +86,7 @@ model HotelAmenity {
 model Room {
   id            String         @id @default(cuid())
   number        String
-  code          String         @unique
+  code          String
   type          String?
   status        RoomStatus     @default(ACTIVE)
   createdAt     DateTime       @default(now())
@@ -97,6 +97,7 @@ model Room {
   hotel         Hotel          @relation(fields: [hotelId], references: [id])
 
   @@unique([hotelId, number])
+  @@unique([hotelId, code])
 }
 
 model Category {
