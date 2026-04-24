@@ -20,7 +20,10 @@ type Props = {
 export function CategoryIconPicker({ open, onOpenChange, value, onChange }: Props) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md max-h-[85vh] flex flex-col p-0 gap-0 overflow-hidden border-[color:var(--border)] bg-card">
+      <DialogContent
+        className="sm:max-w-md max-h-[80vh] flex flex-col p-0 gap-0 overflow-hidden border-[color:var(--border)] bg-card"
+        bodyClassName="flex flex-col flex-1 min-h-0"
+      >
         <DialogHeader className="px-5 pt-5 pb-3 shrink-0 border-b border-[color:var(--border)]">
           <DialogTitle className="font-display text-lg text-ink">
             Choose category icon

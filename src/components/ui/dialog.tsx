@@ -63,9 +63,11 @@ export function Dialog({ open, onOpenChange, children }: DialogProps) {
 export function DialogContent({
   children,
   className,
+  bodyClassName,
 }: {
   children: React.ReactNode;
   className?: string;
+  bodyClassName?: string;
 }) {
   const ctx = React.useContext(DialogWidthContext);
 
@@ -74,7 +76,7 @@ export function DialogContent({
     return () => ctx?.setClassName(undefined);
   }, [ctx, className]);
 
-  return <div className="grid gap-4">{children}</div>;
+  return <div className={bodyClassName ?? "grid gap-4"}>{children}</div>;
 }
 
 export function DialogHeader({
