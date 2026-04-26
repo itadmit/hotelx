@@ -12,10 +12,13 @@ import { CTA } from "@/components/marketing/CTA";
 import { Footer } from "@/components/marketing/Footer";
 
 export const metadata: Metadata = {
-  title: "HotelX — In-Room Concierge & Upselling Platform for Hotels",
+  title: "HotelX — AI Concierge & Smart Upselling Platform for Hotels",
   description:
-    "Turn every room into a revenue channel. The QR concierge platform that lifts in-room spend, raises your Booking score, and cuts calls to reception — in 14 languages, live in 48 hours.",
+    "An AI concierge that learns each guest and offers what they're most likely to buy. Lifts in-room spend, raises your Booking score, cuts calls to reception — in 14 languages, live in 48 hours.",
   keywords: [
+    "AI hotel concierge",
+    "AI upselling for hotels",
+    "personalized hotel offers",
     "hotel concierge app",
     "in-room ordering system",
     "guest messaging platform",
@@ -26,17 +29,17 @@ export const metadata: Metadata = {
     "hotel guest experience",
   ],
   openGraph: {
-    title: "HotelX — Turn every room into a revenue channel",
+    title: "HotelX — The AI concierge that turns every room into a revenue channel",
     description:
-      "QR concierge for hotels. Lift in-room spend, raise your Booking score, cut calls to reception — in 14 languages.",
+      "AI-powered QR concierge for hotels. Learns each guest, recommends the offers they'll actually buy, raises your Booking score — in 14 languages.",
     type: "website",
     siteName: "HotelX",
   },
   twitter: {
     card: "summary_large_image",
-    title: "HotelX — In-room concierge & upselling for hotels",
+    title: "HotelX — AI concierge & smart upselling for hotels",
     description:
-      "Turn every room into a revenue channel. Live in 48 hours, in 14 languages.",
+      "An AI that learns each guest and offers what they're most likely to buy. Live in 48 hours, in 14 languages.",
   },
 };
 
@@ -48,7 +51,7 @@ const jsonLd = {
   applicationSubCategory: "HospitalityManagement",
   operatingSystem: "Web",
   description:
-    "QR-first guest concierge and upselling platform for hotels. In-room ordering, guest messaging, and a smart review loop in 14 languages.",
+    "AI-powered guest concierge and smart upselling platform for hotels. Learns each guest's behavior and preferences to recommend the offers they're most likely to buy — across in-room ordering, messaging, and reviews, in 14 languages.",
   audience: {
     "@type": "BusinessAudience",
     audienceType: "Hotel marketing managers",

@@ -1,18 +1,16 @@
-import Link from "next/link";
 import { TrackedLink } from "@/components/TrackedLink";
 import {
   ArrowUpRight,
   BellRing,
   Bell,
+  Brain,
   Car,
   ChevronRight,
   CheckCircle2,
   Flower2,
   Home,
   MessageCircle,
-  ScanLine,
   Sparkles,
-  Star,
   TrendingUp,
   User,
   Wifi,
@@ -30,8 +28,8 @@ export function Hero() {
           <div className="lg:col-span-7 text-center lg:text-left lg:pr-8 xl:pr-16">
             <div className="reveal flex justify-center lg:justify-start" style={{ animationDelay: "0ms" }}>
               <span className="pill">
-                <Sparkles className="h-3 w-3 text-emerald-brand" />
-                Founders cohort · 6 months retainer free
+                <Brain className="h-3 w-3 text-emerald-brand" />
+                AI concierge · learns every guest
               </span>
             </div>
 
@@ -50,9 +48,10 @@ export function Hero() {
               className="reveal mt-6 sm:mt-7 text-base sm:text-lg text-foreground/70 max-w-xl mx-auto lg:mx-0 leading-relaxed"
               style={{ animationDelay: "220ms" }}
             >
-              The QR concierge that lifts in-room spend, raises your Booking
-              score, and cuts calls to reception &mdash; in 14 languages, live
-              in 48 hours.
+              An <span className="text-ink font-medium">AI concierge</span> that
+              learns each guest&rsquo;s behavior and preferences, then offers
+              the upsells they&rsquo;re most likely to buy &mdash; in 14
+              languages, live in 48 hours.
             </p>
 
             <div
@@ -98,14 +97,14 @@ export function Hero() {
 
               <div className="card-surface p-3 flex items-center gap-3">
                 <span className="inline-flex h-9 w-9 rounded-lg bg-amber-soft text-amber-brand items-center justify-center shrink-0">
-                  <Star className="h-4 w-4" strokeWidth={2} />
+                  <Brain className="h-4 w-4" strokeWidth={2} />
                 </span>
                 <div className="min-w-0 text-left">
                   <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-amber-brand">
-                    Score lift
+                    AI uplift
                   </p>
                   <p className="numeral text-lg text-ink leading-none mt-1">
-                    +0.4 <span className="text-foreground/55 text-xs font-sans">stars on Booking</span>
+                    3.2&times; <span className="text-foreground/55 text-xs font-sans">offer conversion</span>
                   </p>
                 </div>
               </div>
@@ -227,8 +226,9 @@ function HeroComposition() {
                           <Wine className="h-4 w-4 text-primary-foreground" strokeWidth={2} />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-mono text-[8px] uppercase tracking-[0.14em] text-amber-soft">
-                            Tonight's offer
+                          <p className="font-mono text-[8px] uppercase tracking-[0.14em] text-amber-soft inline-flex items-center gap-1">
+                            <Brain className="h-2.5 w-2.5" strokeWidth={2.5} />
+                            Picked for you by AI
                           </p>
                           <p className="font-display text-[13px] leading-tight mt-0.5">
                             Champagne &amp; <span className="display-italic">strawberries</span>
@@ -344,14 +344,14 @@ function HeroComposition() {
             </div>
           </div>
 
-          {/* QR chip — desktop only */}
+          {/* AI chip — desktop only */}
           <div className="hidden lg:flex absolute top-[260px] -right-24 card-elev p-2.5 items-center gap-2 w-[180px] z-30">
             <div className="h-9 w-9 rounded-md bg-ink flex items-center justify-center shrink-0">
-              <ScanLine className="h-4 w-4 text-amber-soft" />
+              <Brain className="h-4 w-4 text-amber-soft" />
             </div>
             <div className="min-w-0">
-              <p className="eyebrow">Scan · Order</p>
-              <p className="text-xs text-ink truncate">Zero friction</p>
+              <p className="eyebrow">AI &middot; Personalized</p>
+              <p className="text-xs text-ink truncate">High-intent offers</p>
             </div>
           </div>
 

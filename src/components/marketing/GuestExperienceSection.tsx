@@ -1,4 +1,4 @@
-import { Wifi, Building2, Compass, Sparkles, BookOpen } from "lucide-react";
+import { Wifi, Building2, Compass, Sparkles, Brain } from "lucide-react";
 
 const INFO_PAGES = [
   {
@@ -42,12 +42,13 @@ export function GuestExperienceSection() {
               </span>
             </h2>
             <p className="mt-5 text-foreground/70 max-w-md">
-              Wi-Fi, amenities, your story, the things only locals know — your
-              team writes once, every guest gets it in their language.
+              Wi-Fi, amenities, your story, the things only locals know &mdash;
+              your team writes once, the AI translates and re-orders the
+              answers based on what each guest actually asks.
             </p>
             <p className="eyebrow flex items-center gap-2 mt-5">
-              <BookOpen className="h-3.5 w-3.5 text-emerald-brand" />
-              Auto-translated · always current
+              <Brain className="h-3.5 w-3.5 text-emerald-brand" />
+              AI-translated &middot; learns from every question
             </p>
           </div>
 

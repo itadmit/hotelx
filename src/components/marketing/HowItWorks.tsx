@@ -1,4 +1,4 @@
-import { ScanLine, Bell, LineChart } from "lucide-react";
+import { ScanLine, Brain, LineChart } from "lucide-react";
 
 const steps = [
   {
@@ -12,12 +12,12 @@ const steps = [
   },
   {
     no: "02",
-    icon: Bell,
+    icon: Brain,
     accent: "bg-emerald-soft text-emerald-brand",
-    title: "Reception responds",
-    sub: "Live request board",
+    title: "AI learns the guest",
+    sub: "Behavior \u00b7 preferences \u00b7 context",
     description:
-      "Orders and questions land on a Kanban sorted by SLA. Assign with one tap, the guest sees a status update automatically.",
+      "Every tap, order and question feeds the model. Within minutes the AI knows their language, taste and likely budget \u2014 and starts surfacing the upsells they\u2019re statistically most likely to buy.",
   },
   {
     no: "03",
@@ -26,7 +26,7 @@ const steps = [
     title: "Marketing sees the numbers",
     sub: "ROI in plain English",
     description:
-      "Revenue per room, top sellers, response times, Booking score \u2014 a weekly digest your GM can read in 90 seconds.",
+      "Revenue per room, top AI-picked offers, response times, Booking score \u2014 a weekly digest your GM can read in 90 seconds.",
   },
 ];
 
@@ -51,13 +51,14 @@ export function HowItWorks() {
               From <span className="display-italic text-emerald-brand">scan</span>{" "}
               to{" "}
               <span className="display-italic text-amber-brand">served</span>{" "}
-              &mdash; in 90 seconds.
+              &mdash; with an AI that learns each guest along the way.
             </h2>
           </div>
           <div className="lg:col-span-5 lg:flex lg:items-end">
             <p className="text-foreground/70 max-w-md">
               No PMS rip-and-replace, no IT project, no app on the App Store.
-              Print a QR, train your team in an afternoon, you&rsquo;re live.
+              Print a QR, train your team in an afternoon &mdash; the AI does
+              the personalization for you from day one.
             </p>
           </div>
         </div>

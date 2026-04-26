@@ -3,7 +3,7 @@ import {
   Star,
   PhoneOff,
   ArrowUpRight,
-  Wallet,
+  Brain,
   Globe,
 } from "lucide-react";
 
@@ -13,10 +13,10 @@ const OUTCOMES = [
     icon: TrendingUp,
     metric: "+\u20ac18",
     metricUnit: "/ room / night",
-    headline: "Every tap is an upsell.",
-    body: "Guests scan, browse, order. Champagne, late check-out, room-service, spa slots — all live in their pocket, in their language.",
+    headline: "Every offer is picked by AI for that guest.",
+    body: "Our AI watches what each guest browses, orders and ignores — then surfaces the upsell they're most likely to say yes to. Champagne for the anniversary couple, late check-out for the business traveller, spa for the long-stay.",
     chips: [
-      { icon: Wallet, label: "0% commission" },
+      { icon: Brain, label: "AI-personalized" },
       { icon: Globe, label: "14 languages" },
     ],
     accent: "emerald",
@@ -63,8 +63,8 @@ export function OutcomesSection() {
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6">
         <div className="max-w-3xl">
           <span className="pill">
-            <TrendingUp className="h-3 w-3 text-emerald-brand" />
-            Outcomes, not features
+            <Brain className="h-3 w-3 text-emerald-brand" />
+            AI-driven outcomes, not features
           </span>
           <h2
             id="outcomes-heading"
@@ -79,7 +79,8 @@ export function OutcomesSection() {
           <p className="mt-5 text-foreground/70 max-w-xl">
             Forget feature lists. HotelX is bought because of three lines on
             your monthly report &mdash; revenue per room, your Booking score,
-            and the volume of calls to reception.
+            and the volume of calls to reception. The AI behind the platform is
+            what moves all three.
           </p>
         </div>
 

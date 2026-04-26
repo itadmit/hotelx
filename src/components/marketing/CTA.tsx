@@ -34,7 +34,8 @@ export function CTA() {
               </h2>
               <p className="mt-4 sm:mt-5 text-white/70 max-w-md">
                 Set up your first 10 rooms in under 30 minutes. Print the QR
-                cards. Watch your service transform — gracefully.
+                cards. The AI starts learning your guests from the very first
+                scan &mdash; and offering them what they&rsquo;ll actually buy.
               </p>
             </div>
 
